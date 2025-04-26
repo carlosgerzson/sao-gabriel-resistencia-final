@@ -9,10 +9,22 @@ body {
     background-color: #f0f0f0; /* Ou a cor de fundo desejada para a navegação */
 }
 
+/* Para telas menores (até 600px de largura) */
+@media (max-width: 600px) {
+    .tela {
+      width: 100vw; /* Ocupa toda a largura em telas menores */
+      max-width: none; /* Remove a largura máxima */
+    }
+  }
+
 .tela {
     background-color: white;
-    width: 900px; /* Largura desejada */
-    height: 1600px; /* Altura desejada */
+    /*width: 900px;  */ 
+    /*height: 1600px; */
+    width: 90vw; /* Ocupa 90% da largura da tela */
+    max-width: 900px; /* Limita a largura máxima em telas maiores */
+    height: auto; /* A altura se ajusta ao conteúdo */
+    max-height: 90vh; /* Limita a altura máxima a 90% da altura da tela */
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
