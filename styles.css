@@ -1,0 +1,412 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background-color: rgb(234, 230, 230);
+    position: relative;
+}
+
+#game-container {
+    width: 100%;
+    height: 100vh; /* 100% da altura da janela */
+    display: flex;
+    justify-content: center;
+    position:relative;   
+}
+
+.tela {    
+    top: 0;
+    left: 0;
+    width: 900px; /* Largura desejada */
+    height: 1600px; /* Altura desejada */
+    z-index: 1000; /* Para garantir que fique acima de outros elementos */
+    display: none; /* Esconde por padrão */
+   position: absolute; /* Tornamos .tela o contêiner de posicionamento */
+   pointer-events: auto; /* Impede cliques de passarem para elementos abaixo */
+}
+
+
+#ui-container button#terminar-partida-btn,
+#ui-container button#salvar-btn,
+#ui-container button#pausar-continuar-btn,
+#ui-container button#modo-jogo-btn {
+    /* Estilos para os botões da UI, se necessário posicionamento absoluto */
+    position: absolute;
+    pointer-events: none;
+    /* Ajuste top, bottom, left, right conforme a necessidade */
+ }
+
+ #tela-fim-de-fase button#btn-voltar-mapa {
+    position: absolute; /* Posicionamos os botões absolutamente dentro de .tela */
+    bottom: 50px; /* 50px da parte inferior da div .tela */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    /* Outros estilos visuais */
+}
+
+#ui-container {
+    position: absolute; /* Para posicionar sobre o #game */
+    top: 50px; /* Tentativa inicial de colocar na metade da altura */
+    left: 50px;
+    z-index: 1000; /* Acima de tudo */
+    font-size: 4em; /* Tamanho da fonte (ajuste conforme necessário) */
+    color: #fed906; /* Example style */
+    text-align: left; /* Alinha o texto do tempo à esquerda dentro do container */
+    /* Outros estilos visuais do container, se necessário */
+}
+
+#game-controls button {
+    position: absolute; /* Ou outro posicionamento */
+    bottom: 20px;
+    left: 50%;
+   transform: translateX(-50%);
+}
+  
+#cronometro {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    /* Adicione outros estilos */
+}
+
+#iniciar-jogo-btn {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Adicione outros estilos */
+}
+
+#game {
+    position: relative;
+    width: 900px;
+    height: 1600px;
+    margin: 0 auto;
+    overflow: hidden !important;   
+}
+
+#background {
+    position: absolute;
+    width: 900px;
+    height: 1600px;
+    z-index: 1; /* Menor z-index */
+    top: 0px;
+    left: 0px;
+    pointer-events: all;
+    /* display: none; */ /* Oculto inicialmente */
+}   
+
+#alvo1-container {
+    position: absolute;
+    left: 197px; /* Correção da posição */
+    bottom: 48px; /* Ajuste conforme necessário */
+    width: 507px; /* Largura aproximada */
+    height: 363px; /* Altura aproximada */
+    z-index: 45;
+}
+
+#alvo2-container {
+    position: absolute;
+    left: 197px; /* Correção da posição */
+    bottom: 48px; /* Ajuste conforme necessário */
+    width: 507px; /* Largura aproximada */
+    height: 363px; /* Altura aproximada */
+    z-index: 45;
+}
+
+#alvo3-container {
+    position: absolute;
+    left: 197px; /* Correção da posição */
+    bottom: 48px; /* Ajuste conforme necessário */
+    width: 507px; /* Largura aproximada */
+    height: 363px; /* Altura aproximada */
+    z-index: 45;
+}
+
+#ford_t {
+    position: absolute;
+    width: 114px;
+    height: 71px;
+    top: 1520px;
+    left: 732px;
+    transform-origin: top left;
+    z-index: 5;
+}
+
+.missil {
+    position: absolute;
+    z-index: 10;
+    width: 20px;
+    height: 250px;
+    transform-origin: center;
+    display: none;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+.army {
+    position: absolute;
+    transform-origin: center bottom;
+    z-index: 15;
+}
+
+#pedestal_d {
+    position: absolute;
+    width: 340px;
+    height: 374px;
+    top: 917px;
+    left: 547px;
+    transform-origin: top left;
+    z-index: 20;
+}
+
+#army_c {
+    position: absolute;
+    width: 33px;
+    height: 103px;
+    top: 932px;
+    left: 592px;
+    transform-origin: center bottom;
+    z-index: 20;
+}
+
+#army_d {
+    position: absolute;
+    width: 41px;
+    height: 126px;
+    top: 775px;
+    left: 772px;
+    transform-origin: center bottom;
+    z-index: 20;
+}
+
+#torre_c_e_d {
+    position: absolute;
+    width: 340px;
+    height: 220px;
+    top: 823px;
+    left: 547px;
+    transform-origin: top left;
+    z-index: 25;
+}
+
+.alvo1-camada {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    background-repeat: no-repeat;
+    background-size: contain; /* Ou cover, dependendo do desejado */
+}
+
+.alvo2-camada {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    background-repeat: no-repeat;
+    background-size: contain; /* Ou cover, dependendo do desejado */
+}
+
+.alvo3-camada {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    background-repeat: no-repeat;
+    background-size: contain; /* Ou cover, dependendo do desejado */
+}
+
+#alvo1_fundo {
+    background-image: url('nivel1/alvo1_fundo.png');
+    z-index: 30;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo2_fundo {
+    background-image: url('nivel2/alvo2_fundo.png');
+    z-index: 30;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo1_destruido {
+    background-image: url('nivel1/alvo1_destruido.png');
+    z-index: 40;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo2_destruido {
+    background-image: url('nivel2/alvo2_destruido.png');
+    z-index: 40;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo1_dano2 {
+    background-image: url('nivel1/alvo1_dano2.png');
+    z-index: 43;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo2_dano2 {
+    background-image: url('nivel2/alvo2_dano2.png');
+    z-index: 43;
+    display: none; /* Oculto inicialmente */
+}
+
+
+#alvo1_dano1 {
+    background-image: url('nivel1/alvo1_dano1.png');
+    z-index: 44;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo2_dano1 {
+    background-image: url('nivel2/alvo2_dano1.png');
+    z-index: 44;
+    display: none; /* Oculto inicialmente */
+}
+
+#alvo1_predio {
+    background-image: url('nivel1/alvo1_predio.png');
+    z-index: 45;
+    display:block;
+}
+
+#alvo2_predio {
+    background-image: url('nivel2/alvo2_predio.png');
+    z-index: 45;
+    display:block;
+}
+
+#alvo3_predio {
+    background-image: url('nivel3/alvo3_predio.png');
+    z-index: 45;
+    display:block;
+}
+
+.bomb {
+    position: absolute;
+    width: 20px;
+    height: 250px;
+    z-index: 45;
+    transform-origin: center;
+}
+
+#army_e {
+    width: 39px;
+    height: 141px;
+    top: 840px;
+    left: 103px;
+    transform-origin: center bottom;
+    z-index: 50;
+}
+
+#torre_e {
+    position: absolute;
+    width: 218px;
+    height: 714px;
+    top: 886px;
+    left: 15px;
+    transform-origin: top left;
+    z-index: 55;
+}
+
+#target {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    z-index: 60;
+}
+
+.explosion {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: none;
+    z-index: 70;
+}
+
+.explosion-area {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background-color: yellow;
+    border: 2px solid red;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: 80;
+    animation: expand 1s ease-out;
+}
+
+#game-controls {
+    position: absolute;
+    bottom: 100px; /* Ajuste a distância da parte inferior conforme necessário */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center; /* Centraliza os botões horizontalmente */
+    gap: 20px; /* Espaçamento entre os botões (ajuste conforme necessário) */
+    z-index: 820;
+    ; /* Garante que os botões estejam acima do conteúdo do jogo */
+}
+
+#game-controls button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-family: 'SuaNovaFonte', sans-serif; /* Use a fonte do seu jogo */
+    background-color: #9fb733;
+    color: rgb(4, 4, 4);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    position: static; /* Remove o posicionamento absoluto individual dos botões */
+    transform: none; /* Remove qualquer transformação de centralização individual */
+    bottom: auto;
+    left: auto;
+}
+
+#game-controls button:hover {
+    background-color: #286090;
+}
+
+#game-info-topo {
+    position: absolute;
+    top: 10px; /* Ajuste a distância do topo conforme necessário */
+    left: 10px; /* Ajuste a distância da esquerda conforme necessário */
+    right: 10px; /* Para estender até a borda direita */
+    display: flex;
+    justify-content: space-between; /* Espaço entre os elementos filhos */
+    align-items: center; /* Alinhamento vertical ao centro */
+    color: white; /* Cor do texto */
+    z-index: 890; /* Para garantir que fique acima de outros elementos */
+    padding: 10px; /* Adiciona um pouco de espaço interno */
+}
+
+#contador, #nivel, #nome-jogo {
+    font-size: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente para melhor legibilidade */
+    padding: 5px 10px;
+    border-radius: 5px; /* Opcional: bordas arredondadas */
+}
+
+#game-info-topo, #contador, #nivel, #nome-jogo, #mensagem-feedback, #iniciar-btn, #modo-jogo-btn {
+    font-family: 'Press Start 2P', cursive; /* 'cursive' é uma fonte de fallback */
+}
+
+
+
+@keyframes expand {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

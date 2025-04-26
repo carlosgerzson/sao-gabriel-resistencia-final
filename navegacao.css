@@ -1,0 +1,147 @@
+body {
+    font-family: sans-serif;
+    margin: 0; /* Garante que não haja margem no topo */
+    padding: 0; /* Garante que não haja preenchimento no topo */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Mantém o alinhamento dos itens ao topo */
+    min-height: 100vh;
+    background-color: #f0f0f0; /* Ou a cor de fundo desejada para a navegação */
+}
+
+.tela {
+    background-color: white;
+    width: 900px; /* Largura desejada */
+    height: 1600px; /* Altura desejada */
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: none; /* Esconde por padrão */
+    flex-direction: column; /* Para organizar o conteúdo interno verticalmente */
+    align-items: center; /* Centralizar itens horizontalmente dentro da tela */
+    gap: 15px; /* Espaçamento entre os elementos internos */ 
+    position: relative; /* Tornamos .tela o contêiner de posicionamento */  
+}
+
+.tela.ativa {
+    display: flex;
+}
+
+.tela h1 {
+    margin-top: 0;
+}
+
+.alvos {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#mapa-fases .niveis-container-botoes {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(239, 19, 19, 0.5);
+    z-index: 1011;
+    width: 400px; /* Ajuste conforme necessário */
+    height: 200px; /* Ajuste conforme necessário */
+}
+
+#mapa-fases img {
+    width: 900px; /* 100%;  Faz a imagem ocupar toda a largura do container mapa-fases */
+    height: 1600px; /* Faz a imagem ocupar toda a altura do container mapa-fases */
+    object-fit: contain; /* Garante que a imagem caiba dentro do container sem cortar */
+    z-index: 1000; /* Garante que a imagem fique abaixo dos botões */
+}
+
+#mapa-fases .nivel-btn {
+    background-color: #5cb85c; /* Verde agradável */
+    color: white;
+    padding: 15px 20px;
+    border: 2px solid red;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    transition: background-color 0.3s ease; /* Transição suave no hover */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Uma leve sombra */
+    z-index: 1011; /* Garante que os botões fiquem acima do container de botões */
+}
+
+#mapa-fases .nivel-btn:hover {
+    background-color: #4cae4c; /* Verde um pouco mais escuro no hover */
+}
+
+.tela-briefing-container {
+    position: fixed; /* Para sobrepor a tela */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centraliza */
+    z-index: 1000;
+    display: none; /* Escondido por padrão */
+}
+
+.tela-briefing-container.ativa {
+    display: flex;
+}
+
+.tela-briefing {
+    max-width: 100%; /* Permite que a imagem ocupe toda a largura do container, se necessário */
+    max-height: 100%; /* Permite que a imagem ocupe toda a altura do container, se necessário */
+    object-fit: contain; /* Garante que a imagem seja redimensionada para caber dentro do container, mantendo sua proporção */
+    width: auto; /* Permite que a largura se ajuste à proporção */
+    height: auto; /* Permite que a altura se ajuste à proporção */
+}
+
+#btn-jogar-briefing {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.alvo {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.alvo:hover {
+    background-color: #0056b3;
+}
+
+#btn-iniciar-jogo {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#tela-inicial > button,
+#tela-introducao1 > button,
+#tela-introducao2 > button {
+    position: absolute; /* Posicionamos os botões absolutamente dentro de .tela */
+    bottom: 50px; /* 50px da parte inferior da div .tela */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    /* Outros estilos visuais */
+}
+
+button:hover {
+    background-color: #1e7e34;
+}

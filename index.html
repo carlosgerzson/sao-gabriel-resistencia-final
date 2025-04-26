@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navegação do Jogo</title>
+    <link rel="stylesheet" href="navegacao.css">
+</head>
+<body>
+    <div id="tela-inicial" class="tela">
+        <img src="tela_inicial.png" alt="Tela Inicial">
+        <button id="btn-continuar-inicial">Continuar</button>
+    </div>          
+
+    <div id="tela-introducao1" class="tela">
+        <img src="tela_introducao1.png" alt="Introdução 1">        
+        <button id="btn-continuar-introducao1">Continuar</button>
+    </div>
+
+    <div id="tela-introducao2" class="tela">
+        <img src="tela_introducao2.png" alt="Introdução 2">       
+        <button id="btn-continuar-introducao2">Continuar</button>
+    </div>
+
+    <div id="mapa-fases" class="tela">
+        <img src="mapa_fases.png" alt="Mapa de Fases">
+        <div class="niveis-container-botoes">
+            <button class="nivel-btn nivel-1" data-nivel="1">Nível 1</button>
+            <button class="nivel-btn nivel-2" data-nivel="2">Nível 2</button>
+            <button class="nivel-btn nivel-3" data-nivel="3">Nível 3</button>
+            <button class="nivel-btn nivel-4" data-nivel="4">Nível 4</button>
+            <button class="nivel-btn nivel-5" data-nivel="5">Nível 5</button>
+            <button class="nivel-btn nivel-6" data-nivel="6">Nível 6</button>
+            <button class="nivel-btn nivel-7" data-nivel="7">Nível 7</button>
+            <button class="nivel-btn nivel-8" data-nivel="8">Nível 8</button>
+            <button class="nivel-btn nivel-9" data-nivel="9">Nível 9</button>
+            <button class="nivel-btn nivel-10" data-nivel="10">Nível 10</button>
+        </div>
+    </div>
+    
+    <div id="briefings" class="tela" style="display: none;">
+        <img id="alvo1_briefing" class="tela-briefing" src="briefings/alvo1_briefing.png" alt="Briefing Nível 1" style="display: none;">
+        <img id="alvo2_briefing" class="tela-briefing" src="briefings/alvo2_briefing.png" alt="Briefing Nível 2" style="display: none;">
+        <img id="alvo3_briefing" class="tela-briefing" src="briefings/alvo3_briefing.png" alt="Briefing Nível 3" style="display: none;">
+        <button id="btn-jogar-briefing">Jogar</button>
+        <!-- Adicione outros briefings aqui -->
+    </div>
+   
+    <script src="navegacao.js"></script>
+</body>
+</html>
