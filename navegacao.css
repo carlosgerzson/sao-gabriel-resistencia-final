@@ -9,6 +9,31 @@ body {
     background-color: #f0f0f0; /* Ou a cor de fundo desejada para a navegação */
 }
 
+.tela-briefing-container {
+    position: fixed; /* Mantém a tela sobreposta */
+    top: 0;        /* Alinha ao topo da tela */
+    left: 0;       /* Alinha à esquerda da tela */
+    width: 100%;   /* Ocupa toda a largura da tela */
+    height: 100%;  /* Ocupa toda a altura da tela */
+    z-index: 1000; /* Mantém a tela na frente de outros elementos */
+    display: none; /* Escondido por padrão */
+    /* Centraliza o conteúdo (a imagem) vertical e horizontalmente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .tela-briefing-container.ativa {
+    display: flex; /* Torna a tela visível */
+  }
+  
+  /* Estilos para a imagem dentro das telas de briefing */
+.tela .briefing-image {
+    max-width: 100%; /* Permite que a imagem ocupe até 100% da largura da tela */
+    max-height: 100%; /* Permite que a imagem ocupe até 100% da altura da tela */
+    object-fit: contain; /* Garante que a imagem inteira seja visível, mantendo a proporção */
+  }
+
 /* Para telas menores (até 600px de largura) */
 @media (max-width: 600px) {
     .tela {
@@ -90,26 +115,7 @@ body {
     background-color: #4cae4c; /* Verde um pouco mais escuro no hover */
 }
 
-.tela-briefing-container {
-    position: fixed; /* Para sobrepor a tela */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Centraliza */
-    z-index: 1000;
-    display: none; /* Escondido por padrão */
-}
 
-.tela-briefing-container.ativa {
-    display: flex;
-}
-
-.tela-briefing {
-    max-width: 100%; /* Permite que a imagem ocupe toda a largura do container, se necessário */
-    max-height: 100%; /* Permite que a imagem ocupe toda a altura do container, se necessário */
-    object-fit: contain; /* Garante que a imagem seja redimensionada para caber dentro do container, mantendo sua proporção */
-    width: auto; /* Permite que a largura se ajuste à proporção */
-    height: auto; /* Permite que a altura se ajuste à proporção */
-}
 
 #btn-jogar-briefing {
     position: absolute;
