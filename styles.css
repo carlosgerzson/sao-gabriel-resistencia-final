@@ -80,12 +80,20 @@ body, html {
     /* Adicione outros estilos */
 }
 
+@media screen and (width: 900px) {
+    #game {
+      width: 900px !important; /* Adicionando !important para forçar a aplicação */
+    }
+  }
+
 #game {
     position: relative;
-    width: 900px;
-    height: 1600px;
+    width: 90vw; /* Tenta ocupar 90% da largura da viewport */
+    max-width: 900px; /* Limita a largura máxima */
+    height: auto; /* A altura se ajustará proporcionalmente */
+    aspect-ratio: 900 / 1600; /* Mantém a proporção */
     margin: 0 auto;
-    overflow: hidden !important;   
+    overflow: hidden !important;
 }
 
 #background {
@@ -96,34 +104,20 @@ body, html {
     top: 0px;
     left: 0px;
     pointer-events: all;
-    /* display: none; */ /* Oculto inicialmente */
+    /*display: none; */ /* Oculto inicialmente */
 }   
 
-#alvo1-container {
-    position: absolute;
-    left: 197px; /* Correção da posição */
-    bottom: 48px; /* Ajuste conforme necessário */
-    width: 507px; /* Largura aproximada */
-    height: 363px; /* Altura aproximada */
-    z-index: 45;
-}
-
-#alvo2-container {
-    position: absolute;
-    left: 197px; /* Correção da posição */
-    bottom: 48px; /* Ajuste conforme necessário */
-    width: 507px; /* Largura aproximada */
-    height: 363px; /* Altura aproximada */
-    z-index: 45;
-}
-
+#alvo1-container,
+#alvo2-container,
 #alvo3-container {
     position: absolute;
-    left: 197px; /* Correção da posição */
-    bottom: 48px; /* Ajuste conforme necessário */
-    width: 507px; /* Largura aproximada */
-    height: 363px; /* Altura aproximada */
+    top: 50.2%; /* Experimente um valor inicial para o topo */
+    left: calc(197 / 900 * 100%);
+    /* bottom: calc(10 / 1600 * 100%); REMOVA OU COMENTE ESTA LINHA */
+    width: calc(507 / 900 * 100%);
+    height: calc(363 / 1600 * 100%);
     z-index: 45;
+    border: 2px solid red;
 }
 
 #ford_t {
@@ -199,7 +193,8 @@ body, html {
     bottom: 0;
     left: 0;
     background-repeat: no-repeat;
-    background-size: contain; /* Ou cover, dependendo do desejado */
+    background-size: contain; /* Mantém a proporção da imagem */
+    background-position: center bottom; /* Alinha a imagem ao centro horizontal e à parte inferior vertical do elemento */
 }
 
 .alvo2-camada {
