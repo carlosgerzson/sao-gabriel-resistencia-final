@@ -17,15 +17,14 @@ body, html {
 
 #game-container {
     display: flex;
-    justify-content: center;
-    /* align-items: center; Remova ou comente esta linha */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: flex-start; /* Alinha ao topo */
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     position: relative;
     margin: 0;
     padding: 0;
-    align-items: flex-start; /* Garante que o conteúdo comece no topo */
 }
 
 .tela {    
@@ -71,10 +70,18 @@ body, html {
 }
 
 #game-controls button {
-    position: absolute; /* Ou outro posicionamento */
-    bottom: 20px;
-    left: 50%;
-   transform: translateX(-50%);
+    /* Remova o posicionamento absoluto individual aqui */
+    position: static;
+    transform: none;
+    width: auto; /* Deixa os botões ajustarem a largura com o conteúdo */
+    padding: 10px 15px; /* Ajuste o padding conforme necessário */
+    font-size: 1em;
+    font-family: 'SuaNovaFonte', sans-serif;
+    background-color: #9fb733;
+    color: rgb(4, 4, 4);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
   
 #cronometro {
@@ -93,11 +100,11 @@ body, html {
     /* Adicione outros estilos */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     #game {
-        width: 100vw; /* Ocupa toda a largura da tela */
-        height: auto; /* Mantém a proporção */
+        width: 100%; /* Ocupa 100% da largura do #game-container em telas menores */
     }
+}
 
     #alvo1-container,
     #alvo2-container,
@@ -106,17 +113,17 @@ body, html {
         left: 50%; /* Centraliza horizontalmente */
         transform: translate(-50%, -50%);
     }
-}
 
-  #game {
-    position: relative;
-    width: 100%; /* Ajusta a largura para ocupar o container */
-    height: auto; /* Mantém a proporção */
-    max-width: 900px; /* Limita a largura máxima */
-    aspect-ratio: 9 / 16; /* Mantém a proporção 900x1600 */
-    margin: 0 auto; /* Centraliza horizontalmente */
-    overflow: hidden;
-}
+
+    #game {
+        position: relative;
+        width: 100%; /* Ocupa toda a largura do #game-container */
+        height: auto; /* A altura se ajusta automaticamente */
+        aspect-ratio: 9 / 16; /* Mantém a proporção 900:1600 */
+        max-height: none; /* Remove a restrição de altura */
+        margin: 0 auto; /* Centraliza horizontalmente */
+        overflow: hidden;
+    }
 
 #background {
     position: absolute;
@@ -134,14 +141,17 @@ body, html {
 #alvo3-container {
     position: absolute;
     width: 56.33%; /* Proporcional à largura do #game */
-    height: 22.69%; /* Proporcional à altura do #game */
-    top: 50%; /* Centraliza verticalmente */
+    max-width: 506px; /* Limita a largura máxima do alvo */
+    max-height: 30vh; /* Limita a altura máxima à altura da viewport */
+    height: auto;
+    aspect-ratio: 56.33 / 22.69; /* Mantém a proporção original */
+    bottom: 15%; /* Ajuste para cima */
     left: 50%; /* Centraliza horizontalmente */
-    transform: translate(-50%, -50%); /* Ajusta o ponto de referência */
+    transform: translateX(-50%); /* Ajusta o ponto de referência */
     z-index: 45;
-    margin: 0; /* Remove margens */
-    padding: 0; /* Remove paddings */
-    border: 2px solid red; /* Apenas para depuração */
+    margin: 0;
+    padding: 0;
+    /* border: 2px solid red; */ /* Apenas para depuração */
 }
 
 #ford_t {
@@ -366,29 +376,28 @@ body, html {
 
 #game-controls {
     position: absolute;
-    bottom: 100px; /* Ajuste a distância da parte inferior conforme necessário */
-    left: 0;
-    right: 0;
+    bottom: 2%;
+    left: 5%; /* Alinha à esquerda com uma margem */
+    right: 5%; /* Alinha à direita com uma margem */
     display: flex;
-    justify-content: center; /* Centraliza os botões horizontalmente */
-    gap: 20px; /* Espaçamento entre os botões (ajuste conforme necessário) */
+    justify-content: space-around; /* Distribui os botões com espaço igual entre eles */
     z-index: 820;
-    ; /* Garante que os botões estejam acima do conteúdo do jogo */
+    padding: 1%;
 }
 
 #game-controls button {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    font-family: 'SuaNovaFonte', sans-serif; /* Use a fonte do seu jogo */
+    flex-grow: 1; /* Permite que os botões cresçam para ocupar o espaço disponível */
+    margin: 0 1%; /* Pequena margem lateral entre os botões */
+    padding: 10px 0; /* Padding vertical, largura se ajusta */
+    font-size: 0.9em;
+    font-family: 'SuaNovaFonte', sans-serif;
     background-color: #9fb733;
     color: rgb(4, 4, 4);
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    position: static; /* Remove o posicionamento absoluto individual dos botões */
-    transform: none; /* Remove qualquer transformação de centralização individual */
-    bottom: auto;
-    left: auto;
+    text-align: center; /* Garante que o texto fique centralizado */
+    max-width: 150px; /* Limita a largura máxima dos botões */
 }
 
 #game-controls button:hover {
