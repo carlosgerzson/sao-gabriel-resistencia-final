@@ -12,18 +12,20 @@ body, html {
     height: 100%;
     background-color: rgb(234, 230, 230);
     position: relative;
+    align-items: flex-start; /* Garante o alinhamento ao topo */
 }
 
 #game-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    width: 100vw; /* Ocupa toda a largura da viewport */
-    height: 100vh; /* Ocupa toda a altura da viewport */
-    overflow: hidden; /* Garante que nada vaze */
+    /* align-items: center; Remova ou comente esta linha */
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
     position: relative;
-    margin: 0; /* Remove qualquer margem */
-    padding: 0; /* Remove qualquer padding */
+    margin: 0;
+    padding: 0;
+    align-items: flex-start; /* Garante que o conteúdo comece no topo */
 }
 
 .tela {    
