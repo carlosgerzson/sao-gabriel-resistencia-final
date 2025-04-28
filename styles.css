@@ -1,3 +1,10 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body, html {
     margin: 0;
     padding: 0;
@@ -8,11 +15,15 @@ body, html {
 }
 
 #game-container {
-    width: 100%;
-    height: 100vh; /* 100% da altura da janela */
     display: flex;
     justify-content: center;
-    position:relative;   
+    align-items: center;
+    width: 100vw; /* Ocupa toda a largura da viewport */
+    height: 100vh; /* Ocupa toda a altura da viewport */
+    overflow: hidden; /* Garante que nada vaze */
+    position: relative;
+    margin: 0; /* Remove qualquer margem */
+    padding: 0; /* Remove qualquer padding */
 }
 
 .tela {    
@@ -80,20 +91,29 @@ body, html {
     /* Adicione outros estilos */
 }
 
-@media screen and (width: 900px) {
+@media (max-width: 768px) {
     #game {
-      width: 900px !important; /* Adicionando !important para forçar a aplicação */
+        width: 100vw; /* Ocupa toda a largura da tela */
+        height: auto; /* Mantém a proporção */
     }
-  }
 
-#game {
+    #alvo1-container,
+    #alvo2-container,
+    #alvo3-container {
+        top: 55%; /* Ajuste fino para dispositivos menores */
+        left: 50%; /* Centraliza horizontalmente */
+        transform: translate(-50%, -50%);
+    }
+}
+
+  #game {
     position: relative;
-    width: 90vw; /* Tenta ocupar 90% da largura da viewport */
+    width: 100%; /* Ajusta a largura para ocupar o container */
+    height: auto; /* Mantém a proporção */
     max-width: 900px; /* Limita a largura máxima */
-    height: auto; /* A altura se ajustará proporcionalmente */
-    aspect-ratio: 900 / 1600; /* Mantém a proporção */
-    margin: 0 auto;
-    overflow: hidden !important;
+    aspect-ratio: 9 / 16; /* Mantém a proporção 900x1600 */
+    margin: 0 auto; /* Centraliza horizontalmente */
+    overflow: hidden;
 }
 
 #background {
@@ -111,13 +131,15 @@ body, html {
 #alvo2-container,
 #alvo3-container {
     position: absolute;
-    top: 50.2%; /* Experimente um valor inicial para o topo */
-    left: calc(197 / 900 * 100%);
-    /* bottom: calc(10 / 1600 * 100%); REMOVA OU COMENTE ESTA LINHA */
-    width: calc(507 / 900 * 100%);
-    height: calc(363 / 1600 * 100%);
+    width: 56.33%; /* Proporcional à largura do #game */
+    height: 22.69%; /* Proporcional à altura do #game */
+    top: 50%; /* Centraliza verticalmente */
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta o ponto de referência */
     z-index: 45;
-    border: 2px solid red;
+    margin: 0; /* Remove margens */
+    padding: 0; /* Remove paddings */
+    border: 2px solid red; /* Apenas para depuração */
 }
 
 #ford_t {
