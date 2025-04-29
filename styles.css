@@ -102,28 +102,36 @@ body, html {
 
 @media (max-width: 900px) {
     #game {
-        width: 100%; /* Ocupa 100% da largura do #game-container em telas menores */
+        width: 100%; /* Ocupa 100% da largura em telas menores */
+        max-width: none; /* Remove a largura máxima em telas menores */
     }
 }
 
-    #alvo1-container,
-    #alvo2-container,
-    #alvo3-container {
-        top: 55%; /* Ajuste fino para dispositivos menores */
-        left: 50%; /* Centraliza horizontalmente */
-        transform: translate(-50%, -50%);
-    }
+   
+#alvo1-container,
+#alvo2-container,
+#alvo3-container,
+#game-controls {
+    position: absolute;
+    /* As posições (top, left, bottom, right) serão ajustadas individualmente */
+}
 
+#game {
+    position: relative;
+    width: 100%; /* Ocupa a largura do container */
+    max-width: 900px; /* Largura máxima em telas maiores */
+    height: auto;
+    max-height: 100vh;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    margin: 0 auto; /* Centraliza o #game horizontalmente */
+}
 
-    #game {
-        position: relative;
-        width: 100%; /* Ocupa toda a largura do #game-container */
-        height: auto; /* A altura se ajusta automaticamente */
-        aspect-ratio: 9 / 16; /* Mantém a proporção 900:1600 */
-        max-height: none; /* Remove a restrição de altura */
-        margin: 0 auto; /* Centraliza horizontalmente */
-        overflow: hidden;
-    }
+#game-content-wrapper {
+    position: relative;
+    width: 900px;
+    height: 1600px;
+}
 
 #background {
     position: absolute;
@@ -139,19 +147,16 @@ body, html {
 #alvo1-container,
 #alvo2-container,
 #alvo3-container {
-    position: absolute;
-    width: 56.33%; /* Proporcional à largura do #game */
-    max-width: 506px; /* Limita a largura máxima do alvo */
-    max-height: 30vh; /* Limita a altura máxima à altura da viewport */
+    width: 56.33%;
     height: auto;
-    aspect-ratio: 56.33 / 22.69; /* Mantém a proporção original */
-    bottom: 15%; /* Ajuste para cima */
-    left: 50%; /* Centraliza horizontalmente */
-    transform: translateX(-50%); /* Ajusta o ponto de referência */
+    aspect-ratio: 1 / 1;
+    max-height: 30vh;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 45;
     margin: 0;
     padding: 0;
-    /* border: 2px solid red; */ /* Apenas para depuração */
 }
 
 #ford_t {
@@ -374,13 +379,13 @@ body, html {
     animation: expand 1s ease-out;
 }
 
+/* Revisitando o posicionamento dos controles */
 #game-controls {
-    position: absolute;
     bottom: 2%;
-    left: 5%; /* Alinha à esquerda com uma margem */
-    right: 5%; /* Alinha à direita com uma margem */
+    left: 5%;
+    right: 5%;
     display: flex;
-    justify-content: space-around; /* Distribui os botões com espaço igual entre eles */
+    justify-content: space-around;
     z-index: 820;
     padding: 1%;
 }
