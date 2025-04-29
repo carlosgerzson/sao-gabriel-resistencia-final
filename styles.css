@@ -26,6 +26,12 @@ body, html {
     background-color: black; /* Cor de fundo para as barras (se houver) */
 }
 
+/* Estilo para a imagem dentro da tela de fim de fase */
+.tela-mensagem img {
+    max-width: 100%;
+    height: auto; /* Para manter a proporção */
+}
+
 .tela {    
     top: 0;
     left: 0;
