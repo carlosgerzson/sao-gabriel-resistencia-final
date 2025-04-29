@@ -117,9 +117,9 @@ body, html {
 
 #game {
     position: relative;
-    width: 900px; /* Largura base do jogo */
-    height: 1600px; /* Altura base do jogo */
-    transform-origin: center center; /* Escala a partir do centro */
+    width: 900px; /* Largura base */
+    height: 1600px; /* Altura base */
+    transform-origin: top left; /* Ajuste para evitar deslocamento */
     overflow: hidden;
 }
 
