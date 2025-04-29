@@ -27,9 +27,9 @@ body, html {
 }
 
 /* Estilo para a imagem dentro da tela de fim de fase */
-.tela-mensagem img {
+.img {
     max-width: 100%;
-    height: auto; /* Para manter a proporção */
+    /* height: auto; Para manter a proporção */
 }
 
 .tela {    
