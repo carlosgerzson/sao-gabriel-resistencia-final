@@ -83,26 +83,29 @@
 
 <script>
         function ajustarEscala() {
-            const larguraViewport = window.innerWidth;
-            const alturaViewport = window.innerHeight;
-            const proporcaoJogo = 9 / 16; // 0.5625
-            const proporcaoViewport = larguraViewport / alturaViewport;
+    const larguraViewport = window.innerWidth;
+    const alturaViewport = window.innerHeight;
+    const proporcaoJogo = 9 / 16; // Proporção do jogo
+    const proporcaoViewport = larguraViewport / alturaViewport;
 
-            let escala = 1;
+    let escala = 1;
 
-            if (proporcaoViewport > proporcaoJogo) {
-                // Viewport mais larga que o jogo => ajustar pela altura
-                escala = alturaViewport / 1600;
-            } else {
-                // Viewport mais estreita que o jogo => ajustar pela largura
-                escala = larguraViewport / 900;
-            }
+    if (proporcaoViewport > proporcaoJogo) {
+        // Viewport mais larga que o jogo => ajustar pela altura
+        escala = alturaViewport / 1600;
+    } else {
+        // Viewport mais estreita que o jogo => ajustar pela largura
+        escala = larguraViewport / 900;
+    }
 
-            document.getElementById('game').style.transform = `scale(${escala})`;
-        }
+    const game = document.getElementById('game');
+    game.style.transform = `scale(${escala})`;
+    game.style.transformOrigin = 'top left'; // Aplica a alteração aqui
+}
 
-        window.onload = ajustarEscala;
-        window.addEventListener('resize', ajustarEscala);
+// Certifique-se de chamar esta função no carregamento da página e no redimensionamento da janela
+window.onload = ajustarEscala;
+window.addEventListener('resize', ajustarEscala);
     </script>
 
     <script src="main.js"></script>
