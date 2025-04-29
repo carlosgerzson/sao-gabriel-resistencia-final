@@ -60,6 +60,13 @@ body {
     position: relative; /* Tornamos .tela o contêiner de posicionamento */  
 }
 
+img {
+    /* display: block; */ /* Garante que a imagem se comporte como bloco */
+    /* width: auto; */    /* Permite que a largura se ajuste ao conteúdo */
+    max-width: 100%; /* Garante que não exceda a largura do pai */
+    /* align-self: center; */ /* Centraliza horizontalmente no container flex */
+}
+
 .tela.ativa {
     display: flex;
 }
