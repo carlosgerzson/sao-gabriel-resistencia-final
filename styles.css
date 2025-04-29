@@ -32,16 +32,18 @@ body, html {
     /* height: auto; Para manter a proporção */
 }
 
+/*
 .tela {    
     top: 0;
     left: 0;
-    width: 900px; /* Largura desejada */
-    height: 1600px; /* Altura desejada */
-    z-index: 1000; /* Para garantir que fique acima de outros elementos */
-    display: none; /* Esconde por padrão */
-   position: absolute; /* Tornamos .tela o contêiner de posicionamento */
-   pointer-events: auto; /* Impede cliques de passarem para elementos abaixo */
-}
+    width: 900px; 
+    height: 1600px; 
+    z-index: 1000; 
+    display: none; 
+   position: absolute; 
+   pointer-events: auto; 
+} 
+*/
 
 
 #ui-container button#terminar-partida-btn,
