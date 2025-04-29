@@ -21,8 +21,7 @@
 
             <div id="ui-container">                
                     <div id="tempo">00:00</div>                    
-            </div>
-            
+            </div>            
 
             <img id="background" src="background.png" alt="Background">
             <img id="ford_t" src="ford_t.png" alt="Ford T">
@@ -81,6 +80,31 @@
             
         </div>
     </div>   
+
+<script>
+        function ajustarEscala() {
+            const larguraViewport = window.innerWidth;
+            const alturaViewport = window.innerHeight;
+            const proporcaoJogo = 9 / 16; // 0.5625
+            const proporcaoViewport = larguraViewport / alturaViewport;
+
+            let escala = 1;
+
+            if (proporcaoViewport > proporcaoJogo) {
+                // Viewport mais larga que o jogo => ajustar pela altura
+                escala = alturaViewport / 1600;
+            } else {
+                // Viewport mais estreita que o jogo => ajustar pela largura
+                escala = larguraViewport / 900;
+            }
+
+            document.getElementById('game').style.transform = `scale(${escala})`;
+        }
+
+        window.onload = ajustarEscala;
+        window.addEventListener('resize', ajustarEscala);
+    </script>
+
     <script src="main.js"></script>
     <script src="navegacao.js" defer></script>
 </body>

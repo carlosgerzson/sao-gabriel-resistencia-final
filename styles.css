@@ -18,13 +18,12 @@ body, html {
 #game-container {
     display: flex;
     justify-content: center; /* Centraliza horizontalmente */
-    align-items: flex-start; /* Alinha ao topo */
+    align-items: center; /* Centraliza verticalmente */
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     position: relative;
-    margin: 0;
-    padding: 0;
+    background-color: black; /* Cor de fundo para as barras (se houver) */
 }
 
 .tela {    
@@ -118,13 +117,10 @@ body, html {
 
 #game {
     position: relative;
-    width: 100%; /* Ocupa a largura do container */
-    max-width: 900px; /* Largura máxima em telas maiores */
-    height: auto;
-    max-height: 100vh;
-    aspect-ratio: 9 / 16;
+    width: 900px; /* Largura base do jogo */
+    height: 1600px; /* Altura base do jogo */
+    transform-origin: center center; /* Escala a partir do centro */
     overflow: hidden;
-    margin: 0 auto; /* Centraliza o #game horizontalmente */
 }
 
 #game-content-wrapper {
