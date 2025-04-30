@@ -40,6 +40,7 @@ body, html {
     height: auto; /* Mantém a proporção */
 }
 
+/*
 .tela-absoluta {
     position: absolute;
     top: 0;
@@ -51,6 +52,7 @@ body, html {
     align-items: center;
     z-index: 1001; 
 }
+*/
 
 #ui-container button#terminar-partida-btn,
 #ui-container button#salvar-btn,
