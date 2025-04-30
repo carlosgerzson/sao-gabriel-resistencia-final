@@ -121,15 +121,16 @@ body, html {
 #game {
     position: relative;
     width: 900px; /* Largura base */
-    height: 1600px; /* Altura base */
     transform-origin: top left; /* Ajuste para evitar deslocamento */
+    max-width: 90vw; /* Ocupa até 90% da largura da tela */
+    max-width: 900px; /* Não ultrapassa 900px de largura */
     /*overflow: hidden;*/
 }
 
 #game-content-wrapper {
     position: relative;
     width: 900px;
-    height: 1600px;
+    max-height: 90vh; /* Opcional: limita a altura a 90% da altura da tela */
 }
 
 #background {

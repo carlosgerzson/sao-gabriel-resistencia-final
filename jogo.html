@@ -85,16 +85,17 @@
             const alturaViewport = window.innerHeight;
             const proporcaoJogo = 9 / 16; // Proporção do jogo
             const proporcaoViewport = larguraViewport / alturaViewport;
-
+    
             const game = document.getElementById('game');
-
+    
             let escala = 1;
-
+    
             if (larguraViewport <= 900) {
                 // Ajustar para telas menores pela largura
                 escala = larguraViewport / 900;
                 game.style.transform = `scale(${escala})`;
-                game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
+                // REMOVA OU COMENTE ESTA LINHA
+                // game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
             } else {
                 // Ajustar para telas maiores pela altura ou largura
                 if (proporcaoViewport > proporcaoJogo) {
@@ -103,11 +104,12 @@
                     escala = larguraViewport / 900;
                 }
                 game.style.transform = `scale(${escala})`;
-                game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
+                // REMOVA OU COMENTE ESTA LINHA
+                // game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
             }
             game.style.transformOrigin = 'top left';
         }
-
+    
         window.onload = ajustarEscala;
         window.addEventListener('resize', ajustarEscala);
     </script>
