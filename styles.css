@@ -44,8 +44,6 @@ body, html {
    pointer-events: auto; 
 } 
 
-
-
 #ui-container button#terminar-partida-btn,
 #ui-container button#salvar-btn,
 #ui-container button#pausar-continuar-btn,
