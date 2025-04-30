@@ -79,31 +79,35 @@
         </div>
     </div>
 
-<script>
+    <script>
         function ajustarEscala() {
-    const larguraViewport = window.innerWidth;
-    const alturaViewport = window.innerHeight;
-    const proporcaoJogo = 9 / 16; // Proporção do jogo
-    const proporcaoViewport = larguraViewport / alturaViewport;
+            const larguraViewport = window.innerWidth;
+            const alturaViewport = window.innerHeight;
+            const proporcaoJogo = 9 / 16; // Proporção do jogo
+            const proporcaoViewport = larguraViewport / alturaViewport;
 
-    let escala = 1;
+            const game = document.getElementById('game');
 
-    if (proporcaoViewport > proporcaoJogo) {
-        // Viewport mais larga que o jogo => ajustar pela altura
-        escala = alturaViewport / 1600;
-    } else {
-        // Viewport mais estreita que o jogo => ajustar pela largura
-        escala = larguraViewport / 900;
-    }
+            if (larguraViewport <= 900) {
+                // Remover a escala em telas menores
+                game.style.transform = 'none';
+                game.style.transformOrigin = 'top left'; // Manter a origem
+            } else {
+                // Aplicar a escala em telas maiores
+                let escala = 1;
+                if (proporcaoViewport > proporcaoJogo) {
+                    escala = alturaViewport / 1600;
+                } else {
+                    escala = larguraViewport / 900;
+                }
+                game.style.transform = `scale(${escala})`;
+                game.style.transformOrigin = 'top left';
+            }
+        }
 
-    const game = document.getElementById('game');
-    game.style.transform = `scale(${escala})`;
-    game.style.transformOrigin = 'top left'; // Aplica a alteração aqui
-}
-
-// Certifique-se de chamar esta função no carregamento da página e no redimensionamento da janela
-window.onload = ajustarEscala;
-window.addEventListener('resize', ajustarEscala);
+        // Certifique-se de chamar esta função no carregamento da página e no redimensionamento da janela
+        window.onload = ajustarEscala;
+        window.addEventListener('resize', ajustarEscala);
     </script>
 
     <script src="main.js"></script>
