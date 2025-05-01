@@ -4,30 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>São Gabriel > Resistência Final</title>
-    <link rel="stylesheet" href="style.css"> {/* Ensure correct path if needed */}
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 
-    {/* Telas que cobrem a viewport inteira, independentemente do jogo, controladas por JS */}
-    {/* Se #tela-ativa for uma tela de introdução/menu/briefing */}
-    <div id="tela-ativa" class="overlay-screen"> {/* Adicionada classe para estilo CSS comum */}
+   
+    <div id="tela-ativa" class="overlay-screen"> 
         <div id="briefing-container">
-            <img id="briefing-img" src="" alt="Briefing"> {/* src será definido via JS */}
+            <img id="briefing-img" src="" alt="Briefing"> 
         </div>
         <button id="btn-iniciar-jogo">Jogar</button>
     </div>
 
-    {/* Se #tela-fim-de-fase também for uma tela que cobre a viewport inteira */}
-    <div id="tela-fim-de-fase" class="overlay-screen"> {/* Adicionada classe para estilo CSS comum */}
+   
+    <div id="tela-fim-de-fase" class="overlay-screen"> 
         <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
         <button id="btn-voltar-mapa">Voltar ao Mapa</button>
     </div>
 
-    {/* Container principal do jogo - Controla a largura responsiva e centraliza horizontalmente */}
+  
     <div id="game-container">
 
-        {/* Elementos de UI que se posicionam sobre o game-container (agora irmaos do #game) */}
-        {/* Estes usarão position: absolute e unidades responsivas (vh, vw, %) relativas a #game-container */}
+       
          <div id="game-controls">
             <button id="pausar-continuar-btn">Pausar</button>
             <button id="salvar-btn">Salvar Jogo</button>
@@ -38,17 +36,16 @@
              <div id="tempo">00:00</div>
          </div>
 
-         <button id="modo-jogo-btn">Modo Coordenado</button> {/* Movido para fora do #game */}
-         <div id="mensagem-feedback"></div> {/* Movido para fora do #game */}
-         {/* #game-info-topo e seus filhos (#contador, #nivel, #nome-jogo) tambem deveriam estar aqui se existirem */}
+         <button id="modo-jogo-btn">Modo Coordenado</button> 
+         <div id="mensagem-feedback"></div> 
+       
 
 
-        {/* A área do jogo com as dimensões de design (900x1600) - Será escalada VISUALMENTE */}
-        {/* Este elemento contém APENAS os elementos que fazem parte do visual escalável do jogo */}
+      
         <div id="game">
-            {/* Wrapper para os elementos internos do jogo posicionados em PIXELS */}
+            
             <div id="game-content-wrapper">
-                {/* Elementos internos do jogo posicionados em PIXELS */}
+               
                 <img id="background" src="background.png" alt="Background">
                 <img id="ford_t" src="ford_t.png" alt="Ford T">
                 <img src="army_e.png" alt="Army E" class="army" id="army_e">
@@ -57,40 +54,40 @@
                 <img id="torre_e" src="torre_e.png" alt="Torre E">
                 <img id="torre_c_e_d" src="torre_c_e_d.png" alt="Torre C e D">
                 <img id="pedestal_d" src="pedestal_d.png" alt="Pedestal D">
-                <img id="target" src="target.png" alt="Target"> {/* Removido inline style */}
+                <img id="target" src="target.png" alt="Target"> 
 
                 <div id="alvo1-container" class="alvo-container">
                     <div id="alvo1_predio" class="alvo1-camada alvo1-predio"></div>
-                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1"></div> {/* Removido inline style */}
-                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2"></div> {/* Removido inline style */}
-                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido"></div> {/* Removido inline style */}
-                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo"></div> {/* Removido inline style */}
+                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1"></div> 
+                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2"></div> 
+                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido"></div> 
+                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo"></div> 
                 </div>
 
                 <div id="alvo2-container" class="alvo-container">
                     <div id="alvo2_predio" class="alvo2-camada alvo2-predio"></div>
-                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1"></div> {/* Removido inline style */}
-                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2"></div> {/* Removido inline style */}
-                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido"></div> {/* Removido inline style */}
-                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo"></div> {/* Removido inline style */}
+                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1"></div> 
+                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2"></div> 
+                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido"></div> 
+                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo"></div> 
                 </div>
 
                 <div id="alvo3-container" class="alvo-container">
                     <div id="alvo3_predio" class="alvo3-camada alvo3-predio"></div>
-                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1"></div> {/* Removido inline style */}
-                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2"></div> {/* Removido inline style */}
-                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido"></div> {/* Removido inline style */}
-                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo"></div> {/* Removido inline style */}
+                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1"></div> 
+                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2"></div> 
+                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido"></div> 
+                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo"></div> 
                 </div>
 
-                <img src="antimissil.png" alt="Míssil" class="missil"> {/* Removido inline style */}
-                <img src="explosion.gif" class="explosion" id="explosion"> {/* Removido inline style */}
+                <img src="antimissil.png" alt="Míssil" class="missil"> 
+                <img src="explosion.gif" class="explosion" id="explosion"> 
 
-            </div> {/* Fim #game-content-wrapper */}
-        </div> {/* Fim #game */}
-    </div> {/* Fim #game-container */}
+            </div> 
+        </div> 
+    </div> 
 
-    {/* Scripts no final do body para melhor performance */}
+   
     <script>
         // Função para ajustar a escala do jogo
         function ajustarEscala() {
