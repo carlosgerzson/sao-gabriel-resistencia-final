@@ -189,7 +189,7 @@ body, html {
 
 /* Estilos baseados na ASSUNÇÃO que #tela-fim-de-fase é IRMÃO de #game-container e FIXA */
 #tela-fim-de-fase {
-    /* display: none; */ /* Controlar visibilidade com JS */
+    display: none;  /* Controlar visibilidade com JS */
     position: fixed; /* Fixo na viewport */
     top: 0;
     left: 0;
