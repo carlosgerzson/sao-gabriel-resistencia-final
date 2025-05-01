@@ -197,7 +197,6 @@ body, html {
     height: 100%;
     z-index: 1000; /* Acima do jogo */
     background-color: rgba(0, 0, 0, 0.8); /* Fundo semi-transparente, ajuste se for uma imagem de fundo */
-    display: flex; /* Centraliza conteúdo interno */
     flex-direction: column; /* Se o conteúdo for vertical */
     align-items: center;
     justify-content: center;
