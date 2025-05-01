@@ -1,121 +1,155 @@
-/* style.css - Sugestões de Responsividade */
+/* style.css - Sugestões de Responsividade (Top-Aligned, Responsivo por Largura, Mantendo Proporção) */
 
+/* Reset básico */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Configuração inicial de body e html */
 body, html {
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Esconde barras de rolagem */
+    overflow-x: hidden; /* Esconde barra de rolagem horizontal se o conteúdo for mais largo que a tela */
+    overflow-y: auto; /* Permite barra de rolagem vertical se o conteúdo for mais alto que a tela */
     height: 100%; /* Garante que ocupem a altura total da viewport */
-    background-color: rgb(234, 230, 230);
-    display: flex; /* Usa Flexbox para centralizar o conteúdo */
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
+    background-color: rgb(234, 230, 230); /* Cor de fundo da página */
+    /* Remove as propriedades flex de centralização usadas na tentativa anterior */
+    display: block; /* Volta para o fluxo normal de bloco */
 }
 
+/* Container principal do jogo - Define a largura responsiva e centraliza horizontalmente */
 #game-container {
-    /* Este container ocupa todo o espaço disponível na viewport (dado pelo body/html) */
-    /* Ele age como o palco onde o jogo escalado será centralizado */
-    position: relative; /* Bom para conter elementos absolutos dentro */
+    position: relative; /* Necessário para posicionamento absoluto de filhos */
     width: 100vw; /* Ocupa 100% da largura da viewport */
-    height: 100vh; /* Ocupa 100% da altura da viewport */
-    background-color: black; /* Fundo para as "barras pretas" (letterbox) */
+    max-width: 900px; /* Mas não excede a largura de design */
+    height: auto; /* A altura será determinada pelo conteúdo escalado (#game) */
+    margin: 0 auto; /* Centraliza o container horizontalmente na tela */
+    background-color: black; /* Fundo para as "barras pretas" laterais se a largura for menor que 900px */
     overflow: hidden; /* Garante que nada escape visualmente deste container */
-
-    /* Configura #game-container para ser um container flex que centraliza o #game */
-    display: flex; /* Use Flexbox neste container */
-    justify-content: center; /* Centraliza o #game horizontalmente dentro de #game-container */
-    align-items: center; /* Centraliza o #game verticalmente dentro de #game-container */
+    /* Remove propriedades flex, volta para o fluxo normal */
+    display: block;
 }
 
+/* A área do jogo com as dimensões de design (900x1600) - Será escalada */
 #game {
-    /* Esta é a área do jogo com as dimensões de design (eixos de coordenadas 900x1600) */
-    /* Usamos max-width/max-height para que ele escale *para baixo* para caber no container,
-       mantendo sua proporção original. */
-       position: relative; /* Mantém-no como container para seus filhos absolutos */
-       width: 900px; /* Largura BASE de design (em pixels) */
-       height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
-       max-width: 100%; /* Permite que a largura escale até 100% do #game-container */
-       max-height: 100%; /* Permite que a altura escale até 100% do #game-container */
-   
-       /* O #game será centralizado DENTRO do #game-container pelas propriedades flex deste último. */
-       /* Remova QUALQUER posicionamento absoluto ou transformações de centralização NESTE elemento (#game) */
-       top: auto !important; /* Garante que regras anteriores não fixem o top */
-       left: auto !important; /* Garante que regras anteriores não fixem o left */
-       transform: none !important; /* Garante que nenhuma transformação de translate esteja aplicada aqui */
-       margin: 0 !important; /* Garante que nenhuma margem esteja deslocando */
+    position: relative; /* Mantém-no como container para seus filhos absolutos */
+    width: 900px; /* Largura BASE de design (em pixels) */
+    height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
+    transform-origin: top left; /* Define o ponto de origem da transformação de escala (canto superior esquerdo) */
 
-    overflow: hidden; /* Esconde qualquer coisa dentro de #game que ultrapasse seus limites após escalonamento */
-    /* transform-origin não é estritamente necessário com a centralização flexbox + max-width/height */
+    /* NOTA IMPORTANTE: A PROPRIEDADE `transform: scale(...)` PRECISA SER APLICADA AQUI! */
+    /* O valor da escala deve ser calculado com base na relação:
+       (largura ATUAL do #game-container) / (largura BASE de design do #game = 900px)
+       Ex: Se #game-container tiver 450px de largura, a escala é 450/900 = 0.5.
+       Você aplicaria transform: scale(0.5);
+       Isto é geralmente feito com JavaScript que calcula o valor dinamicamente
+       ou pode ser feito manualmente com Media Queries para breakpoints específicos. */
+
+    /* Exemplo de como ficaria a regra `transform` (Você PRECISA aplicá-la!): */
+    /* transform: scale( calc( var(--container-width) / 900 ) );  <-- Exemplo com CSS Variable (requer JS para definir a var) */
+    /* transform: scale(0.5); <-- Exemplo com valor fixo (usado em Media Queries) */
+
+    /* Remova quaisquer outras propriedades de posicionamento (top, left, bottom, right) ou margem que possam interferir */
+    top: auto;
+    left: auto;
+    margin: 0;
+
+    /* overflow: hidden; para garantir que elementos internos não causem problemas visuais fora da área definida pelo #game. */
+    overflow: hidden;
 }
 
-/* Remova a media query existente que afeta #game */
-/* @media (max-width: 900px) {
-    #game {
-        width: 100vw !important;
-        max-width: none !important;
-        height: auto !important;
-        transform: none !important;
-    }
-} */
+/* --- Estilos para elementos DENTRO do #game --- */
+/* Elementos posicionados absolutamente DENTRO do #game (background, alvos, exército, carros, mísseis, etc.) */
+/* DEVEM MANTER SUAS POSIÇÕES E DIMENSÕES EM PIXELS. */
+/* Quando o #game for escalado com `transform: scale()`, estes elementos,
+   posicionados em pixels dentro dele, escalarão junto automaticamente e manterão
+   suas posições e tamanhos relativos dentro da área de jogo escalada.
+   É CRUCIAL NÃO MUDAR AS UNIDADES DE PIXEL PARA ESTES ELEMENTOS. */
+
+#background {
+    position: absolute;
+    width: 900px; /* Mantenha em pixels */
+    height: 1600px; /* Mantenha em pixels */
+    top: 0px; /* Mantenha em pixels */
+    left: 0px; /* Mantenha em pixels */
+    z-index: 1;
+    pointer-events: all;
+    /*display: none; */ /* Mantenha ou ajuste conforme a lógica do seu jogo */
+}
+
+#ford_t {
+    position: absolute;
+    width: 114px; /* Mantenha em pixels */
+    height: 71px; /* Mantenha em pixels */
+    top: 1520px; /* Mantenha em pixels */
+    left: 732px; /* Mantenha em pixels */
+    transform-origin: top left;
+    z-index: 5;
+}
+
+/* ... (Continue para todos os outros elementos que usam position: absolute DENTRO do #game - army, pedestal, torre, missil, bomb, target, explosion, etc.) ... */
+/* Exemplo genérico para elementos dentro do #game que são posicionados com pixels: */
+.army, .missil, .bomb, #pedestal_d, #torre_c_e_d, #torre_e, .explosion, .explosion-area {
+    position: absolute; /* Mantenha absolute */
+    /* Mantenha width, height, top, left, bottom, right em PIXELS conforme seu design original */
+    /* z-index: ; */ /* Verifique se os z-indexes fazem sentido com o #game escalado */
+    /* transform-origin: ; */ /* Ajuste se o ponto de origem da transformação for importante */
+    /* clip-path: ; */ /* Mantenha se necessário */
+    /* display: none/block; */ /* Mantenha ou ajuste conforme a lógica do seu jogo */
+    /* animation: ; */ /* Mantenha se necessário */
+}
 
 
-/* Ajustar elementos com posicionamento absoluto que parecem ser baseados na viewport.
-   Eles devem ser posicionados em relação ao #game-container (que preenche a tela)
-   usando unidades responsivas (vw, vh, %, vmin). */
+/* --- Estilos para elementos de UI FORA da área de jogo principal --- */
+/* Elementos como placar, cronômetro, botões de controle/menu, etc. */
+/* Devem ser posicionados ABSOLUTAMENTE em relação ao #game-container
+   (que agora está top-aligned e com largura controlada)
+   usando unidades responsivas (%, vw, vh, vmin) para se posicionarem e escalarem com a tela. */
 
 #ui-container {
-    position: absolute; /* Mantém posicionamento absoluto em relação ao #game-container */
-    /* top: 50px; left: 50px; */ /* Substituir por unidades responsivas */
-    top: 5vh; /* Exemplo: 5% da altura da viewport */
-    left: 5vw; /* Exemplo: 5% da largura da viewport */
-    z-index: 1000;
-    /* font-size: 4em; */ /* Pode ser muito grande/pequeno. Use vmin para tamanho relativo à tela */
-    font-size: 4vmin; /* Exemplo: 4% da menor dimensão da viewport (width ou height) */
+    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
+    top: 2vh; /* Exemplo: 2% da altura da viewport */
+    left: 2vw; /* Exemplo: 2% da largura da viewport */
+    z-index: 1000; /* Garante que fique acima de tudo */
+    font-size: 2.5vmin; /* Exemplo: tamanho de fonte relativo à menor dimensão da viewport */
     color: #fed906;
     text-align: left;
     /* Outros estilos visuais do container, se necessário */
 }
 
 #cronometro {
-    position: absolute; /* Mantém posicionamento absoluto em relação ao #game-container */
-    /* top: 10px; left: 10px; */ /* Substituir por unidades responsivas */
+    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
     top: 2vh; /* Exemplo */
     left: 2vw; /* Exemplo */
-    /* font-size: 24px; */ /* Substituir por unidade responsiva */
     font-size: 2.5vmin; /* Exemplo */
     z-index: 890; /* Garante que fique acima do jogo principal */
     /* Adicione outros estilos */
 }
 
 #iniciar-jogo-btn {
-    position: absolute; /* Mantém posicionamento absoluto em relação ao #game-container */
-    /* top: 60%; left: 50%; transform: translate(-50%, -50%); */ /* Isso já é relativamente responsivo e centraliza */
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
+    /* top: 60%; left: 50%; transform: translate(-50%, -50%); */ /* Isto já é relativamente responsivo e centraliza DENTRO DO CONTAINER */
+    top: 60%; /* 60% da altura do #game-container */
+    left: 50%; /* 50% da largura do #game-container */
+    transform: translate(-50%, -50%); /* Centraliza o próprio botão */
     z-index: 900; /* Garante que fique acima do jogo */
     /* Adicione outros estilos */
 }
 
 #tela-fim-de-fase button#btn-voltar-mapa {
-    /* Assumindo que #tela-fim-de-fase é filho direto do #game-container */
-    position: absolute; /* Relativo ao #game-container */
-    /* bottom: 50px; left: 50%; transform: translateX(-50%); */ /* bottom em px pode ser um problema */
+    /* Assumindo que #tela-fim-de-fase é filho direto do #game-container ou de um elemento que preenche o #game-container */
+    position: absolute; /* Relativo ao container pai (#game-container ou #tela-fim-de-fase) */
     bottom: 5vh; /* Exemplo: 5% da altura da viewport */
-    left: 50%;
-    transform: translateX(-50%);
+    left: 50%; /* 50% da largura do container pai */
+    transform: translateX(-50%); /* Centraliza o próprio botão horizontalmente */
     z-index: 20; /* Verifique se este z-index é suficiente para sobrepor a tela de fundo */
     /* Outros estilos visuais */
 }
 
 #game-info-topo {
-    position: absolute; /* Relativo ao #game-container */
-    /* top: 10px; left: 10px; right: 10px; */ /* Substituir por unidades responsivas */
+    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
     top: 2vh; /* Exemplo */
     left: 2vw; /* Exemplo */
     right: 2vw; /* Exemplo */
@@ -124,26 +158,24 @@ body, html {
     align-items: center;
     color: white;
     z-index: 890; /* Deve ser maior que o jogo principal */
-    padding: 1vmin; /* Exemplo usando vmin para padding */
-    /* font-family já está ok */
+    padding: 1vmin; /* Exemplo usando vmin */
+    font-family: 'Press Start 2P', cursive; /* Mantenha sua fonte */
 }
 
 #contador, #nivel, #nome-jogo {
-    /* font-size: 20px; */ /* Substituir por unidade responsiva */
     font-size: 2vmin; /* Exemplo */
     background-color: rgba(0, 0, 0, 0.5);
     padding: 0.5vmin 1vmin; /* Exemplo usando vmin */
     border-radius: 0.5vmin; /* Exemplo usando vmin */
-    /* font-family já está ok */
+    font-family: 'Press Start 2P', cursive; /* Mantenha sua fonte */
 }
 
 #game-controls {
-    /* Assumindo que #game-controls é filho direto do #game-container ou body */
-    /* bottom: 2%; left: 5%; right: 5%; */ /* Percentagens já são responsivas em relação ao pai */
-    position: absolute; /* Mantenha se for absoluto em relação ao container pai */
-    bottom: 2%; /* % é relativo à altura do container pai (#game-container ou body) */
-    left: 5%; /* % é relativo à largura do container pai */
-    right: 5%; /* % é relativo à largura do container pai */
+    /* Assumindo que #game-controls é filho direto do #game-container ou de um elemento que preenche o #game-container */
+    position: absolute; /* Posicionado absolutamente em relação ao container pai */
+    bottom: 2%; /* % da altura do container pai (#game-container) */
+    left: 5%; /* % da largura do container pai */
+    right: 5%; /* % da largura do container pai */
     display: flex;
     justify-content: space-around;
     z-index: 820; /* Garante que fique acima do jogo principal */
@@ -155,7 +187,6 @@ body, html {
     flex-grow: 1;
     margin: 0 1%; /* Percentagem para margem */
     padding: 1vmin 0; /* vmin para padding */
-    /* font-size: 0.9em; */ /* 'em' é relativo ao tamanho da fonte do #game-controls, pode ser ok, mas vmin é mais previsível */
     font-size: 1.8vmin; /* Exemplo */
     font-family: 'SuaNovaFonte', sans-serif; /* ou a fonte correta */
     background-color: #9fb733;
@@ -170,45 +201,10 @@ body, html {
 }
 
 #game-controls button:hover {
-     background-color: #286090; /* Mantenha o hover */
+    background-color: #286090; /* Mantenha o hover */
 }
 
-/* Estilos para elementos DENTRO do #game (background, alvos, exército, etc.) */
-/* Estes elementos têm position: absolute com top/left/width/height em PIXELS */
-/* Eles são posicionados em relação ao canto superior esquerdo do #game. */
-/* Quando #game escala usando max-width/max-height e é centralizado,
-   seu sistema de coordenadas de 900x1600 px é que está sendo "esticado" ou "comprimido".
-   Portanto, os elementos posicionados em pixels DENTRO de #game se ajustarão automaticamente
-   em sua posição relativa e tamanho DENTRO DA ÁREA ESCALADA do #game. */
-/* É CRUCIAL NÃO MUDAR AS UNIDADES DE PIXEL para porcentagens/vw/vh/vmin para estes elementos,
-   a menos que você refatore TODO o sistema de posicionamento do jogo. */
-
-/* Exemplos de elementos dentro do #game que DEVEM MANTER PIXELS: */
-#background {
-    position: absolute;
-    width: 900px; /* Mantenha em pixels */
-    height: 1600px; /* Mantenha em pixels */
-    top: 0px; /* Mantenha em pixels */
-    left: 0px; /* Mantenha em pixels */
-    z-index: 1;
-    pointer-events: all;
-    /* display: none; */ /* Mantenha se for controlado via JS */
-}
-
-#ford_t {
-    position: absolute;
-    width: 114px; /* Mantenha em pixels */
-    height: 71px; /* Mantenha em pixels */
-    top: 1520px; /* Mantenha em pixels */
-    left: 732px; /* Mantenha em pixels */
-    transform-origin: top left;
-    z-index: 5;
-}
-
-/* .missil, .army, #pedestal_d, #army_c, #army_d, #torre_c_e_d, .alvo1-camada, etc. */
-/* Todos os elementos posicionados absolutamente DENTRO de #game devem manter suas unidades de pixel */
-/* Ajuste as propriedades 'display' (none/block) conforme a lógica do seu jogo */
-
+/* Outros estilos gerais ou para elementos específicos que não afetam o layout principal */
 .img {
     max-width: 100%;
     height: auto; /* Para manter a proporção */
@@ -222,33 +218,12 @@ body, html {
     height: auto; /* Mantém a proporção */
 }
 
-/* Outros estilos que não afetam layout principal podem permanecer */
-/* Ex: .explosion, .explosion-area, @keyframes */
-.explosion {
-    position: absolute;
-    width: 100px; /* Mantenha em pixels se for dentro do #game */
-    height: 100px; /* Mantenha em pixels se for dentro do #game */
-    display: none;
-    z-index: 70; /* Verifique se o z-index faz sentido com o #game escalado */
-}
-
-.explosion-area {
-    position: absolute;
-    width: 150px; /* Mantenha em pixels se for dentro do #game */
-    height: 150px; /* Mantenha em pixels se for dentro do #game */
-    background-color: yellow;
-    border: 2px solid red;
-    border-radius: 50%;
-    opacity: 0.8;
-    z-index: 80; /* Verifique se o z-index faz sentido com o #game escalado */
-    animation: expand 1s ease-out;
-}
-
+/* ... (outros estilos de elementos internos ou animações) ... */
 @keyframes expand {
-0% {
- transform: scale(0);
-}
-100% {
-transform: scale(1);
-}
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
