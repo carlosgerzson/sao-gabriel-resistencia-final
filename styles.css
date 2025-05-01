@@ -18,46 +18,36 @@ body, html {
 }
 
 #game-container {
-    /* Este container define a área máxima que o jogo pode ocupar na tela. */
-    /* Ele se centraliza usando o Flexbox aplicado em body/html. */
-    position: relative; /* Necessário para posicionamento absoluto de filhos como o #game */
-    width: 100vw; /* Ocupa a largura total da viewport */
-    height: 100vh; /* Ocupa a altura total da viewport */
-    /* max-width e max-height aqui limitariam o *container*,
-       vamos deixar que o #game dentro dele gerencie o escalonamento */
-    background-color: black; /* Fundo para preencher áreas não ocupadas pelo jogo (letterbox) */
-    overflow: hidden; /* Esconde qualquer conteúdo que saia dos limites (após escalonamento) */
-    /* Remove display/justify-content/align-items pois a centralização do #game
-       será feita com position: absolute e transform */
+    /* Este container ocupa todo o espaço disponível na viewport (dado pelo body/html) */
+    /* Ele age como o palco onde o jogo escalado será centralizado */
+    position: relative; /* Bom para conter elementos absolutos dentro */
+    width: 100vw; /* Ocupa 100% da largura da viewport */
+    height: 100vh; /* Ocupa 100% da altura da viewport */
+    background-color: black; /* Fundo para as "barras pretas" (letterbox) */
+    overflow: hidden; /* Garante que nada escape visualmente deste container */
+
+    /* Configura #game-container para ser um container flex que centraliza o #game */
+    display: flex; /* Use Flexbox neste container */
+    justify-content: center; /* Centraliza o #game horizontalmente dentro de #game-container */
+    align-items: center; /* Centraliza o #game verticalmente dentro de #game-container */
 }
 
 #game {
-    /* Esta div representa a área do jogo com as dimensões de design (eixos de coordenadas). */
-    /* Os elementos internos (background, alvos, etc.) são posicionados em PIXELS DENTRO DELE. */
-    position: absolute; /* Posiciona absolutamente dentro do #game-container */
-    width: 900px; /* Largura BASE de design (em pixels) */
-    height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
-    top: 50%; /* Centraliza verticalmente */
-    left: 50%; /* Centraliza horizontalmente */
-    transform: translate(-50%, -50%); /* Ajusta a posição para o centro exato */
-    transform-origin: center center; /* Escala a partir do centro */
-
-    /* Adiciona escalonamento para caber no container (#game-container) mantendo a proporção */
-    /* A escala será calculada com base no tamanho do container vs o tamanho de design (900x1600) */
-    /* scale = min(container_width / design_width, container_height / design_height) */
-    /* Esta parte é complexa em CSS puro, mas podemos simular com max-width/max-height */
-
-    /* Alternativa simples com max-width/max-height no #game para escalar e manter proporção: */
-    /* Remove position/top/left/transform e usa a centralização do #game-container */
-    position: relative; /* Volta a ser relative para conter filhos absolutos */
-    width: 900px; /* Largura base de design */
-    height: 1600px; /* Altura base de design (ajuste se necessário) */
-    max-width: 100%; /* Permite que a largura escale até 100% do #game-container */
-    max-height: 100%; /* Permite que a altura escale até 100% do #game-container */
-    /* Quando ambos max-width/max-height são definidos e a proporção é diferente do container,
-       o elemento escalará para caber na restrição que for atingida primeiro, mantendo a proporção. */
-
-    /* Com esta abordagem, o #game já está sendo centralizado pelo Flexbox do #game-container */
+    /* Esta é a área do jogo com as dimensões de design (eixos de coordenadas 900x1600) */
+    /* Usamos max-width/max-height para que ele escale *para baixo* para caber no container,
+       mantendo sua proporção original. */
+       position: relative; /* Mantém-no como container para seus filhos absolutos */
+       width: 900px; /* Largura BASE de design (em pixels) */
+       height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
+       max-width: 100%; /* Permite que a largura escale até 100% do #game-container */
+       max-height: 100%; /* Permite que a altura escale até 100% do #game-container */
+   
+       /* O #game será centralizado DENTRO do #game-container pelas propriedades flex deste último. */
+       /* Remova QUALQUER posicionamento absoluto ou transformações de centralização NESTE elemento (#game) */
+       top: auto !important; /* Garante que regras anteriores não fixem o top */
+       left: auto !important; /* Garante que regras anteriores não fixem o left */
+       transform: none !important; /* Garante que nenhuma transformação de translate esteja aplicada aqui */
+       margin: 0 !important; /* Garante que nenhuma margem esteja deslocando */
 
     overflow: hidden; /* Esconde qualquer coisa dentro de #game que ultrapasse seus limites após escalonamento */
     /* transform-origin não é estritamente necessário com a centralização flexbox + max-width/height */
