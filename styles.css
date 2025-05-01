@@ -1,4 +1,4 @@
-/* style.css - Arquivo Completo com Sugestões de Responsividade */
+/* style.css - Revisado para Posicionamento (Top-Aligned, Responsivo por Largura, Mantendo Proporção) */
 
 /* Reset básico */
 * {
@@ -23,7 +23,7 @@ body, html {
 /* Container principal do jogo - Define a largura responsiva e centraliza horizontalmente */
 /* Este container estará alinhado ao topo pelo fluxo normal do documento */
 #game-container {
-    position: relative; /* Necessário para posicionamento absoluto de filhos (UI e o #game) */
+    position: relative; /* Essencial para posicionar #game e elementos de UI de forma absoluta dentro dele */
     width: 100vw; /* Ocupa 100% da largura da viewport */
     max-width: 900px; /* Mas não excede a largura de design base */
     /* A altura será determinada pelo conteúdo escalado dentro dele (#game) */
@@ -37,9 +37,13 @@ body, html {
 
 /* A área do jogo com as dimensões de design (900x1600) - Será escalada */
 #game {
-    /* Importante: Este elemento é o que contém todo o conteúdo visual do jogo (background, personagens, etc.) */
+    /* Importante: Este elemento contém todo o conteúdo visual do jogo (background, personagens, etc.) */
     /* Ele será escalado VISUALMENTE usando transform: scale() */
-    position: relative; /* Mantém-no como container para seus filhos absolutos */
+    /* Posicionamento absoluto para garantir que comece exatamente no canto superior esquerdo do #game-container */
+    position: absolute;
+    top: 0; /* Alinha ao topo do #game-container */
+    left: 0; /* Alinha à esquerda do #game-container */
+
     width: 900px; /* Largura BASE de design (em pixels) */
     height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
     transform-origin: top left; /* Define o ponto de origem da transformação de escala (canto superior esquerdo) */
@@ -47,12 +51,11 @@ body, html {
     /* A propriedade `transform: scale(...)` PRECISA SER APLICADA AQUI! */
     /* O valor da escala deve ser calculado (largura ATUAL do #game-container) / 900 */
     /* Isso é geralmente feito com JavaScript (veja a função ajustarEscala no jogo.html) */
-    /* Certifique-se de que seu script JavaScript atualiza o transform: scale(escala) neste elemento. */
+    /* Certifique-se de que seu script JavaScript atualiza o transform: scale(escala) neste elemento
+       e que o cálculo da escala está correto (apenas largura do container / 900). */
     /* transform: scale(1); /* Exemplo - o JS/Media Query vai sobrescrever isso */
 
-    /* Remova quaisquer outras propriedades de posicionamento (top, left, bottom, right) ou margem que possam interferir */
-    top: auto;
-    left: auto;
+    /* Remova quaisquer outras propriedades de posicionamento (bottom, right) ou margem que possam interferir */
     margin: 0;
 
     /* overflow: hidden; */ /* Pode ser útil aqui também */
@@ -257,6 +260,7 @@ body, html {
     text-align: center;
     /* max-width: 150px; */ /* Removido ou ajustado para vmin */
     max-width: 15vmin; /* Exemplo */
+    /* Se os botões ficarem muito grandes/pequenos, ajuste esta ou remova */
 }
 
 #game-controls button:hover {
@@ -276,6 +280,30 @@ body, html {
     color: #fed906; /* Exemplo */
     /* text-align: left; */ /* Pode manter se precisar alinhar o texto dentro do div #tempo */
     /* font-family */
+    font-family: 'Press Start 2P', cursive;
+}
+
+/* Se existir #game-info-topo (não vi no HTML colado, mas estava no CSS original) */
+#game-info-topo {
+    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
+    top: 2vh; /* Exemplo */
+    left: 2vw; /* Exemplo */
+    right: 2vw; /* Exemplo */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    z-index: 890; /* Deve ser maior que o jogo principal */
+    padding: 1vmin; /* Use vmin */
+    font-family: 'Press Start 2P', cursive;
+}
+
+/* Se existirem #contador, #nivel, #nome-jogo (filhos de #game-info-topo) */
+#contador, #nivel, #nome-jogo {
+    font-size: 2vmin; /* Exemplo */
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 0.5vmin 1vmin; /* Exemplo */
+    border-radius: 0.5vmin; /* Exemplo */
     font-family: 'Press Start 2P', cursive;
 }
 

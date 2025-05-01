@@ -1,28 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>São GAbriel> Resistência Final</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>São Gabriel > Resistência Final</title>
+    <link rel="stylesheet" href="style.css"> {/* Ensure correct path if needed */}
 </head>
-
 <body>
 
+    {/* Telas que cobrem a viewport inteira, independentemente do jogo, controladas por JS */}
+    {/* Se #tela-ativa for uma tela de introdução/menu/briefing */}
+    <div id="tela-ativa" class="overlay-screen"> {/* Adicionada classe para estilo CSS comum */}
+        <div id="briefing-container">
+            <img id="briefing-img" src="" alt="Briefing"> {/* src será definido via JS */}
+        </div>
+        <button id="btn-iniciar-jogo">Jogar</button>
+    </div>
+
+    {/* Se #tela-fim-de-fase também for uma tela que cobre a viewport inteira */}
+    <div id="tela-fim-de-fase" class="overlay-screen"> {/* Adicionada classe para estilo CSS comum */}
+        <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
+        <button id="btn-voltar-mapa">Voltar ao Mapa</button>
+    </div>
+
+    {/* Container principal do jogo - Controla a largura responsiva e centraliza horizontalmente */}
     <div id="game-container">
+
+        {/* Elementos de UI que se posicionam sobre o game-container (agora irmaos do #game) */}
+        {/* Estes usarão position: absolute e unidades responsivas (vh, vw, %) relativas a #game-container */}
+         <div id="game-controls">
+            <button id="pausar-continuar-btn">Pausar</button>
+            <button id="salvar-btn">Salvar Jogo</button>
+            <button id="terminar-partida-btn">Terminar Partida</button>
+         </div>
+
+         <div id="ui-container">
+             <div id="tempo">00:00</div>
+         </div>
+
+         <button id="modo-jogo-btn">Modo Coordenado</button> {/* Movido para fora do #game */}
+         <div id="mensagem-feedback"></div> {/* Movido para fora do #game */}
+         {/* #game-info-topo e seus filhos (#contador, #nivel, #nome-jogo) tambem deveriam estar aqui se existirem */}
+
+
+        {/* A área do jogo com as dimensões de design (900x1600) - Será escalada VISUALMENTE */}
+        {/* Este elemento contém APENAS os elementos que fazem parte do visual escalável do jogo */}
         <div id="game">
-            <div id="game-content-wrapper" style="width: 900px; height: 1600px; position: relative;">
-                <div id="game-controls">
-                    <button id="pausar-continuar-btn">Pausar</button>
-                    <button id="salvar-btn">Salvar Jogo</button>
-                    <button id="terminar-partida-btn">Terminar Partida</button>
-                </div>
-    
-                <div id="ui-container">
-                    <div id="tempo">00:00</div>
-                </div>
-    
+            {/* Wrapper para os elementos internos do jogo posicionados em PIXELS */}
+            <div id="game-content-wrapper">
+                {/* Elementos internos do jogo posicionados em PIXELS */}
                 <img id="background" src="background.png" alt="Background">
                 <img id="ford_t" src="ford_t.png" alt="Ford T">
                 <img src="army_e.png" alt="Army E" class="army" id="army_e">
@@ -31,90 +57,87 @@
                 <img id="torre_e" src="torre_e.png" alt="Torre E">
                 <img id="torre_c_e_d" src="torre_c_e_d.png" alt="Torre C e D">
                 <img id="pedestal_d" src="pedestal_d.png" alt="Pedestal D">
-                <img id="target" src="target.png" alt="Target" style="position:absolute; display:none;">
-    
+                <img id="target" src="target.png" alt="Target"> {/* Removido inline style */}
+
                 <div id="alvo1-container" class="alvo-container">
                     <div id="alvo1_predio" class="alvo1-camada alvo1-predio"></div>
-                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1" style="display: none;"></div>
-                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2" style="display: none;"></div>
-                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido" style="display: none;"></div>
-                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo" style="display: none;"></div>
+                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1"></div> {/* Removido inline style */}
+                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2"></div> {/* Removido inline style */}
+                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido"></div> {/* Removido inline style */}
+                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo"></div> {/* Removido inline style */}
                 </div>
-    
+
                 <div id="alvo2-container" class="alvo-container">
                     <div id="alvo2_predio" class="alvo2-camada alvo2-predio"></div>
-                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1" style="display: none;"></div>
-                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2" style="display: none;"></div>
-                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido" style="display: none;"></div>
-                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo" style="display: none;"></div>
+                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1"></div> {/* Removido inline style */}
+                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2"></div> {/* Removido inline style */}
+                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido"></div> {/* Removido inline style */}
+                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo"></div> {/* Removido inline style */}
                 </div>
-    
+
                 <div id="alvo3-container" class="alvo-container">
                     <div id="alvo3_predio" class="alvo3-camada alvo3-predio"></div>
-                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1" style="display: none;"></div>
-                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2" style="display: none;"></div>
-                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido" style="display: none;"></div>
-                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo" style="display: none;"></div>
+                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1"></div> {/* Removido inline style */}
+                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2"></div> {/* Removido inline style */}
+                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido"></div> {/* Removido inline style */}
+                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo"></div> {/* Removido inline style */}
                 </div>
-    
-                <img src="antimissil.png" alt="Míssil" class="missil" style="position: absolute; display: none;">
-                <button id="modo-jogo-btn">Modo Coordenado</button>
-                <img src="explosion.gif" class="explosion" id="explosion" style="display: none;">
-                <div id="mensagem-feedback"
-                    style="display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background-color: yellow; padding: 10px; border: 1px solid black; z-index: 1000;">
-                </div>
-    
-                <div id="tela-fim-de-fase" class="tela tela-absoluta">
-                    <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
-                    <button id="btn-voltar-mapa">Voltar ao Mapa</button>
-                </div>
-            </div>
-    
-            <div id="tela-ativa" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background-color: rgba(0, 0, 0, 0.8); flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <div id="briefing-container" style="display: flex; flex-direction: column; align-items: center;">
-                    <img id="briefing-img" src="" alt="Briefing" style="max-width: 80%; max-height: 80%; margin-bottom: 20px;">
-                </div>
-                <button id="btn-iniciar-jogo" style="margin-top: 20px; padding: 10px 20px; font-size: 1.2em; cursor: pointer;">Jogar</button>
-            </div>
-        </div>
-    </div>
 
+                <img src="antimissil.png" alt="Míssil" class="missil"> {/* Removido inline style */}
+                <img src="explosion.gif" class="explosion" id="explosion"> {/* Removido inline style */}
+
+            </div> {/* Fim #game-content-wrapper */}
+        </div> {/* Fim #game */}
+    </div> {/* Fim #game-container */}
+
+    {/* Scripts no final do body para melhor performance */}
     <script>
+        // Função para ajustar a escala do jogo
         function ajustarEscala() {
-            const larguraViewport = window.innerWidth;
-            const alturaViewport = window.innerHeight;
-            const proporcaoJogo = 9 / 16; // Proporção do jogo
-            const proporcaoViewport = larguraViewport / alturaViewport;
-    
+            const gameContainer = document.getElementById('game-container');
             const game = document.getElementById('game');
-    
-            let escala = 1;
-    
-            if (larguraViewport <= 900) {
-                // Ajustar para telas menores pela largura
-                escala = larguraViewport / 900;
-                game.style.transform = `scale(${escala})`;
-                // REMOVA OU COMENTE ESTA LINHA
-                // game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
-            } else {
-                // Ajustar para telas maiores pela altura ou largura
-                if (proporcaoViewport > proporcaoJogo) {
-                    escala = alturaViewport / 1600;
-                } else {
-                    escala = larguraViewport / 900;
-                }
-                game.style.transform = `scale(${escala})`;
-                // REMOVA OU COMENTE ESTA LINHA
-                // game.style.height = `${1600 * escala}px`; // Ajustar a altura proporcionalmente
+            const designWidth = 900; // Largura base de design do #game
+
+            // Verificar se os elementos existem antes de tentar acessá-los
+            if (!gameContainer || !game) {
+                console.error("Elementos #game-container ou #game não encontrados!");
+                return;
             }
+
+            // Obter a largura atual do #game-container
+            const containerWidth = gameContainer.clientWidth;
+
+            // Calcular a escala baseada APENAS na largura do container vs largura de design
+            const escala = containerWidth / designWidth;
+
+            // Aplicar a transformação de escala ao elemento #game
+            game.style.transform = `scale(${escala})`;
+            // A origem da transformação é o canto superior esquerdo
             game.style.transformOrigin = 'top left';
+
+            // Não ajuste a altura ou largura do #game aqui via JS.
+            // O CSS define suas dimensões base e o transform cuida do escalonamento visual.
+            // O #game-container.height: auto no CSS deve ajustar a altura do container
+            // para acomodar a altura visual do #game escalado.
         }
-    
+
+        // Chama a função ao carregar a página
         window.onload = ajustarEscala;
+
+        // Chama a função sempre que a janela for redimensionada
         window.addEventListener('resize', ajustarEscala);
+
+        // Opcional: Observar mudanças no game-container que podem afetar a escala
+        // (ex: adicionando/removendo elementos que mudam o tamanho do container)
+        // const observer = new MutationObserver(ajustarEscala);
+        // if (document.getElementById('game-container')) {
+        //    observer.observe(document.getElementById('game-container'), { attributes: true, childList: true, subtree: true });
+        // }
+
     </script>
 
     <script src="main.js"></script>
     <script src="navegacao.js" defer></script>
+
 </body>
 </html>
