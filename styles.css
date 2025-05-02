@@ -8,152 +8,66 @@
 }
 
 /* Configuração inicial de body e html */
-body,
-html {
-    margin: 0;
-    padding: 0;
-    /* Permitir scroll vertical caso o conteúdo (jogo escalado) seja mais alto que a viewport */
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Esconde barra de rolagem horizontal */
-    height: 100%;
-    /* Garante que ocupem a altura total da viewport */
-    background-color: rgb(234, 230, 230);
-    /* Cor de fundo da página */
-    /* Remove as propriedades flex de centralização usadas na tentativa anterior */
-    display: block;
-    /* Volta para o fluxo normal de bloco */
+body {
+    margin: 0;        
+    overflow-x: hidden;   
 }
 
 /* Container principal do jogo - Define a largura responsiva e centraliza horizontalmente */
 /* Este container estará alinhado ao topo pelo fluxo normal do documento */
 #game-container {
-    position: relative;
-    /* Essencial para posicionar #game e elementos de UI de forma absoluta dentro dele */
-    width: 100vw;
-    /* Ocupa 100% da largura da viewport */
-    max-width: 900px;
-    /* Mas não excede a largura de design base */
-    /* A altura será determinada pelo conteúdo escalado dentro dele (#game) */
-    height: auto;
-    margin: 0 auto;
-    /* Centraliza o container horizontalmente na tela */
-    background-color: black;
-    /* Fundo para as "barras pretas" laterais se a largura for menor que 900px */
-    overflow: hidden;
-    /* Garante que nada escape visualmente deste container */
-    /* Remove propriedades flex, volta para o fluxo normal */
-    display: block;
+    position: relative; /* Contexto para posicionamento dos filhos */
+    width: 100%;
+    height: 100%;
+    /* Outros estilos específicos da área de jogo */
 }
 
 /* A área do jogo com as dimensões de design (900x1600) - Será escalada */
 #game {
-    /* Importante: Este elemento contém todo o conteúdo visual do jogo (background, personagens, etc.) */
-    /* Ele será escalado VISUALMENTE usando transform: scale() */
-    /* Posicionamento absoluto para garantir que comece exatamente no canto superior esquerdo do #game-container */
-    position: absolute;
-    top: 0;
-    /* Alinha ao topo do #game-container */
-    left: 0;
-    /* Alinha à esquerda do #game-container */
-
-    width: 900px;
-    /* Largura BASE de design (em pixels) */
-    height: 1600px;
-    /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
-    transform-origin: top left;
-    /* Define o ponto de origem da transformação de escala (canto superior esquerdo) */
-
-    /* A propriedade `transform: scale(...)` PRECISA SER APLICADA AQUI! */
-    /* O valor da escala deve ser calculado (largura ATUAL do #game-container) / 900 */
-    /* Isso é geralmente feito com JavaScript (veja a função ajustarEscala no jogo.html) */
-    /* Certifique-se de que seu script JavaScript atualiza o transform: scale(escala) neste elemento
-        e que o cálculo da escala está correto (apenas largura do container / 900). */
-    /* transform: scale(1); /* Exemplo - o JS/Media Query vai sobrescrever isso */
-
-    /* Remova quaisquer outras propriedades de posicionamento (bottom, right) ou margem que possam interferir */
-    margin: 0;
-
-    /* overflow: hidden; */
-    /* Pode ser útil aqui também */
-}
-
-#game-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    color: rgb(223, 199, 15);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    /* Organizar título e tempo verticalmente */
-    align-items: center;
-    /* Centralizar os itens horizontalmente */
-    z-index: 2;
+    width: 100vw;
+    height: 100vh;
+    /* Estilos de fundo geral do jogo, se houver */
 }
 
 #game-title {
+    position: absolute;
+    top: 10vh; /* Ajuste a posição vertical */
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 2em;
-    margin-bottom: 5px;
+    color: rgb(223, 199, 15); /* Exemplo de cor */
     text-align: center;
-    /* Garante que o texto fique centralizado dentro do seu espaço */
-    width: 100%;
-    /* Ocupa toda a largura disponível no cabeçalho */
+    z-index: 2;
 }
 
 #game-subtitle {
+    position: absolute;
+    top: 15vh; /* Ajuste a posição vertical (abaixo do título) */
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 1.2em;
+    color: white; /* Exemplo de cor */
     text-align: center;
-    width: 100%;
+    z-index: 2;
 }
 
 #tempo {
+    position: absolute;
+    top: 5vh; /* Ajuste a posição vertical */
+    left: 10px; /* Alinhado à esquerda */
     font-size: 1.5em;
-    margin-top: 10px;
-    text-align: left;
-    /* Alinhar o tempo à esquerda */
-    width: 100%;
-    /* Ocupa toda a largura para o alinhamento funcionar */
-    padding-left: 10px;
-    /* Adicionar um padding à esquerda */
+    color: white; /* Exemplo de cor */
+    z-index: 2;
 }
 
-/* --- Wrapper para o Conteúdo do Jogo (Elementos internos posicionados em pixels) --- */
-/* Move estilos inline de #game-content-wrapper do HTML para cá */
-#game-content-wrapper {
-    width: 900px;
-    /* Largura base de design */
-    height: 1600px;
-    /* Altura base de design */
-    position: relative;
-    /* Para conter os elementos absolutos dentro dele */
-    /* Certifique-se de que #game é o container pai direto de #game-content-wrapper no HTML */
-    overflow: hidden;
-    /* Adicionado para garantir que nada dentro vaze */
-}
-
-
-/* --- Estilos para elementos DENTRO de #game-content-wrapper --- */
-/* Elementos posicionados absolutamente DENTRO de #game-content-wrapper
-    (background, alvos, exército, carros, mísseis, etc.) DEVEM MANTER SUAS POSIÇÕES E DIMENSÕES EM PIXELS. */
-/* Eles herdam o escalonamento aplicado ao #game (seu ancestral). */
-
+/* Posicionamento do background */
 #background {
     position: absolute;
-    width: 900px;
-    /* Mantenha em pixels */
-    height: 1600px;
-    /* Mantenha em pixels */
-    top: 0px;
-    /* Mantenha em pixels */
-    left: 0px;
-    /* Mantenha em pixels */
-    z-index: 1;
-    pointer-events: all;
-    /*display: none; */
-    /* Mantenha ou ajuste conforme a lógica do seu jogo */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
 #ford_t {
