@@ -8,29 +8,40 @@
 }
 
 /* Configuração inicial de body e html */
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     /* Permitir scroll vertical caso o conteúdo (jogo escalado) seja mais alto que a viewport */
     overflow-y: auto;
-    overflow-x: hidden; /* Esconde barra de rolagem horizontal */
-    height: 100%; /* Garante que ocupem a altura total da viewport */
-    background-color: rgb(234, 230, 230); /* Cor de fundo da página */
+    overflow-x: hidden;
+    /* Esconde barra de rolagem horizontal */
+    height: 100%;
+    /* Garante que ocupem a altura total da viewport */
+    background-color: rgb(234, 230, 230);
+    /* Cor de fundo da página */
     /* Remove as propriedades flex de centralização usadas na tentativa anterior */
-    display: block; /* Volta para o fluxo normal de bloco */
+    display: block;
+    /* Volta para o fluxo normal de bloco */
 }
 
 /* Container principal do jogo - Define a largura responsiva e centraliza horizontalmente */
 /* Este container estará alinhado ao topo pelo fluxo normal do documento */
 #game-container {
-    position: relative; /* Essencial para posicionar #game e elementos de UI de forma absoluta dentro dele */
-    width: 100vw; /* Ocupa 100% da largura da viewport */
-    max-width: 900px; /* Mas não excede a largura de design base */
+    position: relative;
+    /* Essencial para posicionar #game e elementos de UI de forma absoluta dentro dele */
+    width: 100vw;
+    /* Ocupa 100% da largura da viewport */
+    max-width: 900px;
+    /* Mas não excede a largura de design base */
     /* A altura será determinada pelo conteúdo escalado dentro dele (#game) */
     height: auto;
-    margin: 0 auto; /* Centraliza o container horizontalmente na tela */
-    background-color: black; /* Fundo para as "barras pretas" laterais se a largura for menor que 900px */
-    overflow: hidden; /* Garante que nada escape visualmente deste container */
+    margin: 0 auto;
+    /* Centraliza o container horizontalmente na tela */
+    background-color: black;
+    /* Fundo para as "barras pretas" laterais se a largura for menor que 900px */
+    overflow: hidden;
+    /* Garante que nada escape visualmente deste container */
     /* Remove propriedades flex, volta para o fluxo normal */
     display: block;
 }
@@ -41,75 +52,130 @@ body, html {
     /* Ele será escalado VISUALMENTE usando transform: scale() */
     /* Posicionamento absoluto para garantir que comece exatamente no canto superior esquerdo do #game-container */
     position: absolute;
-    top: 0; /* Alinha ao topo do #game-container */
-    left: 0; /* Alinha à esquerda do #game-container */
+    top: 0;
+    /* Alinha ao topo do #game-container */
+    left: 0;
+    /* Alinha à esquerda do #game-container */
 
-    width: 900px; /* Largura BASE de design (em pixels) */
-    height: 1600px; /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
-    transform-origin: top left; /* Define o ponto de origem da transformação de escala (canto superior esquerdo) */
+    width: 900px;
+    /* Largura BASE de design (em pixels) */
+    height: 1600px;
+    /* Altura BASE de design (em pixels - ajuste se a proporção for outra) */
+    transform-origin: top left;
+    /* Define o ponto de origem da transformação de escala (canto superior esquerdo) */
 
     /* A propriedade `transform: scale(...)` PRECISA SER APLICADA AQUI! */
     /* O valor da escala deve ser calculado (largura ATUAL do #game-container) / 900 */
     /* Isso é geralmente feito com JavaScript (veja a função ajustarEscala no jogo.html) */
     /* Certifique-se de que seu script JavaScript atualiza o transform: scale(escala) neste elemento
-       e que o cálculo da escala está correto (apenas largura do container / 900). */
+        e que o cálculo da escala está correto (apenas largura do container / 900). */
     /* transform: scale(1); /* Exemplo - o JS/Media Query vai sobrescrever isso */
 
     /* Remova quaisquer outras propriedades de posicionamento (bottom, right) ou margem que possam interferir */
     margin: 0;
 
-    /* overflow: hidden; */ /* Pode ser útil aqui também */
+    /* overflow: hidden; */
+    /* Pode ser útil aqui também */
+}
+
+#game-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    color: rgb(223, 199, 15);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    /* Organizar título e tempo verticalmente */
+    align-items: center;
+    /* Centralizar os itens horizontalmente */
+    z-index: 2;
+}
+
+#game-title {
+    font-size: 2em;
+    margin-bottom: 5px;
+    text-align: center;
+    /* Garante que o texto fique centralizado dentro do seu espaço */
+    width: 100%;
+    /* Ocupa toda a largura disponível no cabeçalho */
+}
+
+#game-subtitle {
+    font-size: 1.2em;
+    text-align: center;
+    width: 100%;
+}
+
+#tempo {
+    font-size: 1.5em;
+    margin-top: 10px;
+    text-align: left;
+    /* Alinhar o tempo à esquerda */
+    width: 100%;
+    /* Ocupa toda a largura para o alinhamento funcionar */
+    padding-left: 10px;
+    /* Adicionar um padding à esquerda */
 }
 
 /* --- Wrapper para o Conteúdo do Jogo (Elementos internos posicionados em pixels) --- */
 /* Move estilos inline de #game-content-wrapper do HTML para cá */
 #game-content-wrapper {
-    width: 900px; /* Largura base de design */
-    height: 1600px; /* Altura base de design */
-    position: relative; /* Para conter os elementos absolutos dentro dele */
+    width: 900px;
+    /* Largura base de design */
+    height: 1600px;
+    /* Altura base de design */
+    position: relative;
+    /* Para conter os elementos absolutos dentro dele */
     /* Certifique-se de que #game é o container pai direto de #game-content-wrapper no HTML */
-    overflow: hidden; /* Adicionado para garantir que nada dentro vaze */
+    overflow: hidden;
+    /* Adicionado para garantir que nada dentro vaze */
 }
 
 
 /* --- Estilos para elementos DENTRO de #game-content-wrapper --- */
 /* Elementos posicionados absolutamente DENTRO de #game-content-wrapper
-   (background, alvos, exército, carros, mísseis, etc.) DEVEM MANTER SUAS POSIÇÕES E DIMENSÕES EM PIXELS. */
+    (background, alvos, exército, carros, mísseis, etc.) DEVEM MANTER SUAS POSIÇÕES E DIMENSÕES EM PIXELS. */
 /* Eles herdam o escalonamento aplicado ao #game (seu ancestral). */
 
 #background {
     position: absolute;
-    width: 900px; /* Mantenha em pixels */
-    height: 1600px; /* Mantenha em pixels */
-    top: 0px; /* Mantenha em pixels */
-    left: 0px; /* Mantenha em pixels */
+    width: 900px;
+    /* Mantenha em pixels */
+    height: 1600px;
+    /* Mantenha em pixels */
+    top: 0px;
+    /* Mantenha em pixels */
+    left: 0px;
+    /* Mantenha em pixels */
     z-index: 1;
     pointer-events: all;
-    /*display: none; */ /* Mantenha ou ajuste conforme a lógica do seu jogo */
+    /*display: none; */
+    /* Mantenha ou ajuste conforme a lógica do seu jogo */
 }
 
 #ford_t {
     position: absolute;
-    width: 114px; /* Mantenha em pixels */
-    height: 71px; /* Mantenha em pixels */
-    top: 1520px; /* Mantenha em pixels */
-    left: 732px; /* Mantenha em pixels */
+    width: 114px;
+    /* Mantenha em pixels */
+    height: 71px;
+    /* Mantenha em pixels */
+    /* O posicionamento original (top: 1520px, left: 732px) será relativo ao #game-content-wrapper */
     transform-origin: top left;
     z-index: 5;
+    /* Precisaremos ajustar top e left para o rodapé */
 }
 
-/* Estilos para outros elementos internos posicionados em pixels */
-.army, .missil, .bomb, #pedestal_d, #torre_c_e_d, #torre_e, .explosion, .explosion-area, #target {
-    position: absolute; /* Mantenha absolute */
-    /* Mantenha width, height, top, left, bottom, right em PIXELS conforme seu design original */
-    /* display: none; */ /* Mantenha ou ajuste conforme a lógica do seu jogo */
-}
 
-/* Ajustes específicos para alguns elementos internos se necessário */
+
+
 #target {
     width: 40px;
     height: 40px;
-    display: none; /* Mantido do inline style, gerencie com JS */
+    display: none;
+    /* Mantido do inline style, gerencie com JS */
     pointer-events: none;
     z-index: 60;
 }
@@ -117,7 +183,8 @@ body, html {
 .explosion {
     width: 100px;
     height: 100px;
-    display: none; /* Mantido do inline style, gerencie com JS */
+    display: none;
+    /* Mantido do inline style, gerencie com JS */
     z-index: 70;
 }
 
@@ -138,15 +205,20 @@ body, html {
 /* Devem ser irmãos do #game-container no HTML, NÃO filhos de #game. */
 /* Move estilos inline de #tela-ativa do HTML para cá */
 #tela-ativa {
-    /* display: none; */ /* Controlar visibilidade com JS */
-    position: fixed; /* Fixo na viewport */
+    display: none;
+    /* Controlar visibilidade com JS */
+    position: fixed;
+    /* Fixo na viewport */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000; /* Garante que fique acima de tudo, incluindo o jogo */
-    background-color: rgba(0, 0, 0, 0.8); /* Fundo semi-transparente */
-    display: flex; /* Usa flexbox para centralizar conteúdo interno */
+    z-index: 1000;
+    /* Garante que fique acima de tudo, incluindo o jogo */
+    background-color: rgba(0, 0, 0, 0.8);
+    /* Fundo semi-transparente */
+    display: flex;
+    /* Usa flexbox para centralizar conteúdo interno */
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -162,17 +234,23 @@ body, html {
     align-items: center;
 }
 
-#briefing-img { /* Imagem dentro do briefing */
-    max-width: 80%; /* Exemplo */
-    max-height: 80%; /* Exemplo */
-    height: auto; /* Mantém proporção */
+#briefing-img {
+    /* Imagem dentro do briefing */
+    max-width: 80%;
+    /* Exemplo */
+    max-height: 80%;
+    /* Exemplo */
+    height: auto;
+    /* Mantém proporção */
     margin-bottom: 20px;
 }
 
-#btn-iniciar-jogo { /* Botão Jogar dentro de #tela-ativa */
+#btn-iniciar-jogo {
+    /* Botão Jogar dentro de #tela-ativa */
     margin-top: 20px;
     padding: 10px 20px;
-    font-size: 1.2em; /* Pode ajustar para vmin se preferir */
+    font-size: 1.2em;
+    /* Pode ajustar para vmin se preferir */
     cursor: pointer;
     /* Adicione a fonte se não herdar do #tela-ativa */
     font-family: 'Press Start 2P', cursive;
@@ -180,24 +258,23 @@ body, html {
 
 /* Estilos para #tela-fim-de-fase - Ajustar se ela for fixa na viewport */
 /* Se #tela-fim-de-fase também for uma tela fixa como #tela-ativa, use position: fixed e estilos similares */
-/* Baseado no seu CSS original e HTML, #tela-fim-de-fase está dentro de #game-content-wrapper (o que é estranho se ela deve cobrir a tela).
-   Vamos assumir que ela deveria ser um irmão de #game-container ou #tela-ativa,
-   e posicionada fixamente como #tela-ativa para cobrir a tela. */
-/* SE ela for filho de #game-content-wrapper ou #game, o posicionamento absoluto abaixo estaria correto RELATIVO AO PAI ESCALADO,
-   MAS o 'bottom: 50px' provavelmente não funcionaria bem. */
-/* Recomendo mover #tela-fim-de-fase para fora de #game e tratá-la como tela fixa como #tela-ativa */
-
-/* Estilos baseados na ASSUNÇÃO que #tela-fim-de-fase é IRMÃO de #game-container e FIXA */
+/* Baseado no seu CSS original e HTML, #tela-fim-de-fase estava dentro de #game-content-wrapper.
+   Assumindo que ela foi movida para fora e é fixa como #tela-ativa. */
 #tela-fim-de-fase {
-    display: none;  /* Controlar visibilidade com JS */
-    position: fixed; /* Fixo na viewport */
+    display: none;
+    /* Controlar visibilidade com JS */
+    position: fixed;
+    /* Fixo na viewport */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000; /* Acima do jogo */
-    background-color: rgba(0, 0, 0, 0.8); /* Fundo semi-transparente, ajuste se for uma imagem de fundo */
-    flex-direction: column; /* Se o conteúdo for vertical */
+    z-index: 1000;
+    /* Acima do jogo */
+    background-color: rgba(0, 0, 0, 0.8);
+    /* Fundo semi-transparente, ajuste se for uma imagem de fundo */
+    flex-direction: column;
+    /* Se o conteúdo for vertical */
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -207,23 +284,26 @@ body, html {
 
 /* Elementos dentro de #tela-fim-de-fase (se for fixa) */
 #tela-fim-de-fase img#imagem-fim-de-fase {
-    max-width: 90%; /* Ajuste conforme necessário */
-    max-height: 80%; /* Ajuste conforme necessário */
-    height: auto; /* Mantém a proporção */
+    max-width: 90%;
+    /* Ajuste conforme necessário */
+    max-height: 80%;
+    /* Ajuste conforme necessário */
+    height: auto;
+    /* Mantém a proporção */
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
 
 #tela-fim-de-fase button#btn-voltar-mapa {
-    /* Se #tela-fim-de-fase for fixa e flexbox centralizada, este botão pode não precisar de position absolute */
-    /* bottom: 50px; left: 50%; transform: translateX(-50%); */
-    /* Se for filho direto do flex container #tela-fim-de-fase, pode usar margin/padding */
-    margin-top: 20px; /* Exemplo de espaçamento após a imagem */
+    margin-top: 20px;
+    /* Exemplo de espaçamento após a imagem */
     padding: 10px 20px;
-    font-size: 1.2em; /* Ajuste */
+    font-size: 1.2em;
+    /* Ajuste */
     cursor: pointer;
-    z-index: 20; /* Z-index pode ser menos crítico se o pai for fixo e com alto z-index */
+    z-index: 20;
+    /* Z-index pode ser menos crítico se o pai for fixo e com alto z-index */
     /* Mantenha a fonte */
     font-family: 'Press Start 2P', cursive;
 }
@@ -233,135 +313,237 @@ body, html {
 /* Usam position: absolute e unidades responsivas (%, vw, vh, vmin) relativas ao #game-container */
 
 #game-controls {
-    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
-    bottom: 2vh; /* Exemplo: 2% da altura da viewport */
-    left: 5vw; /* Exemplo: 5% da largura da viewport */
-    right: 5vw; /* Exemplo: 5% da largura da viewport */
+    position: absolute;
+    /* Posicionado absolutamente em relação ao #game-container */
+    bottom: 2vh;
+    /* Exemplo: 2% da altura da viewport */
+    left: 5vw;
+    /* Exemplo: 5% da largura da viewport */
+    right: 5vw;
+    /* Exemplo: 5% da largura da viewport */
     display: flex;
     justify-content: space-around;
-    z-index: 820; /* Garante que fique acima do jogo principal */
-    padding: 1vmin; /* Use vmin para padding */
+    z-index: 820;
+    /* Garante que fique acima do jogo principal */
+    padding: 1vmin;
+    /* Use vmin para padding */
     /* font-family */
     font-family: 'Press Start 2P', cursive;
 }
 
 #game-controls button {
     flex-grow: 1;
-    margin: 0 1%; /* Percentagem para margem */
-    padding: 1vmin 0; /* vmin para padding */
-    font-size: 1.8vmin; /* Exemplo */
-    font-family: 'SuaNovaFonte', sans-serif; /* ou a fonte correta */
+    margin: 0 1%;
+    /* Percentagem para margem */
+    padding: 1vmin 0;
+    /* vmin para padding */
+    font-size: 1.8vmin;
+    /* Exemplo */
+    font-family: 'SuaNovaFonte', sans-serif;
+    /* ou a fonte correta */
     background-color: #9fb733;
     color: rgb(4, 4, 4);
     border: none;
-    border-radius: 0.5vmin; /* vmin para border-radius */
+    border-radius: 0.5vmin;
+    /* vmin para border-radius */
     cursor: pointer;
     text-align: center;
-    /* max-width: 150px; */ /* Removido ou ajustado para vmin */
-    max-width: 15vmin; /* Exemplo */
+    /* max-width: 150px; */
+    /* Removido ou ajustado para vmin */
+    max-width: 15vmin;
+    /* Exemplo */
     /* Se os botões ficarem muito grandes/pequenos, ajuste esta ou remova */
 }
 
 #game-controls button:hover {
-    background-color: #286090; /* Mantenha o hover */
+    background-color: #286090;
+    /* Mantenha o hover */
 }
 
-#ui-container { /* Contém #tempo */
-    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
-    top: 2vh; /* Exemplo: 2% da altura da viewport */
-    left: 2vw; /* Exemplo: 2% da largura da viewport */
-    z-index: 1000; /* Garante que fique acima de tudo */
+#ui-container {
+    /* Contém #tempo */
+    position: absolute;
+    /* Posicionado absolutamente em relação ao #game-container */
+    top: 2vh;
+    /* Exemplo: 2% da altura da viewport */
+    left: 2vw;
+    /* Exemplo: 2% da largura da viewport */
+    z-index: 1000;
+    /* Garante que fique acima de tudo */
     /* Remova font-size/color/text-align se estiverem no filho #tempo */
 }
 
-#ui-container #tempo { /* Estilo para o elemento de tempo dentro de ui-container */
-    font-size: 2.5vmin; /* Exemplo: tamanho de fonte relativo à menor dimensão da viewport */
-    color: #fed906; /* Exemplo */
-    /* text-align: left; */ /* Pode manter se precisar alinhar o texto dentro do div #tempo */
+#ui-container #tempo {
+    /* Estilo para o elemento de tempo dentro de ui-container */
+    font-size: 2.5vmin;
+    /* Exemplo: tamanho de fonte relativo à menor dimensão da viewport */
+    color: #fed906;
+    /* Exemplo */
+    /* text-align: left; */
+    /* Pode manter se precisar alinhar o texto dentro do div #tempo */
     /* font-family */
     font-family: 'Press Start 2P', cursive;
 }
 
 /* Se existir #game-info-topo (não vi no HTML colado, mas estava no CSS original) */
 #game-info-topo {
-    position: absolute; /* Posicionado absolutamente em relação ao #game-container */
-    top: 2vh; /* Exemplo */
-    left: 2vw; /* Exemplo */
-    right: 2vw; /* Exemplo */
+    position: absolute;
+    /* Posicionado absolutamente em relação ao #game-container */
+    top: 2vh;
+    /* Exemplo */
+    left: 2vw;
+    /* Exemplo */
+    right: 2vw;
+    /* Exemplo */
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
-    z-index: 890; /* Deve ser maior que o jogo principal */
-    padding: 1vmin; /* Use vmin */
+    z-index: 890;
+    /* Deve ser maior que o jogo principal */
+    padding: 1vmin;
+    /* Use vmin */
     font-family: 'Press Start 2P', cursive;
 }
 
 /* Se existirem #contador, #nivel, #nome-jogo (filhos de #game-info-topo) */
-#contador, #nivel, #nome-jogo {
-    font-size: 2vmin; /* Exemplo */
+#contador,
+#nivel,
+#nome-jogo {
+    font-size: 2vmin;
+    /* Exemplo */
     background-color: rgba(0, 0, 0, 0.5);
-    padding: 0.5vmin 1vmin; /* Exemplo */
-    border-radius: 0.5vmin; /* Exemplo */
+    padding: 0.5vmin 1vmin;
+    /* Exemplo */
+    border-radius: 0.5vmin;
+    /* Exemplo */
     font-family: 'Press Start 2P', cursive;
 }
 
 
-/* --- Outros estilos gerais ou para elementos específicos --- */
-/* Mantenha seus estilos originais que não foram modificados acima */
-
-/* Ex: Styles for alvo-container, alvoX-camada, etc. (mantendo pixel/%) */
-/* Estilos do seu código original: */
-#alvo1-container,
-#alvo2-container,
-#alvo3-container {
+/* --- Estilos para elementos de RODAPÉ (#game-footer) --- */
+#game-footer {
     position: absolute;
-    width: 56.33%; /* Mantenha % se for relativo ao pai */
-    height: auto;
-    aspect-ratio: 1 / 1;
-    max-height: 30vh; /* Verifique se vh faz sentido aqui, talvez % ou pixel escalado */
-    bottom: 4%; /* Mantenha % */
-    left: 50%; /* Mantenha % */
-    transform: translateX(-50%); /* Mantenha */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;   
+    z-index: 2;    
+    display: flex;   
+    justify-content: space-around;    
+    align-items: flex-end;    
+    padding: 10px;
+    }
+
+.silhueta-urbana {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    /* Zeramos a altura */
+    padding-bottom: 43.22%;
+    /* Proporção calculada */
+    background-image: url('silhueta_urbana.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center bottom;
+    z-index: 1;
+    /* Abaixo dos outros elementos do rodapé */
+}
+
+#alvo1-container {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 45;
+    width: 507px;
+    /* Largura da imagem original */
+    height: 363px;
+    /* Altura da imagem original */
     margin: 0;
     padding: 0;
 }
 
-.alvo1-camada, .alvo2-camada, .alvo3-camada {
+#alvo1_predio {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    bottom: 0;
-    left: 0;
+    background-image: url('nivel1/alvo1_predio.png');
     background-repeat: no-repeat;
-    background-size: contain; /* Mantém a proporção da imagem */
-    background-position: center bottom; /* Alinha a imagem ao centro horizontal e à parte inferior vertical do elemento */
+    background-size: contain;
+    /* Garante que a imagem caiba dentro do container */
+    background-position: center bottom;
+    z-index: 45;
+    display: block;
 }
 
-/* Background images para as camadas de alvo */
-#alvo1_fundo { background-image: url('nivel1/alvo1_fundo.png'); z-index: 30; display: none; }
-#alvo2_fundo { background-image: url('nivel2/alvo2_fundo.png'); z-index: 30; display: none; }
-#alvo1_destruido { background-image: url('nivel1/alvo1_destruido.png'); z-index: 40; display: none; }
-#alvo2_destruido { background-image: url('nivel2/alvo2_destruido.png'); z-index: 40; display: none; }
-#alvo1_dano2 { background-image: url('nivel1/alvo1_dano2.png'); z-index: 43; display: none; }
-#alvo2_dano2 { background-image: url('nivel2/alvo2_dano2.png'); z-index: 43; display: none; }
-#alvo1_dano1 { background-image: url('nivel1/alvo1_dano1.png'); z-index: 44; display: none; }
-#alvo2_dano1 { background-image: url('nivel2/alvo2_dano1.png'); z-index: 44; display: none; }
-#alvo1_predio { background-image: url('nivel1/alvo1_predio.png'); z-index: 45; display:block;}
-#alvo2_predio { background-image: url('nivel2/alvo2_predio.png'); z-index: 45; display:block;}
-#alvo3_predio { background-image: url('nivel3/alvo3_predio.png'); z-index: 45; display:block;}
-
-
-/* Animações */
-@keyframes expand {
-    0% {
-        transform: scale(0);
-    }
-    100% {
-        transform: scale(1);
-    }
+.army {
+    position: absolute;
+    transform-origin: center bottom;
+    z-index: 15;
 }
 
-/* Outros estilos que podem existir no seu CSS original e não foram mencionados */
-/* ... */
+#army_e {
+    width: 4.33%;
+    height: 141px;
+    bottom: 619px; 
+    left: 11.44%;
+    z-index: 50;
+}
+
+#army_c {
+    width: 3.67%;
+    height: 103px;
+    bottom: 565px; /* Aumentando o valor de bottom */
+    left: 65.78%;
+    z-index: 20;
+}
+
+#army_d {
+    width: 4.56%;
+    height: 126px;
+    bottom: 699px; /* Aumentando o valor de bottom */
+    left: 85.78%;
+    z-index: 20;
+}
+
+#pedestal_d {
+    position: absolute;
+    width: 340px;
+    height: 374px;
+    bottom: 308px;
+    left: 60.78%;
+    transform-origin: top left;
+    z-index: 20;
+}
+
+#torre_c_e_d {
+    position: absolute;
+    width: 340px;
+    height: 220px;
+    bottom: 557px;
+    /* Distância fixa da parte inferior */
+    left: 60.78%;
+    /* Posição horizontal responsiva */
+    transform-origin: top left;
+    z-index: 25;
+}
+
+#torre_e {
+    position: absolute;
+    width: 218px;
+    height: 818px;
+    bottom: 0;
+    left: 1.67%;
+    /* Posiciona a borda esquerda a 1.67% da largura do rodapé */
+    transform-origin: top left;
+    z-index: 55;
+}
+
+
+
+/* Posicionamento específico dos elementos do rodapé - AJUSTE OS VALORES CON

@@ -8,133 +8,69 @@
 </head>
 <body>
 
-   
-    <div id="tela-ativa" class="overlay-screen"> 
-        <div id="briefing-container">
-            <img id="briefing-img" src="" alt="Briefing"> 
-        </div>
-        <button id="btn-iniciar-jogo">Jogar</button>
-    </div>
-
-   
-    <div id="tela-fim-de-fase" class="overlay-screen"> 
-        <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
-        <button id="btn-voltar-mapa">Voltar ao Mapa</button>
-    </div>
-
-  
-    <div id="game-container">
-
-       
-         <div id="game-controls">
-            <button id="pausar-continuar-btn">Pausar</button>
-            <button id="salvar-btn">Salvar Jogo</button>
-            <button id="terminar-partida-btn">Terminar Partida</button>
-         </div>
-
-         <div id="ui-container">
-             <div id="tempo">00:00</div>
-         </div>
-
-         <button id="modo-jogo-btn">Modo Coordenado</button> 
-         <div id="mensagem-feedback"></div> 
-       
-
-
-      
-        <div id="game">
-            
-            <div id="game-content-wrapper">
-               
+    <div id="game">
+        <div id="game-content-wrapper">
+            <div id="game-header">
+                <h1 id="game-title">SÃO GABRIEL</h1>
+                <h2 id="game-subtitle">RESISTÊNCIA FINAL</h2>
+                <div id="tempo">00:00</div>
+            </div>
+            <div id="game-area">
                 <img id="background" src="background.png" alt="Background">
+                <img id="target" src="target.png" alt="Target">
+                <img src="antimissil.png" alt="Míssil" class="missil" style="display: none;">
+                <img src="explosion.gif" class="explosion" id="explosion" style="display: none;">
+            </div>
+            <div id="game-footer">
+                <div class="silhueta-urbana"></div>
+                <img id="torre_e" src="torre_e.png" alt="Torre E">
+                <img id="torre_c_e_d" src="torre_c_e_d.png" alt="Torre C e D">
+                <img id="pedestal_d" src="pedestal_d.png" alt="Pedestal D">
                 <img id="ford_t" src="ford_t.png" alt="Ford T">
                 <img src="army_e.png" alt="Army E" class="army" id="army_e">
                 <img src="army_c.png" alt="Army C" class="army" id="army_c">
                 <img src="army_d.png" alt="Army D" class="army" id="army_d">
-                <img id="torre_e" src="torre_e.png" alt="Torre E">
-                <img id="torre_c_e_d" src="torre_c_e_d.png" alt="Torre C e D">
-                <img id="pedestal_d" src="pedestal_d.png" alt="Pedestal D">
-                <img id="target" src="target.png" alt="Target"> 
 
                 <div id="alvo1-container" class="alvo-container">
                     <div id="alvo1_predio" class="alvo1-camada alvo1-predio"></div>
-                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1"></div> 
-                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2"></div> 
-                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido"></div> 
-                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo"></div> 
+                    <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1"></div>
+                    <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2"></div>
+                    <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido"></div>
+                    <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo"></div>
                 </div>
-
+    
                 <div id="alvo2-container" class="alvo-container">
                     <div id="alvo2_predio" class="alvo2-camada alvo2-predio"></div>
-                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1"></div> 
-                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2"></div> 
-                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido"></div> 
-                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo"></div> 
+                    <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1"></div>
+                    <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2"></div>
+                    <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido"></div>
+                    <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo"></div>
                 </div>
-
+    
                 <div id="alvo3-container" class="alvo-container">
                     <div id="alvo3_predio" class="alvo3-camada alvo3-predio"></div>
-                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1"></div> 
-                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2"></div> 
-                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido"></div> 
-                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo"></div> 
+                    <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1"></div>
+                    <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2"></div>
+                    <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido"></div>
+                    <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo"></div>
                 </div>
-
-                <img src="antimissil.png" alt="Míssil" class="missil"> 
-                <img src="explosion.gif" class="explosion" id="explosion"> 
-
-            </div> 
-        </div> 
-    </div> 
-
-   
-    <script>
-        // Função para ajustar a escala do jogo
-        function ajustarEscala() {
-            const gameContainer = document.getElementById('game-container');
-            const game = document.getElementById('game');
-            const designWidth = 900; // Largura base de design do #game
-
-            // Verificar se os elementos existem antes de tentar acessá-los
-            if (!gameContainer || !game) {
-                console.error("Elementos #game-container ou #game não encontrados!");
-                return;
-            }
-
-            // Obter a largura atual do #game-container
-            const containerWidth = gameContainer.clientWidth;
-
-            // Calcular a escala baseada APENAS na largura do container vs largura de design
-            const escala = containerWidth / designWidth;
-
-            // Aplicar a transformação de escala ao elemento #game
-            game.style.transform = `scale(${escala})`;
-            // A origem da transformação é o canto superior esquerdo
-            game.style.transformOrigin = 'top left';
-
-            // Não ajuste a altura ou largura do #game aqui via JS.
-            // O CSS define suas dimensões base e o transform cuida do escalonamento visual.
-            // O #game-container.height: auto no CSS deve ajustar a altura do container
-            // para acomodar a altura visual do #game escalado.
-        }
-
-        // Chama a função ao carregar a página
-        window.onload = ajustarEscala;
-
-        // Chama a função sempre que a janela for redimensionada
-        window.addEventListener('resize', ajustarEscala);
-
-        // Opcional: Observar mudanças no game-container que podem afetar a escala
-        // (ex: adicionando/removendo elementos que mudam o tamanho do container)
-        // const observer = new MutationObserver(ajustarEscala);
-        // if (document.getElementById('game-container')) {
-        //    observer.observe(document.getElementById('game-container'), { attributes: true, childList: true, subtree: true });
-        // }
-
-    </script>
-
+            </div>
+        </div>
+    
+        <div id="tela-ativa" class="overlay-screen" style="display: none;">
+            <div id="briefing-container">
+                <img id="briefing-img" src="" alt="Briefing">
+            </div>
+            <button id="btn-iniciar-jogo">Jogar</button>
+        </div>
+    
+        <div id="tela-fim-de-fase" class="overlay-screen" style="display: none;">
+            <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
+            <button id="btn-voltar-mapa">Voltar ao Mapa</button>
+        </div>
+    </div>
+    
     <script src="main.js"></script>
     <script src="navegacao.js" defer></script>
-
-</body>
-</html>
+    </body>
+    </html>
