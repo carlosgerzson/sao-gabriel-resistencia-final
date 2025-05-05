@@ -1,88 +1,35 @@
 body {
-    font-family: sans-serif;
-    margin: 0; /* Garante que não haja margem no topo */
-    padding: 0; /* Garante que não haja preenchimento no topo */
+    background-color: black;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Estilos base para TODAS as telas */
+.tela {
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Mantém o alinhamento dos itens ao topo */
-    min-height: 100vh;
-    background-color: #f0f0f0; /* Ou a cor de fundo desejada para a navegação */
+    flex-direction: column;
+    justify-content: center; /* Centraliza verticalmente por padrão */
+    align-items: center; /* Centraliza horizontalmente por padrão */
+    position: relative; /* Para posicionamento de elementos internos */
+    overflow: hidden; /* Esconde overflows */
 }
 
-.tela-briefing-container {
-    position: fixed; /* Mantém a tela sobreposta */
-    top: 0;        /* Alinha ao topo da tela */
-    left: 0;       /* Alinha à esquerda da tela */
-    width: 100%;   /* Ocupa toda a largura da tela */
-    height: 100%;  /* Ocupa toda a altura da tela */
-    z-index: 1000; /* Mantém a tela na frente de outros elementos */
-    display: none; /* Escondido por padrão */
-    /* Centraliza o conteúdo (a imagem) vertical e horizontalmente */
+/* Estilos para quando a tela precisa ser visível */
+.tela.ativa,
+.tela[style*="display: block"] { /* Se o display for setado inline como block */
     display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .tela-briefing-container.ativa {
-    display: flex; /* Torna a tela visível */
-  }
-  
-  /* Estilos para a imagem dentro das telas de briefing */
-.tela .briefing-image {
-    max-width: 100%; /* Permite que a imagem ocupe até 100% da largura da tela */
-    max-height: 100%; /* Permite que a imagem ocupe até 100% da altura da tela */
-    object-fit: contain; /* Garante que a imagem inteira seja visível, mantendo a proporção */
-  }
-
-/* Para telas menores (até 600px de largura) */
-@media (max-width: 600px) {
-    .tela {
-      width: 100vw; /* Ocupa toda a largura em telas menores */
-      max-width: none; /* Remove a largura máxima */
-    }
-  }
-
-  .tela-absoluta {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1101; 
-}
- 
- 
-  .tela {
-    background-color: white;
-    /*width: 900px;  */ 
-    /*height: 1600px; */
-    width: 90vw; /* Ocupa 90% da largura da tela */
-    max-width: 900px; /* Limita a largura máxima em telas maiores */
-    height: auto; /* A altura se ajusta ao conteúdo */
-    max-height: 90vh; /* Limita a altura máxima a 90% da altura da tela */
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    display: none; /* Esconde por padrão */
-    flex-direction: column; /* Para organizar o conteúdo interno verticalmente */
-    align-items: center; /* Centralizar itens horizontalmente dentro da tela */
-    gap: 15px; /* Espaçamento entre os elementos internos */ 
-    position: relative; /* Tornamos .tela o contêiner de posicionamento */  
 }
 
-
-img {
-    /* display: block; */ /* Garante que a imagem se comporte como bloco */
-    /* width: auto; */    /* Permite que a largura se ajuste ao conteúdo */
-    max-width: 100%; /* Garante que não exceda a largura do pai */
-    /* align-self: center; */ /* Centraliza horizontalmente no container flex */
-}
-
-.tela.ativa {
-    display: flex;
+/* Estilo unificado para as imagens dentro das telas */
+.tela img {
+    display: block;
+    max-height: 100vh; /* Tenta ocupar toda a altura da viewport */
+    width: auto; /* A largura se ajusta para manter a proporção */
+    object-fit: contain;
 }
 
 .tela h1 {
@@ -95,37 +42,72 @@ img {
     margin-top: 20px;
 }
 
+/* Estilo unificado para botões dentro das telas */
+.tela button {
+    padding: 1em 2em;
+    font-size: 1em;
+    cursor: pointer;
+    z-index: 20;
+    position: absolute; /* Posição padrão para botões */
+    bottom: 5vh; /* Posição padrão na parte inferior */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza horizontalmente */
+}
+
+/* Podemos adicionar estilos específicos para botões em telas específicas se necessário */
+#tela-inicial button,
+#briefings button {
+    /* Se o posicionamento padrão do botão não for ideal */
+    bottom: 10vh; /* Exemplo de ajuste */
+}
+
+/* Estilos ESPECÍFICOS para o mapa de fases */
+#mapa-fases {
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#mapa-fases .niveis-container-botoes .nivel-btn {
+    position: static; /* Garante que os botões sigam o fluxo normal da grid */
+    margin: 0; /* Remove quaisquer margens que possam causar deslocamento */
+    /* Outros estilos visuais dos botões devem permanecer */
+}
+
 #mapa-fases .niveis-container-botoes {
     position: absolute;
-    top: 50%;
+    bottom: 20px; /* Distância da parte inferior da viewport */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%); /* Centraliza horizontalmente */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    border-radius: 10px;
-    background-color: rgba(239, 19, 19, 0.5);
-    z-index: 1011;
-    width: 400px; /* Ajuste conforme necessário */
-    height: 200px; /* Ajuste conforme necessário */
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    width: 90%;
+    max-width: 500px;
+    z-index: 2; /* Garante que os botões fiquem acima da imagem */
 }
 
 #mapa-fases img {
-    width: 900px; /* 100%;  Faz a imagem ocupar toda a largura do container mapa-fases */
-    height: 1600px; /* Faz a imagem ocupar toda a altura do container mapa-fases */
-    object-fit: contain; /* Garante que a imagem caiba dentro do container sem cortar */
-    z-index: 1000; /* Garante que a imagem fique abaixo dos botões */
+    display: block;
+    width: auto; /* Deixa a largura se ajustar para manter a proporção */
+    height: 100%; /* Tenta ocupar 100% da altura do pai */
+    object-fit: contain;
+    z-index: 1;
 }
 
 #mapa-fases .nivel-btn {
     background-color: #5cb85c; /* Verde agradável */
     color: white;
-    padding: 15px 20px;
+    padding: 10px 15px; /* Reduzi um pouco o padding */
     border: 2px solid red;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 0.9em; /* Reduzi um pouco o tamanho da fonte */
     text-align: center;
     transition: background-color 0.3s ease; /* Transição suave no hover */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Uma leve sombra */
@@ -136,11 +118,35 @@ img {
     background-color: #4cae4c; /* Verde um pouco mais escuro no hover */
 }
 
+.tela-briefing-container {
+    position: fixed; /* Para sobrepor a tela */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: none; /* Escondido por padrão */
+    background-color: black; /* Clona o fundo preto da tela */
+    justify-content: flex-start; /* Alinha os itens ao topo */
+    align-items: center; /* Centraliza horizontalmente o conteúdo */
+    flex-direction: column; /* Organiza imagem e botão verticalmente */
+}
 
+.tela-briefing-container.ativa {
+    display: flex; /* Mantém a ativação */
+}
+
+#briefings img.tela-briefing {
+    max-width: 100%; /* Permite ocupar a largura total do container */
+    height: 100%; /* Força a imagem a ocupar a altura total do container */
+    object-fit: contain; 
+    margin-bottom: 0; /* Espaço entre a imagem e o botão */
+}
 
 #btn-jogar-briefing {
+    /* Mantém o estilo do botão */
     position: absolute;
-    bottom: 50px;
+    bottom: 5vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
@@ -165,7 +171,7 @@ img {
 
 #btn-iniciar-jogo {
     position: absolute;
-    bottom: 50px;
+    bottom: 5vh;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -174,11 +180,50 @@ img {
 #tela-introducao1 > button,
 #tela-introducao2 > button {
     position: absolute; /* Posicionamos os botões absolutamente dentro de .tela */
-    bottom: 50px; /* 50px da parte inferior da div .tela */
+    bottom: 5vh; /* 5% da altura da viewport da parte inferior */
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
     /* Outros estilos visuais */
+}
+
+/* Media query para telas menores */
+@media (max-width: 600px) {
+    #mapa-fases .niveis-container-botoes {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 5px;
+        padding: 10px;
+        width: 95%;
+    }
+    #mapa-fases .nivel-btn {
+        font-size: 0.8em;
+        padding: 8px 10px;
+    }
+    .tela button {
+        font-size: 0.9em;
+        padding: 0.8em 1.5em;
+    }
+    #btn-jogar-briefing {
+        font-size: 1em;
+        padding: 12px 20px;
+    }
+    #tela-inicial > button,
+    #tela-introducao1 > button,
+    #tela-introducao2 > button {
+        bottom: 3vh; /* Ajusta a distância do botão da parte inferior em telas pequenas */
+    }
+}
+
+/* Ajustes para telas menores (media query) */
+@media (max-width: 600px) {
+    .tela {
+        border-radius: 0; /* Remove bordas arredondadas em telas pequenas */
+        box-shadow: none; /* Remove sombra em telas pequenas */
+    }
+    .tela img {
+        max-width: 95vw;
+        max-height: 60vh;
+    }
 }
 
 button:hover {
