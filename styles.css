@@ -201,7 +201,7 @@ html {
     top: 0px;
     left: 0px;
     pointer-events: all;
-    /*display: none;*/
+    display: none;
 }
 
 #alvo1-container {
