@@ -15,13 +15,11 @@
     display: flex;
     justify-content: center;
     align-items: flex-start; /* Ancorar no topo */
-    padding-bottom: 5px; /* Pequena margem inferior no body */
 }
 
 .container-teste {
-    height: 98vh; /* Altura ligeiramente menor */
-    width: calc(98vh * (900 / 1600)); /* Largura proporcional */
     border: 2px solid white; /* Borda visível */
+    /* Altura e largura serão definidas pelo JavaScript */
 }
 
 
@@ -117,23 +115,21 @@
 </body>
 
 <script>
-  function forceResize() {
-    // Dispara um evento de redimensionamento na janela
-    if (window.dispatchEvent) {
-      window.dispatchEvent(new Event('resize'));
-    } else if (document.createEvent) {
-      var event = document.createEvent('HTMLEvents');
-      event.initEvent('resize', true, false);
-      document.dispatchEvent(event);
-    } else {
-      // Fallback para navegadores mais antigos (IE 8 e abaixo)
-      window.resizeTo(window.innerWidth + 1, window.innerHeight + 1);
-      window.resizeTo(window.innerWidth - 1, window.innerHeight - 1);
-    }
-  }
+  function setContainerHeight() {
+    const viewportHeight = window.innerHeight;
+    const aspectRatio = 900 / 1600;
+    const containerWidth = viewportHeight * aspectRatio;
+    const containerHeight = viewportHeight * 0.98; // Usar 98% da altura para criar espaço
 
-  // Chama a função forceResize após o carregamento da página
-  window.onload = forceResize;
+    const container = document.querySelector('.container-teste');
+    if (container) {
+        container.style.height = `${containerHeight}px`;
+        container.style.width = `${containerWidth}px`;
+    }
+}
+
+window.addEventListener('resize', setContainerHeight);
+window.addEventListener('load', setContainerHeight);
 </script>
 
 </html>
