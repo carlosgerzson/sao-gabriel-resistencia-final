@@ -18,8 +18,20 @@
 }
 
 .container-teste {
+    height: 98vh; /* Altura ligeiramente menor */
+    width: calc(98vh * (900 / 1600)); /* Largura proporcional */
     border: 2px solid white; /* Borda visível */
-    /* Altura e largura serão definidas pelo JavaScript */
+    position: relative; /* Necessário para posicionar o pseudo-elemento */
+}
+
+.container-teste::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 5px; /* Posicionar 5px acima da parte inferior */
+    width: 100%;
+    height: 1px; /* Uma linha fina */
+    background-color: red; /* Cor contrastante para visualização */
 }
 
 
