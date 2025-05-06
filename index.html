@@ -17,16 +17,17 @@
 }
 
 .grid-container {
-    /* Dimensionar a altura para caber na tela */
-    height: 100vh;
-    /* Calcular a largura proporcionalmente */
-    width: calc(100vh * (900 / 1600));
+    /* Forçar a altura a ocupar a tela, com um limite */
+    height: 98vh; /* Tentar ocupar 98% da altura */
+    max-height: 98vh; /* Não exceder 98% da altura */
+    /* Calcular a largura com base na altura */
+    width: calc(98vh * (900 / 1600));
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(16, 1fr);
     border: 2px solid white;
     position: relative;
-    margin-bottom: 5px; /* Adicionando margem inferior */
+    margin-bottom: 5px; /* Manter a margem inferior */
 }
 
 .grid-container::before {
