@@ -14,13 +14,19 @@
     overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-start; /* Manter ancorado no topo */
+    padding-bottom: 5px; /* Adicionar uma pequena margem inferior ao body */
 }
 
 .grid-container {
-    height: 95vh;
-    width: calc(95vh * (900 / 1600));
+    height: 98vh; /* Reduzir um pouco a altura do container */
+    max-height: 100vh;
+    width: calc(98vh * (900 / 1600));
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(16, 1fr);
     border: 2px solid white;
+    /* Remover padding inferior do container */
 }
 
 
