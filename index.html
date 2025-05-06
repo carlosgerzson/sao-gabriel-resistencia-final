@@ -17,11 +17,11 @@
 }
 
 .grid-container {
-    /* Forçar a altura a ocupar a tela, com um limite */
-    height: 98vh; /* Tentar ocupar 98% da altura */
-    max-height: 98vh; /* Não exceder 98% da altura */
+    /* Altura ligeiramente menor que a tela */
+    height: 97vh;
+    max-height: 97vh;
     /* Calcular a largura com base na altura */
-    width: calc(98vh * (900 / 1600));
+    width: calc(97vh * (900 / 1600));
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(16, 1fr);
