@@ -13,12 +13,12 @@
     overflow: hidden;
     display: flex;
     justify-content: center; /* Centralizar horizontalmente */
-    align-items: flex-end; /* Ancorar os itens ao final (bottom) */
+    align-items: flex-start; /* Ancorar os itens no início (top) */
 }
 
 .grid-container {
     /* Altura ligeiramente menor que a tela */
-    height: 95vh;
+    height: 95vh; /* Reduzir a altura em 5% */
     max-height: 100vh;
     /* Calcular a largura com base na altura */
     width: calc(95vh * (900 / 1600));
@@ -27,8 +27,9 @@
     grid-template-rows: repeat(16, 1fr);
     border: 2px solid white;
     position: relative;
-    margin-bottom: 5px; /* Manter a margem inferior */
+    margin-bottom: 0; /* Remover margem inferior */
 }
+
 
 .grid-container::before {
     content: '';
