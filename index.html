@@ -17,17 +17,16 @@
 }
 
 .grid-container {
-    width: 100vw;
+    /* Dimensionar a altura para caber na tela */
     height: 100vh;
-    /* Calcular a largura máxima para manter a proporção com base na altura */
-    max-width: calc(100vh * (900 / 1600));
-    /* Calcular a altura máxima para manter a proporção com base na largura */
-    max-height: calc(100vw * (1600 / 900));
+    /* Calcular a largura proporcionalmente */
+    width: calc(100vh * (900 / 1600));
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(16, 1fr);
-    border: 3px solid white;
+    border: 2px solid white;
     position: relative;
+    margin-bottom: 5px; /* Adicionando margem inferior */
 }
 
 .grid-container::before {
