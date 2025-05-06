@@ -14,44 +14,16 @@
     overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Manter ancorado no topo */
-    padding-bottom: 5px; /* Adicionar uma pequena margem inferior ao body */
+    align-items: flex-start; /* Ancorar no topo */
+    padding-bottom: 5px; /* Pequena margem inferior no body */
 }
 
-.grid-container {
-    height: 98vh; /* Reduzir um pouco a altura do container */
-    max-height: 100vh;
-    width: calc(98vh * (900 / 1600));
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(16, 1fr);
-    border: 2px solid white;
-    /* Remover padding inferior do container */
+.container-teste {
+    height: 98vh; /* Altura ligeiramente menor */
+    width: calc(98vh * (900 / 1600)); /* Largura proporcional */
+    border: 2px solid white; /* Borda visível */
 }
 
-
-.grid-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0.1) 0,
-        rgba(255, 255, 255, 0.1) calc(100% / 16),
-        transparent calc(100% / 16),
-        transparent calc(2 * 100% / 16)
-    ),
-    repeating-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.1) 0,
-        rgba(255, 255, 255, 0.1) calc(100% / 9),
-        transparent calc(100% / 9),
-        transparent calc(2 * 100% / 9)
-    );
-}
 
 .jogo-container {
     display: block;
@@ -141,8 +113,7 @@
 </head>
 
 <body>
-  <div class="grid-container">
-      </div>
+  <div class="container-teste"></div>
 </body>
 
 <script>
