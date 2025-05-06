@@ -17,17 +17,17 @@
 }
 
 .grid-container {
-    /* Altura ligeiramente menor que a tela para garantir visibilidade das bordas */
-    height: 98vh;
+    /* Reduzir a altura para criar mais espaço visível */
+    height: 95vh;
     max-height: 100vh; /* Permitir um pequeno ajuste para telas mais altas */
     /* Calcular a largura com base na altura */
-    width: calc(98vh * (900 / 1600));
+    width: calc(95vh * (900 / 1600));
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(16, 1fr);
     border: 2px solid white;
     position: relative;
-    margin-bottom: 5px; /* Margem inferior corrigida */
+    margin-bottom: 5px; /* Manter a margem inferior */
 }
 
 .grid-container::before {
