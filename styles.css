@@ -1,30 +1,22 @@
-body,
-html {
+body {
     margin: 0;
     padding: 0;
-    /* Adicionando padding para consistência */
+    background-color: black;
+    height: 100vh;
     overflow: hidden;
-    /* Esconde barras de rolagem desnecessárias */
-    background-color: #000;
-    /* Cor de fundo geral */
     display: flex;
     justify-content: center;
-    /* Centraliza o game-container horizontalmente */
-    align-items: center;
-    /* Centraliza o game-container verticalmente */
-    height: 100vh;
-    /* Garante que ambos ocupem a altura total da tela */
-    min-height: 100vh;
-    /* Garante que a altura seja pelo menos a da tela */
-    width: 100%;
-    /* Garante que ocupem a largura total */
+    align-items: flex-start; /* Ancorar no topo */
 }
 
 #game-container {
-    max-width: 100%;
-    max-height: 100vh;
-    /* object-fit: contain; REMOVA ESTA LINHA TEMPORARIAMENTE */
-    background-color: #333;
+    height: 99vh; /* Ou ajuste conforme necessário */
+    width: calc(99vh * (900 / 1600)); /* Largura proporcional */
+    border: 5px solid rgb(238, 9, 9); /* Borda vermelha para visualização */
+    box-sizing: border-box; /* Incluir borda no cálculo das dimensões */
+    display: flex; /* Para centralizar o conteúdo interno (as telas) */
+    flex-direction: column; /* Alinhar as telas verticalmente */
+    align-items: center; /* Centralizar horizontalmente o conteúdo das telas */
 }
 
 /*
@@ -189,7 +181,7 @@ html {
     margin: 0 auto;
     /* Centraliza o conteúdo interno, se necessário */
     overflow: hidden !important;
-    background-color: rgb(151, 7, 7);
+    /*background-color: rgb(151, 7, 7); */
 }
 
 #background {
