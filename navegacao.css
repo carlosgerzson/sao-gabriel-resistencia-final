@@ -28,7 +28,7 @@ body {
     height: 100%; /* Ocupar a altura do container */
     display: none;
     flex-direction: column;
-    justify-content: center; /* Centraliza verticalmente por padrão */
+    /* justify-content: center; /* Centraliza verticalmente por padrão */
     align-items: center; /* Centraliza horizontalmente por padrão */
     position: relative; /* Para posicionamento de elementos internos */
     overflow: hidden; /* Esconde overflows */
@@ -45,11 +45,12 @@ body {
 .tela img {
     display: block;
     max-width: 100%;
-    max-height: 100%;
+    /* max-height: 100%; REMOVER ESTA LINHA */
     width: auto;
     height: auto;
-    background-color: plum; /* Roxinha */
-    object-fit: cover; /* Tentar cobrir todo o espaço, cortando se necessário */
+    object-fit: cover;
+    background-color: plum; /* Para visualização */
+    flex-grow: 1; /* Tentar ocupar o espaço vertical */
 }
 
 .tela h1 {
