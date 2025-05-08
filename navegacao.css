@@ -28,7 +28,7 @@ body {
     height: 100%; /* Ocupar a altura do container */
     display: none;
     flex-direction: column;
-    /*justify-content: center;*/ /* Centraliza verticalmente por padrão */
+    justify-content: center; /* Centraliza verticalmente por padrão */
     align-items: center; /* Centraliza horizontalmente por padrão */
     position: relative; /* Para posicionamento de elementos internos */
     overflow: hidden; /* Esconde overflows */
@@ -45,12 +45,11 @@ body {
 .tela img {
     display: block;
     max-width: 100%;
-    /* max-height: 100%; REMOVER ESTA LINHA */
+    max-height: 100%;
     width: auto;
     height: auto;
-    object-fit: cover;
-    background-color: plum; /* Para visualização */
-    flex-grow: 1; /* Tentar ocupar o espaço vertical */
+    background-color: plum; /* Roxinha */
+    object-fit: cover; /* Tentar cobrir todo o espaço, cortando se necessário */
 }
 
 .tela h1 {
@@ -139,7 +138,7 @@ body {
     display: block;
     width: auto; /* Deixa a largura se ajustar para manter a proporção */
     height: 100%; /* Tenta ocupar 100% da altura do pai */
-    object-fit: contain;
+    object-fit: cover;
     z-index: 1;
 }
 
@@ -180,7 +179,7 @@ body {
 #briefings img.tela-briefing {
     max-width: 100%; /* Permite ocupar a largura total do container */
     height: 100%; /* Força a imagem a ocupar a altura total do container */
-    object-fit: contain; 
+    object-fit: cover; 
     margin-bottom: 0; /* Espaço entre a imagem e o botão */
 }
 
