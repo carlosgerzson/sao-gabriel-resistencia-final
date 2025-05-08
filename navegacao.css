@@ -137,9 +137,9 @@ body {
 
 #mapa-fases img {
     display: block;
-    width: auto; /* Deixa a largura se ajustar para manter a proporção */
-    height: 100%; /* Tenta ocupar 100% da altura do pai */
-    object-fit: cover;
+    width: 100%; /* Tentar ocupar a largura total do container */
+    height: 100%; /* Tentar ocupar a altura total do container */
+    object-fit: cover; /* Alterar para cover para preencher o container */
     z-index: 1;
 }
 
@@ -178,10 +178,10 @@ body {
 }
 
 #briefings img.tela-briefing {
-    max-width: 100%; /* Permite ocupar a largura total do container */
-    height: 100%; /* Força a imagem a ocupar a altura total do container */
-    object-fit: cover; 
-    margin-bottom: 0; /* Espaço entre a imagem e o botão */
+    max-width: 100%;
+    height: 100%;
+    object-fit: cover; /* Alterar para cover para preencher o container */
+    margin-bottom: 0;
 }
 
 #btn-jogar-briefing {
