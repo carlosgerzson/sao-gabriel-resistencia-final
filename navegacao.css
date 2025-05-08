@@ -10,8 +10,8 @@ body {
 }
 
 .jogo-container {
-    height: 99vh; /* Ou ajuste conforme necessário */
-    width: calc(99vh * (900 / 1600)); /* Largura proporcional */
+    height: 100vh; /* Ou ajuste conforme necessário */
+    width: calc(100vh * (900 / 1600)); /* Largura proporcional */
     border: 5px solid rgb(238, 9, 9); /* Borda vermelha para visualização */
     box-sizing: border-box; /* Incluir borda no cálculo das dimensões */
     display: flex; /* Para centralizar o conteúdo interno (as telas) */
