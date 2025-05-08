@@ -43,11 +43,11 @@ body {
 /* Estilo unificado para as imagens dentro das telas */
 .tela img {
     display: block;
-    max-width: 100%; /* Tenta ocupar toda a largura do container */
-    max-height: 100%; /* Tenta ocupar toda a altura do container */
-    width: auto; /* A largura se ajusta para manter a proporção */
-    height: auto; /* A altura se ajusta para manter a proporção */
-    object-fit: contain; /* Garante que a imagem caiba dentro sem cortar */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: cover; /* Tentar cobrir todo o espaço, cortando se necessário */
 }
 
 .tela h1 {
