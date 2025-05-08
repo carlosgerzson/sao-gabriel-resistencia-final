@@ -1,21 +1,36 @@
 body {
-    background-color: black;
     margin: 0;
+    padding: 0;
+    background-color: black;
     height: 100vh;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Ancorar no topo */
+}
+
+.jogo-container {
+    height: 99vh; /* Ou ajuste conforme necessário */
+    width: calc(99vh * (900 / 1600)); /* Largura proporcional */
+    border: 5px solid rgb(238, 9, 9); /* Borda vermelha para visualização */
+    box-sizing: border-box; /* Incluir borda no cálculo das dimensões */
+    display: flex; /* Para centralizar o conteúdo interno (as telas) */
+    flex-direction: column; /* Alinhar as telas verticalmente */
+    align-items: center; /* Centralizar horizontalmente o conteúdo das telas */
 }
 
 /* Estilos base para TODAS as telas */
 .tela {
     background-color: black;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
+    width: 100%; /* Ocupar a largura do container */
+    height: 100%; /* Ocupar a altura do container */
+    display: none;
     flex-direction: column;
     justify-content: center; /* Centraliza verticalmente por padrão */
     align-items: center; /* Centraliza horizontalmente por padrão */
     position: relative; /* Para posicionamento de elementos internos */
     overflow: hidden; /* Esconde overflows */
+    box-sizing: border-box; /* Importante para o dimensionamento */
 }
 
 /* Estilos para quando a tela precisa ser visível */
@@ -27,9 +42,11 @@ body {
 /* Estilo unificado para as imagens dentro das telas */
 .tela img {
     display: block;
-    max-height: 100vh; /* Tenta ocupar toda a altura da viewport */
+    max-width: 100%; /* Tenta ocupar toda a largura do container */
+    max-height: 100%; /* Tenta ocupar toda a altura do container */
     width: auto; /* A largura se ajusta para manter a proporção */
-    object-fit: contain;
+    height: auto; /* A altura se ajusta para manter a proporção */
+    object-fit: contain; /* Garante que a imagem caiba dentro sem cortar */
 }
 
 .tela h1 {
@@ -64,32 +81,54 @@ body {
 /* Estilos ESPECÍFICOS para o mapa de fases */
 #mapa-fases {
     background-color: black;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     position: relative;
     overflow: hidden;
     display: flex;
+    flex-direction: column; /* Alinhar os itens verticalmente (se necessário) */
     justify-content: center;
     align-items: center;
 }
 
 #mapa-fases .niveis-container-botoes .nivel-btn {
-    position: static; /* Garante que os botões sigam o fluxo normal da grid */
-    margin: 0; /* Remove quaisquer margens que possam causar deslocamento */
-    /* Outros estilos visuais dos botões devem permanecer */
+    position: relative; /* Permite ajustes de posicionamento */
+    margin: 0; /* Remove margens extras */
+    padding: 5px 10px; /* Ajusta o padding interno (vertical e horizontal) */
+    text-align: center; /* Centraliza o texto */
+    width: auto; /* Ajusta a largura ao tamanho do conteúdo */
+    display: inline-flex; /* Garante que o botão se ajuste ao conteúdo */
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: center; /* Centraliza o conteúdo verticalmente */
+    box-sizing: border-box; /* Inclui padding no cálculo do tamanho */
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
 }
 
 #mapa-fases .niveis-container-botoes {
-    position: absolute;
-    bottom: 20px; /* Distância da parte inferior da viewport */
-    left: 50%;
-    transform: translateX(-50%); /* Centraliza horizontalmente */
+    position: absolute; /* Permite posicionar em relação ao #mapa-fases */
+    top: 50%; /* Centraliza verticalmente */
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta para o centro exato */
+    z-index: 10; /* Garante que fique acima da imagem */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
-    width: 90%;
-    max-width: 500px;
-    z-index: 2; /* Garante que os botões fiquem acima da imagem */
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Reduz o tamanho mínimo das colunas */
+    gap: 3px; /* Reduz o espaçamento entre os botões */
+    justify-content: center; /* Centraliza os itens horizontalmente na grid */
+    align-items: center; /* Centraliza os itens verticalmente na grid */
+    width: 90%; /* Ajusta a largura relativa */
+    max-width: 300px; /* Limita ainda mais a largura da grid */
+    box-sizing: border-box; /* Inclui padding e borda no cálculo do tamanho */
+    padding: 0; /* Remove o padding para evitar somar ao tamanho total */
+}
+
+@media (max-width: 600px) {
+    #mapa-fases .niveis-container-botoes {
+        grid-template-columns: repeat(2, 1fr); /* Força 2 colunas em telas menores */
+        gap: 5px; /* Reduz o espaçamento entre os botões */
+        padding: 10px; /* Reduz o padding */
+        width: 95%; /* Ajusta a largura para telas menores */
+        max-width: 385px; /* Garante que não ultrapasse o tamanho do jogo-container */
+    }
 }
 
 #mapa-fases img {
@@ -101,17 +140,15 @@ body {
 }
 
 #mapa-fases .nivel-btn {
-    background-color: #5cb85c; /* Verde agradável */
-    color: white;
-    padding: 10px 15px; /* Reduzi um pouco o padding */
-    border: 2px solid red;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9em; /* Reduzi um pouco o tamanho da fonte */
-    text-align: center;
-    transition: background-color 0.3s ease; /* Transição suave no hover */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Uma leve sombra */
-    z-index: 1011; /* Garante que os botões fiquem acima do container de botões */
+    margin: 0; /* Remove margens extras */
+    padding: 4px 8px; /* Reduz o padding interno dos botões */
+    text-align: center; /* Centraliza o texto */
+    width: auto; /* Ajusta a largura ao tamanho do conteúdo */
+    display: inline-flex; /* Garante que o botão se ajuste ao conteúdo */
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: center; /* Centraliza o conteúdo verticalmente */
+    box-sizing: border-box; /* Inclui padding no cálculo do tamanho */
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
 }
 
 #mapa-fases .nivel-btn:hover {

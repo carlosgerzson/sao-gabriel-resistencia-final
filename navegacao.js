@@ -5,6 +5,7 @@ const btnContinuarIntroducao1 = document.getElementById('btn-continuar-introduca
 const telaIntroducao2 = document.getElementById('tela-introducao2');
 const btnContinuarIntroducao2 = document.getElementById('btn-continuar-introducao2');
 const mapaFases = document.getElementById('mapa-fases');
+const container = document.querySelector('.jogo-container');
 
 function mostrarTela(idTela) {
     console.log("Executando mostrarTela com ID:", idTela);
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarTela('mapa-fases');
         } else {
             mostrarTela('tela-inicial');
+            esconderTela('mapa-fases'); // Garante que o mapa esteja escondido no início
         }
     
     esconderTela('briefings'); // Garante que os briefings estejam escondidos inicialmente

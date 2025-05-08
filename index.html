@@ -1,136 +1,69 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Teste Responsivo do Jogo</title>
-  <style>
- body {
-    margin: 0;
-    padding: 0;
-    background-color: black;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Ancorar no topo */
-}
-
-.container-teste {
-    height: 98vh; /* Ou tente 99vh */
-    width: calc(98vh * (900 / 1600)); /* Largura proporcional */
-    border: 2px solid white; /* Borda visível */
-}
-
-
-.jogo-container {
-    display: block;
-    width: 100%;
-    max-width: 600px;
-    height: 256.66px; /* Definir a altura do container */
-    background-color: #333;
-    margin-bottom: 20px;
-    box-sizing: border-box;
-    position: relative; /* Contexto para posicionar os filhos */
-}
-
-
-    .gradiente-container {
-      position: absolute;
-      bottom: 0;
-      /* Alinha com a parte inferior (onde a silhueta está) */
-      left: 50%;
-      /* Centraliza horizontalmente */
-      transform: translateX(-50%);
-      /* Ajuste para centralização */
-      width: 90%;
-      /* Largura da silhueta (ou do container) */
-      height: 30vh;
-      /* Altura desejada para o gradiente */
-      background-image: linear-gradient(to top, red, orange);
-      /* Gradiente de baixo para cima */
-      opacity: 0.7;
-      /* Opcional: para dar um efeito de transparência */
-      z-index: -2;
-      /* Abaixo da silhueta e do container */
-    }
-
-    .silhueta-urbana-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%; /* Preencher o jogo-container */
-    z-index: 1; /* Garantir que fique acima do fundo do jogo-container */
-}
-
-   .silhueta-urbana-container svg {
-    display: block; /* Garantir que o SVG se comporte como um bloco */
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Ajustar o SVG dentro do container */
-}
- 
-
-    .elementos-inferiores {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      position: absolute;
-      /* Posicionar dentro do container */
-      bottom: 20px;
-      left: 0;
-      width: 100%;
-      padding: 0 20px;
-      box-sizing: border-box;
-      z-index: 10;
-    }
-
-    .botao-acao {
-      padding: 10px 20px;
-      font-size: 1em;
-      flex-grow: 1;
-      max-width: 150px;
-      box-sizing: border-box;
-    }
-
-    @media (max-width: 600px) {
-      .elementos-inferiores {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        bottom: 10px;
-      }
-
-      .botao-acao {
-        width: 80%;
-        max-width: none;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Intro</title>
+    <link rel="stylesheet" href="navegacao.css">
 </head>
-
 <body>
-  <div class="container-teste"></div>
+    <div class="jogo-container">
+        <div id="tela-inicial" class="tela">
+            <img src="tela_inicial.png" alt="Tela Inicial">
+            <button id="btn-continuar-inicial">Continuar</button>
+        </div>
+
+        <div id="tela-introducao1" class="tela">
+            <img src="tela_introducao1.png" alt="Introdução 1">
+            <button id="btn-continuar-introducao1">Continuar</button>
+        </div>
+
+        <div id="tela-introducao2" class="tela">
+            <img src="tela_introducao2.png" alt="Introdução 2">
+            <button id="btn-continuar-introducao2">Continuar</button>
+        </div>
+
+        <div id="mapa-fases" class="tela">
+            <img src="mapa_fases.png" alt="Mapa de Fases">
+            <div class="niveis-container-botoes">
+                <button class="nivel-btn nivel-1" data-nivel="1">Nível 1</button>
+                <button class="nivel-btn nivel-2" data-nivel="2">Nível 2</button>
+                <button class="nivel-btn nivel-3" data-nivel="3">Nível 3</button>
+                <button class="nivel-btn nivel-4" data-nivel="4">Nível 4</button>
+                <button class="nivel-btn nivel-5" data-nivel="5">Nível 5</button>
+                <button class="nivel-btn nivel-6" data-nivel="6">Nível 6</button>
+                <button class="nivel-btn nivel-7" data-nivel="7">Nível 7</button>
+                <button class="nivel-btn nivel-8" data-nivel="8">Nível 8</button>
+                <button class="nivel-btn nivel-9" data-nivel="9">Nível 9</button>
+                <button class="nivel-btn nivel-10" data-nivel="10">Nível 10</button>
+            </div>
+        </div>
+
+        <div id="briefings" class="tela" style="display: none;">
+            <img id="alvo1_briefing" class="tela-briefing" src="briefings/alvo1_briefing.png" alt="Briefing Nível 1" style="display: none;">
+            <img id="alvo2_briefing" class="tela-briefing" src="briefings/alvo2_briefing.png" alt="Briefing Nível 2" style="display: none;">
+            <img id="alvo3_briefing" class="tela-briefing" src="briefings/alvo3_briefing.png" alt="Briefing Nível 3" style="display: none;">
+            <button id="btn-jogar-briefing">Jogar</button>
+            </div>
+    </div>
+
+    <script>
+        function setContainerHeight() {
+            const viewportHeight = window.innerHeight;
+            const aspectRatio = 900 / 1600;
+            const containerWidth = viewportHeight * aspectRatio;
+            const containerHeight = viewportHeight * 0.99; // Usando 99vh como definido
+
+            const container = document.querySelector('.jogo-container');
+            if (container) {
+                container.style.height = `${containerHeight}px`;
+                container.style.width = `${containerWidth}px`;
+            }
+        }
+
+        window.addEventListener('resize', setContainerHeight);
+        window.addEventListener('load', setContainerHeight);
+    </script>
+    <script src="navegacao.js"></script>
 </body>
-
-<script>
-  function setContainerHeight() {
-    const viewportHeight = window.innerHeight;
-    const aspectRatio = 900 / 1600;
-    const containerWidth = viewportHeight * aspectRatio;
-    const containerHeight = viewportHeight * 0.98; // Usar 98% da altura para criar espaço
-
-    const container = document.querySelector('.container-teste');
-    if (container) {
-        container.style.height = `${containerHeight}px`;
-        container.style.width = `${containerWidth}px`;
-    }
-}
-
-window.addEventListener('resize', setContainerHeight);
-window.addEventListener('load', setContainerHeight);
-</script>
-
 </html>
