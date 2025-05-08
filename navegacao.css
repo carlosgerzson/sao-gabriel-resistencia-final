@@ -28,7 +28,7 @@ body {
     height: 100%; /* Ocupar a altura do container */
     display: none;
     flex-direction: column;
-    justify-content: center; /* Centraliza verticalmente por padrão */
+    /*justify-content: center;*/ /* Centraliza verticalmente por padrão */
     align-items: center; /* Centraliza horizontalmente por padrão */
     position: relative; /* Para posicionamento de elementos internos */
     overflow: hidden; /* Esconde overflows */
