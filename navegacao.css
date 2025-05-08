@@ -10,13 +10,15 @@ body {
 }
 
 .jogo-container {
-    height: 100vh; /* Ou ajuste conforme necessário */
-    width: calc(100vh * (900 / 1600)); /* Largura proporcional */
-    border: 5px solid rgb(238, 9, 9); /* Borda vermelha para visualização */
-    box-sizing: border-box; /* Incluir borda no cálculo das dimensões */
-    display: flex; /* Para centralizar o conteúdo interno (as telas) */
-    flex-direction: column; /* Alinhar as telas verticalmente */
-    align-items: center; /* Centralizar horizontalmente o conteúdo das telas */
+    max-width: 900px; /* Largura máxima desejada */
+    height: calc(900px * (1600 / 900)); /* Altura proporcional à largura máxima */
+    width: 100%; /* Ocupar a largura disponível até a largura máxima */
+    height: auto; /* Ajustar a altura automaticamente */
+    border: 5px solid rgb(238, 9, 9);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Estilos base para TODAS as telas */
