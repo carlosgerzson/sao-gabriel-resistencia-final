@@ -14,7 +14,7 @@ body {
     width: calc(100vh * (900 / 1600)); /* Largura proporcional à altura da viewport */
     max-width: 900px; /* Largura máxima para evitar que fique muito largo */
     border: 5px solid rgb(238, 9, 9);
-    background-color: lightgreen; /* Verdinha */
+    background-color: rgb(238, 144, 164); /* Verdinha */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -178,10 +178,10 @@ body {
 }
 
 #briefings img.tela-briefing {
-    max-width: 100%;
-    height: 100%;
-    object-fit: cover; /* Alterar para cover para preencher o container */
-    margin-bottom: 0;
+    max-width: 100%; /* Permite ocupar a largura total do container */
+    height: 100%; /* Força a imagem a ocupar a altura total do container */
+    object-fit: cover; 
+    margin-bottom: 0; /* Espaço entre a imagem e o botão */
 }
 
 #btn-jogar-briefing {

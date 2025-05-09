@@ -1,21 +1,9 @@
-body {
-    margin: 0;
-    padding: 0;
-    background-color: rgb(204, 236, 22);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Ancorar no topo */
-    padding-bottom: 1px; /* Ou um valor maior */
-}
-
 #game-container {
-    height: 98vh; 
+    height: 100vh;
     width: calc(100vh * (900 / 1600));
     max-width: 900px;
     border: 5px solid rgb(238, 9, 9);
-    background-color: lightgreen;
+    background-color: rgb(75, 1, 50);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
