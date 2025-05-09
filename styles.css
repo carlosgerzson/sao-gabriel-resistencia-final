@@ -108,15 +108,22 @@
 
 #ui-container button#terminar-partida-btn,
 #ui-container button#salvar-btn,
-#ui-container button#pausar-continuar-btn,
-#ui-container button#modo-jogo-btn {
-    /* Estilos para os botões da UI, se necessário posicionamento absoluto */
+#ui-container button#pausar-continuar-btn {
+    /* Estilos para os outros botões da UI */
     position: absolute;
     pointer-events: none;
-    /* Ajuste top, bottom, left, right conforme a necessidade */
+    /* Outros estilos */
 }
 
-/*
+#modo-jogo-btn {
+    position: absolute;
+    bottom: 20px; /* Ajuste conforme necessário */
+    left: 20px; /* Ou right: 20px; */
+    z-index: 1010; /* Garante que fique visível */
+    pointer-events: none; /* Permite que o botão seja clicável */
+    /* Adicione outros estilos visuais para o botão */
+}
+
  #tela-fim-de-fase button#btn-voltar-mapa {
     position: absolute; 
     bottom: 50px; 
@@ -124,7 +131,7 @@
     transform: translateX(-50%);
     z-index: 120;
 }
-*/
+
 
 
 #game-controls button {
