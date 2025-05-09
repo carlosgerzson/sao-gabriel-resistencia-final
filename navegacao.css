@@ -51,6 +51,7 @@ body {
     object-fit: cover;
     background-color: plum; /* Para visualização */
     flex-grow: 1; /* Tentar ocupar o espaço vertical */
+    z-index: 1010;
 }
 
 .tela h1 {
