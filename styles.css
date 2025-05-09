@@ -1,38 +1,27 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: black;
+    background-color: rgb(204, 236, 22);
     height: 100vh;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: flex-start; /* Ancorar no topo */
+    padding-bottom: 1px; /* Ou um valor maior */
 }
 
 #game-container {
-   height: 100vh; /* Ocupar a altura total da viewport */
-    width: calc(100vh * (900 / 1600)); /* Largura proporcional à altura da viewport */
-    max-width: 900px; /* Largura máxima para evitar que fique muito largo */
+    height: calc(100vh - 1px); /* Ou talvez -5px */
+    width: calc(100vh * (900 / 1600));
+    max-width: 900px;
     border: 5px solid rgb(238, 9, 9);
-    background-color: lightgreen; /* Verdinha */
+    background-color: lightgreen;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/*
-.tela {
-    top: 0;
-    left: 0;
-    width: 900px;   
-    height: 1600px;
-    z-index: 1000;
-    display: none;
-    position: absolute;
-    pointer-events: auto;
-}
-*/
 
 #top-bar {
     position: absolute;
