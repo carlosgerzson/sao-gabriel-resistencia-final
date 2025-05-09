@@ -69,7 +69,7 @@ body {
     padding: 1em 2em;
     font-size: 1em;
     cursor: pointer;
-    z-index: 20;
+    z-index: 1020;
     position: absolute; /* Posição padrão para botões */
     bottom: 5vh; /* Posição padrão na parte inferior */
     left: 50%;
