@@ -225,7 +225,7 @@ body {
     bottom: 5vh; /* 5% da altura da viewport da parte inferior */
     left: 50%;
     transform: translateX(-50%);
-    z-index: 20;
+    z-index: 1015;
     /* Outros estilos visuais */
 }
 
