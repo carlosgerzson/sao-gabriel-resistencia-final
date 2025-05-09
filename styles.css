@@ -122,7 +122,7 @@
     bottom: 50px; 
     left: 50%;
     transform: translateX(-50%);
-    z-index: 20;
+    z-index: 120;
 }
 */
 
@@ -135,13 +135,6 @@
     transform: translateX(-50%);
 }
 
-#cronometro {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 24px;
-    /* Adicione outros estilos */
-}
 
 #iniciar-jogo-btn {
     position: absolute;
@@ -161,6 +154,7 @@
     /* Centraliza o conteúdo interno, se necessário */
     overflow: hidden !important;
     /*background-color: rgb(151, 7, 7); */
+    background-image: linear-gradient(rgba(152, 6, 6, 0.57), rgb(211, 88, 5));
 }
 
 #background {
