@@ -10,7 +10,7 @@ body {
 }
 
 #game-container {
-    height: 100vh; /* Ocupar a altura total da viewport */
+   height: 100vh; /* Ocupar a altura total da viewport */
     width: calc(100vh * (900 / 1600)); /* Largura proporcional à altura da viewport */
     max-width: 900px; /* Largura máxima para evitar que fique muito largo */
     border: 5px solid rgb(238, 9, 9);
