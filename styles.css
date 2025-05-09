@@ -129,7 +129,7 @@
     bottom: 50px; 
     left: 50%;
     transform: translateX(-50%);
-    z-index: 120;
+    z-index: 1020;
 }
 
 
