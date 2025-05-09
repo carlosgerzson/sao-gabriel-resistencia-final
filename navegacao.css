@@ -191,7 +191,7 @@ body {
     bottom: 5vh;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 20;
+    z-index: 1020;
     padding: 15px 30px;
     font-size: 1.2em;
     cursor: pointer;
