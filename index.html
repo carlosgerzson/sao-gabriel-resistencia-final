@@ -46,24 +46,6 @@
             <button id="btn-jogar-briefing">Jogar</button>
             </div>
     </div>
-
-    <script>
-        function setContainerHeight() {
-            const viewportHeight = window.innerHeight;
-            const aspectRatio = 900 / 1600;
-            const containerWidth = viewportHeight * aspectRatio;
-            const containerHeight = viewportHeight * 0.99; // Usando 99vh como definido
-
-            const container = document.querySelector('.jogo-container');
-            if (container) {
-                container.style.height = `${containerHeight}px`;
-                container.style.width = `${containerWidth}px`;
-            }
-        }
-
-        window.addEventListener('resize', setContainerHeight);
-        window.addEventListener('load', setContainerHeight);
-    </script>
     <script src="navegacao.js"></script>
 </body>
 </html>
