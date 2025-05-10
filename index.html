@@ -46,6 +46,25 @@
             <button id="btn-jogar-briefing">Jogar</button>
             </div>
     </div>
+
+    <script>
+  function setJogoContainerHeight() {
+    const viewportHeight = window.innerHeight;
+    const aspectRatio = 900 / 1600;
+    const containerWidth = viewportHeight * aspectRatio;
+    const containerHeight = viewportHeight * 0.98;
+
+    const jogoContainer = document.querySelector('.jogo-container');
+    if (jogoContainer) {
+      jogoContainer.style.height = `${containerHeight}px`;
+      jogoContainer.style.width = `${containerWidth}px`;
+    }
+  }
+
+  window.addEventListener('resize', setJogoContainerHeight);
+  window.addEventListener('load', setJogoContainerHeight);
+</script>
+
     <script src="navegacao.js"></script>
 </body>
 </html>
