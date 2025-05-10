@@ -11,6 +11,11 @@
     align-items: center;
 }
 
+#game {
+    display: none; /* Oculta o jogo inicialmente */
+    /* Outros estilos do jogo */
+}
+
 
 #top-bar {
     position: absolute;
