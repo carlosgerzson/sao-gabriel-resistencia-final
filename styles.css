@@ -1,5 +1,6 @@
 #game-container {
     height: 100vh;
+    height: calc(100vh - env(safe-area-inset-bottom)); /* Tenta subtrair a altura da barra de navegação */
     width: calc(100vh * (900 / 1600));
     max-width: 900px;
     border: 5px solid rgb(238, 9, 9);
