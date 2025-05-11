@@ -6,6 +6,8 @@ const telaIntroducao2 = document.getElementById('tela-introducao2');
 const btnContinuarIntroducao2 = document.getElementById('btn-continuar-introducao2');
 const mapaFases = document.getElementById('mapa-fases');
 const container = document.querySelector('.jogo-container');
+const gameContainer = document.getElementById('game-container'); // Adicione esta linha para referenciar o container do jogo
+const gameElement = document.getElementById('game'); // Adicione esta linha para referenciar o elemento do jogo
 
 function mostrarTela(idTela) {
     console.log("Executando mostrarTela com ID:", idTela);
@@ -32,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const telaInicial = document.getElementById('tela-inicial');
         const mapaFases = document.getElementById('mapa-fases');
 
-       // Move as declarações para dentro do DOMContentLoaded
+        // Move as declarações para dentro do DOMContentLoaded
         const briefingsContainer = document.getElementById('briefings');
         const todosBriefings = briefingsContainer ? briefingsContainer.querySelectorAll('.tela-briefing') : [];
 
-       
+        
         // Verifica o parâmetro da URL e decide qual tela mostrar
         const urlParams = new URLSearchParams(window.location.search);
         const fromGame = urlParams.get('fromGame');
@@ -103,7 +105,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Define o evento de clique do botão "Jogar" para ir para o jogo
                     btnJogar.onclick = () => {
-                        window.location.href = `index.html?nivel=${nivelSelecionado}`;
+                        console.log('Botão Jogar clicado');
+                        esconderTela('briefings'); // Esconde a tela de briefings
+                        if (gameContainer) {
+                            gameContainer.style.display = 'block'; // Exibe o container do jogo
+                            console.log('Game container exibido');
+                        }
+                        if (gameElement) {
+                            gameElement.style.display = 'block'; // Garante que o elemento do jogo também esteja visível
+                            console.log('Elemento do jogo exibido');
+                        }
+                        // window.location.href = `index.html?nivel=${nivelSelecionado}`; // Não precisamos mais redirecionar
                     };
                 } else {
                     console.error(`Briefing para o nível ${nivelSelecionado} não encontrado.`);
