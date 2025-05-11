@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Define o evento de clique do botão "Jogar" para ir para o jogo
                     btnJogar.onclick = () => {
-                        window.location.href = `jogo.html?nivel=${nivelSelecionado}`;
+                        window.location.href = `index.html?nivel=${nivelSelecionado}`;
                     };
                 } else {
                     console.error(`Briefing para o nível ${nivelSelecionado} não encontrado.`);
