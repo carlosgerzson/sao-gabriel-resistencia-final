@@ -18,7 +18,7 @@ body {
     flex-direction: column;
     /* justify-content: center; /* Centraliza verticalmente por padrão */
     align-items: center; /* Centraliza horizontalmente por padrão */
-    position: relative; /* Para posicionamento de elementos internos */
+    position: absolute; /* Para posicionamento de elementos internos */
     overflow: hidden; /* Esconde overflows */
     box-sizing: border-box; /* Importante para o dimensionamento */
 }

@@ -1,6 +1,7 @@
 #game-container {
     height: 100vh;
-    height: calc(100vh - env(safe-area-inset-bottom)); /* Tenta subtrair a altura da barra de navegação */
+    height: calc(100vh - env(safe-area-inset-bottom));
+    /* Tenta subtrair a altura da barra de navegação */
     width: calc(100vh * (900 / 1600));
     max-width: 900px;
     border: 5px solid rgb(238, 9, 9);
@@ -9,10 +10,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 }
 
 #game {
-    display: none; /* Oculta o jogo inicialmente */
+    display: none;
+    /* Oculta o jogo inicialmente */
     /* Outros estilos do jogo */
 }
 
@@ -123,16 +126,20 @@
 
 #modo-jogo-btn {
     position: absolute;
-    bottom: 20px; /* Ajuste conforme necessário */
-    left: 20px; /* Ou right: 20px; */
-    z-index: 1010; /* Garante que fique visível */
-    pointer-events: none; /* Permite que o botão seja clicável */
+    bottom: 20px;
+    /* Ajuste conforme necessário */
+    left: 20px;
+    /* Ou right: 20px; */
+    z-index: 1010;
+    /* Garante que fique visível */
+    pointer-events: none;
+    /* Permite que o botão seja clicável */
     /* Adicione outros estilos visuais para o botão */
 }
 
- #tela-fim-de-fase button#btn-voltar-mapa {
-    position: absolute; 
-    bottom: 50px; 
+#tela-fim-de-fase button#btn-voltar-mapa {
+    position: absolute;
+    bottom: 50px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1020;
@@ -160,13 +167,9 @@
 #game {
     position: relative;
     width: 100%;
-    /* Ocupa 100% da largura do pai (#game-container) */
     height: 100%;
-    /* Ocupa 100% da altura do pai (#game-container) */
     margin: 0 auto;
-    /* Centraliza o conteúdo interno, se necessário */
     overflow: hidden !important;
-    /*background-color: rgb(151, 7, 7); */
     background-image: linear-gradient(rgba(152, 6, 6, 0.57), rgb(211, 88, 5));
 }
 
@@ -174,7 +177,7 @@
     position: absolute;
     width: 900px;
     height: 1600px;
-    z-index: 21;
+    z-index: 1;
     /* Menor z-index */
     top: 0px;
     left: 0px;
