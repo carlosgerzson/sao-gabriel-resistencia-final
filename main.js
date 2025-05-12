@@ -77,10 +77,87 @@ let alvo1Dano2Element;
 let alvo1DestruidoElement;
 let alvo1FundoElement;
 
+// Variável para armazenar o ID do intervalo de criação de bombas
+let bombInterval;
+let jogoIniciado = false; // Flag para controlar a inicialização do jogo
+
+function iniciarJogo(nivelSelecionado) {
+    if (!jogoIniciado) {
+        console.log('Iniciando a lógica do jogo em main.js...');
+
+        // Obtenha as referências aos elementos da UI **aqui** DENTRO da inicialização do jogo
+        tempoElement = document.getElementById("tempo");
+        pausarContinuarBtn = document.getElementById("pausar-continuar-btn");
+        salvarBtn = document.getElementById("salvar-btn");
+        terminarPartidaBtn = document.getElementById("terminar-partida-btn");
+        alvo2PredioElement = document.getElementById("alvo2_predio");
+        alvo2Dano1Element = document.getElementById("alvo2_dano1");
+        alvo2Dano2Element = document.getElementById("alvo2_dano2");
+        alvo2DestruidoElement = document.getElementById("alvo2_destruido");
+        alvo2FundoElement = document.getElementById("alvo2_fundo");
+        alvo1PredioElement = document.getElementById("alvo1_predio");
+        alvo1Dano1Element = document.getElementById("alvo1_dano1");
+        alvo1Dano2Element = document.getElementById("alvo1_dano2");
+        alvo1DestruidoElement = document.getElementById("alvo1_destruido");
+        alvo1FundoElement = document.getElementById("alvo1_fundo");
+
+        if (pausarContinuarBtn) {
+            pausarContinuarBtn.addEventListener("click", togglePause);
+        } else {
+            console.error("Botão 'pausar-continuar-btn' não encontrado.");
+        }
+
+        let nivelParaIniciar = nivelSelecionado;
+
+        if (nivelParaIniciar) {
+            console.log(`Nível selecionado: ${nivelParaIniciar}`);
+            exibirAlvo(nivelParaIniciar);
+            iniciarNivel(nivelParaIniciar);
+            // ... outras inicializações baseadas no nível ...
+        } else {
+            console.error("Nenhum nível selecionado para iniciar o jogo.");
+            return; // Impede a inicialização se o nível não for definido
+        }
+
+        const telaFimDeFase = document.getElementById("tela-fim-de-fase");
+        const btnVoltarMapa = document.getElementById("btn-voltar-mapa");
+
+        if (btnVoltarMapa) {
+            btnVoltarMapa.addEventListener("click", () => {
+                console.log("Voltando para o mapa de fases.");
+                telaFimDeFase.style.display = "none";
+                // Redireciona de volta para o index.html com parâmetro
+                window.location.href = "index.html?fromGame=true";
+            });
+        }
+
+        initializeArmy("army_e");
+        initializeArmy("army_c");
+        initializeArmy("army_d");
+        game.addEventListener("mousedown", handleGameClick);
+        setInterval(checkBombCollisions, 50);
+
+        // Agora, adicione os event listeners dos botões da UI (já feito acima)
+
+        if (salvarBtn) {
+            salvarBtn.addEventListener("click", salvarJogo);
+        }
+
+        if (terminarPartidaBtn) {
+            terminarPartidaBtn.addEventListener("click", terminarPartida);
+        }
+
+        jogoIniciado = true;
+        console.log('Lógica de inicialização do jogo concluída em main.js');
+    } else {
+        console.log('Jogo já foi iniciado.');
+    }
+}
+
 function atualizarTempo() {
     const minutos = Math.floor((DURACAO_NIVEL - tempoDecorridoNivel) / 60).toString().padStart(2, '0');
     const segundos = ((DURACAO_NIVEL - tempoDecorridoNivel) % 60).toString().padStart(2, '0');
-    tempoElement.innerHTML = `<span class="math-inline">${minutos}:</span>${segundos}`;
+    tempoElement.innerHTML = `<span class="math-inline">\{minutos\}\:</span>{segundos}`;
     tempoDecorridoNivel++;
 
     // Verifique se algum alvo foi destruído
@@ -625,82 +702,8 @@ function atualizarEstadoDanoAlvo(alvoId, dano) {
             }
         }
 
-     document.addEventListener("DOMContentLoaded", () => {
-            console.log("DOMContentLoaded no index.html foi disparado.");
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const nivel = urlParams.get('nivel');
-
-            // Obtenha as referências aos elementos da UI **aqui** DENTRO do DOMContentLoaded
-            tempoElement = document.getElementById("tempo");
-            pausarContinuarBtn = document.getElementById("pausar-continuar-btn");
-            salvarBtn = document.getElementById("salvar-btn");
-            terminarPartidaBtn = document.getElementById("terminar-partida-btn");
-            alvo2PredioElement = document.getElementById("alvo2_predio");
-            alvo2Dano1Element = document.getElementById("alvo2_dano1");
-            alvo2Dano2Element = document.getElementById("alvo2_dano2");
-            alvo2DestruidoElement = document.getElementById("alvo2_destruido");
-            alvo2FundoElement = document.getElementById("alvo2_fundo");
-            alvo1PredioElement = document.getElementById("alvo1_predio");
-            alvo1Dano1Element = document.getElementById("alvo1_dano1");
-            alvo1Dano2Element = document.getElementById("alvo1_dano2");
-            alvo1DestruidoElement = document.getElementById("alvo1_destruido");
-            alvo1FundoElement = document.getElementById("alvo1_fundo");
-
-            if (pausarContinuarBtn) {
-                pausarContinuarBtn.addEventListener("click", togglePause);
-            } else {
-                console.error("Botão 'pausar-continuar-btn' não encontrado.");
-            }
-
-            if (nivel) {
-                console.log(`Nível recebido da URL: ${nivel}`);
-                exibirAlvo(nivel); // Exibe o container do alvo correto
-                iniciarNivel(nivel); // Inicia o jogo para o nível
-                // Aqui é onde a lógica para carregar os elementos do jogo
-                // (incluindo as bombas) para o nível específico deve estar.
-            } else {
-                console.log("Nenhum nível especificado na URL. Iniciando o jogo no nível padrão (se houver).");
-                exibirAlvo(nivelAtual); // Inicia no nível padrão (1)
-                iniciarNivel(nivelAtual);
-            }
-
-            const telaFimDeFase = document.getElementById("tela-fim-de-fase");
-            const btnVoltarMapa = document.getElementById("btn-voltar-mapa");
-            const mapaFases = document.getElementById("mapa-fases"); // Certifique-se do ID correto
-
-            if (btnVoltarMapa) {
-                btnVoltarMapa.addEventListener("click", () => {
-                    console.log("Voltando para o mapa de fases.");
-                    telaFimDeFase.style.display = "none";
-                    // Redireciona de volta para o navegacao.html
-                    window.location.href = "index.html?fromGame=true";
-                });
-            }
-
-            initializeArmy("army_e");
-            initializeArmy("army_c");
-            initializeArmy("army_d");
-            game.addEventListener("mousedown", handleGameClick);
-            setInterval(checkBombCollisions, 50);
-
-            // Agora, adicione os event listeners dos botões da UI
-            if (pausarContinuarBtn) {
-                pausarContinuarBtn.addEventListener("click", togglePause);
-            } else {
-                console.error("Botão pausar-continuar não encontrado!");
-            }
-
-            if (salvarBtn) {
-                salvarBtn.addEventListener("click", salvarJogo);
-            }
-
-            if (terminarPartidaBtn) {
-                terminarPartidaBtn.addEventListener("click", terminarPartida);
-            }
-
-            // Inicia a criação de bombas (agora movido para iniciarNivel)
-        });
+    // Este bloco DOMContentLoaded foi removido daqui e sua lógica movida para iniciarJogo()
+    // document.addEventListener("DOMContentLoaded", () => { ... });
 
 
         // Função para exibir o container do alvo
@@ -725,7 +728,7 @@ function atualizarEstadoDanoAlvo(alvoId, dano) {
         // Função para iniciar o nível (somente após o briefing - agora chamado diretamente no carregamento)
         function iniciarNivel(nivel) {
             console.log(`Iniciando nível: ${nivel}`);
-            jogoPausado = false; // Marca o jogo como ativo
+jogoPausado = false; // Marca o jogo como ativo
             tempoDecorridoNivel = 0;
             clearInterval(intervaloTempoNivel);
             intervaloTempoNivel = setInterval(atualizarTempo, 1000); // Inicia o contador de tempo
@@ -735,9 +738,6 @@ function atualizarEstadoDanoAlvo(alvoId, dano) {
             // Outras inicializações específicas do nível (se houver)
             console.log(`Jogo iniciado no nível ${nivelAtual}`);
         }
-
-        // Variável para armazenar o ID do intervalo de criação de bombas
-        let bombInterval;
 
 
         function feedbackDanoLeve(alvoId) {
@@ -764,3 +764,7 @@ function atualizarEstadoDanoAlvo(alvoId, dano) {
             mensagemFeedback.style.display = "block";
         }
         console.log("Fim do código JavaScript");
+
+// Chamada para iniciar o jogo APÓS o carregamento do DOM
+// REMOVE ESTE LISTENER. A chamada para iniciarJogo AGORA VEM DO navegacao.js
+// document.addEventListener('DOMContentLoaded', iniciarJogo);

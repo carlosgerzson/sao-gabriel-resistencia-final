@@ -5,15 +5,11 @@ const btnContinuarIntroducao1 = document.getElementById('btn-continuar-introduca
 const telaIntroducao2 = document.getElementById('tela-introducao2');
 const btnContinuarIntroducao2 = document.getElementById('btn-continuar-introducao2');
 const mapaFases = document.getElementById('mapa-fases');
-const container = document.querySelector('.jogo-container');
-const gameContainer = document.getElementById('game-container'); // Adicione esta linha para referenciar o container do jogo
-const gameElement = document.getElementById('game'); // Adicione esta linha para referenciar o elemento do jogo
+const gameContainer = document.getElementById('game-container');
+const gameElement = document.getElementById('game');
+const briefingsContainer = document.getElementById('briefings');
 
 function mostrarTela(idTela) {
-    console.log("Executando mostrarTela com ID:", idTela);
-    console.log("Document:", document); // Verifique se 'document' é realmente o objeto document
-    const telas = document.querySelectorAll('.tela'); // Linha 10
-    console.log("Telas encontradas:", telas);
     const tela = document.getElementById(idTela);
     if (tela) {
         tela.classList.add('ativa');
@@ -30,27 +26,18 @@ function esconderTela(idTela) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    esconderTela('mapa-fases');
+    esconderTela('briefings');
+    esconderTela('game');
 
-        const telaInicial = document.getElementById('tela-inicial');
-        const mapaFases = document.getElementById('mapa-fases');
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromGame = urlParams.get('fromGame');
 
-        // Move as declarações para dentro do DOMContentLoaded
-        const briefingsContainer = document.getElementById('briefings');
-        const todosBriefings = briefingsContainer ? briefingsContainer.querySelectorAll('.tela-briefing') : [];
-
-        
-        // Verifica o parâmetro da URL e decide qual tela mostrar
-        const urlParams = new URLSearchParams(window.location.search);
-        const fromGame = urlParams.get('fromGame');
-
-        if (fromGame === 'true') {
-            mostrarTela('mapa-fases');
-        } else {
-            mostrarTela('tela-inicial');
-            esconderTela('mapa-fases'); // Garante que o mapa esteja escondido no início
-        }
-    
-    esconderTela('briefings'); // Garante que os briefings estejam escondidos inicialmente
+    if (fromGame === 'true') {
+        mostrarTela('mapa-fases');
+    } else {
+        mostrarTela('tela-inicial');
+    }
 
     if (btnContinuarInicial) {
         btnContinuarInicial.addEventListener('click', () => {
@@ -69,30 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnContinuarIntroducao2) {
         btnContinuarIntroducao2.addEventListener('click', () => {
             esconderTela('tela-introducao2');
-            mostrarTela('mapa-fases'); // Exibe o mapa de fases após a intro 2
+            mostrarTela('mapa-fases');
         });
     }
 
-    // Adiciona event listeners aos botões do mapa de fases (nível)
-    const botoesAlvo = document.querySelectorAll('.nivel-btn'); // Move para dentro do DOMContentLoaded também por segurança
+    const botoesAlvo = document.querySelectorAll('.nivel-btn');
     botoesAlvo.forEach(botao => {
         botao.addEventListener('click', function() {
             const nivelSelecionado = this.dataset.nivel;
-            console.log(`Nível selecionado: ${nivelSelecionado}`);
-            esconderTela('mapa-fases'); // Esconde o mapa de fases AO CLICAR no nível
-            mostrarTela('briefings'); // Mostra a tela de briefings
+            esconderTela('mapa-fases');
+            mostrarTela('briefings');
 
-            // Esconde todos os briefings
             if (briefingsContainer) {
-                const todosBriefings = briefingsContainer.querySelectorAll('.tela-briefing'); // Garante que seja acessado após o DOM
+                const todosBriefings = briefingsContainer.querySelectorAll('.tela-briefing');
                 todosBriefings.forEach(briefing => briefing.style.display = 'none');
 
-                // Exibe o briefing correto
                 const briefingVisivel = document.getElementById(`alvo${nivelSelecionado}_briefing`);
                 if (briefingVisivel) {
                     briefingVisivel.style.display = 'block';
 
-                    // Cria um botão "Jogar" dinamicamente (se não existir)
                     let btnJogar = document.getElementById('btn-jogar-briefing');
                     if (!btnJogar) {
                         btnJogar = document.createElement('button');
@@ -100,28 +82,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnJogar.textContent = 'Jogar';
                         briefingsContainer.appendChild(btnJogar);
                     } else {
-                        btnJogar.style.display = 'block'; // Garante que esteja visível
+                        btnJogar.style.display = 'block';
                     }
 
-                    // Define o evento de clique do botão "Jogar" para ir para o jogo
                     btnJogar.onclick = () => {
-                        console.log('Botão Jogar clicado');
-                        esconderTela('briefings'); // Esconde a tela de briefings
+                        esconderTela('briefings');
                         if (gameContainer) {
-                            gameContainer.style.display = 'block'; // Exibe o container do jogo
-                            console.log('Game container exibido');
+                            gameContainer.style.display = 'block';
                         }
                         if (gameElement) {
-                            gameElement.style.display = 'block'; // Garante que o elemento do jogo também esteja visível
-                            console.log('Elemento do jogo exibido');
+                            gameElement.style.display = 'block';
                         }
-                        // window.location.href = `index.html?nivel=${nivelSelecionado}`; // Não precisamos mais redirecionar
+                        // A CHAMADA PARA iniciarJogo() DEVE FICAR AQUI, APÓS O CLIQUE NO JOGAR
+                        iniciarJogo(nivelSelecionado);
+                        // Passar o nível selecionado para iniciarJogo
+                        // iniciarJogo(nivelSelecionado);
                     };
                 } else {
                     console.error(`Briefing para o nível ${nivelSelecionado} não encontrado.`);
-                    // Adicionar lógica para ir direto ao jogo se o briefing não existir?
                 }
             }
         });
     });
 });
+
+// REMOVA qualquer chamada para iniciarJogo() que possa estar fora deste escopo
+// no seu navegacao.js ou em qualquer outro lugar que não seja o clique do "Jogar"
