@@ -1,159 +1,284 @@
+<script type="text/javascript">
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function filledCell(cell) {
+    return cell !== '' && cell != null;
+  }
+  function loadFileData(filename) {
+    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+
+        // Convert sheet to JSON to filter blank rows
+        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+        // Filter out blank rows (rows where all cells are empty, null, or undefined)
+        var filteredData = jsonData.filter(row => row.some(filledCell));
+
+        // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+        var headerRowIndex = filteredData.findIndex((row, index) =>
+          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+        );
+        // Fallback
+        if (headerRowIndex === -1 || headerRowIndex > 25) {
+          headerRowIndex = 0;
+        }
+
+        // Convert filtered JSON back to CSV
+        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+        return csv;
+      } catch (e) {
+        console.error(e);
+        return "";
+      }
+    }
+    return gk_fileData[filename] || "";
+  }
+</script>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"> 
-    <title>São GAbriel> Resistência Final</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="navegacao.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>São Gabriel Resistência Final</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #3b1a1a;
+    }
+
+    #gameCanvas {
+      width: 100vw;
+      height: 100vh;
+      max-width: 1920px;
+      max-height: 1080px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    @media (min-width: 768px) {
+      #gameCanvas {
+        max-height: 80vh;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div id="game-container">
+  <div id="gameCanvas"></div>
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      parent: 'gameCanvas',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      },
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      }
+    };
 
-        <div id="tela-inicial" class="tela">
-            <img src="tela_inicial.png" alt="Tela Inicial">
-            <button id="btn-continuar-inicial">Continuar</button>
-        </div>
+    const game = new Phaser.Game(config);
+    let cannons = [];
+    let missiles = [];
+    let antiMissiles = [];
+    let currentBuilding = null;
+    let currentBuildingIndex = 0;
+    let currentState = 'title';
+    let waveCount = 0;
+    const buildingStates = [
+      { health: 3, color: 0x8b4b4b }, // Intacto
+      { health: 2, color: 0x6b3b3b }, // Dano1
+      { health: 1, color: 0x4b2b2b }, // Dano2
+      { health: 0, color: 0x2b1b1b }  // Destruído
+    ];
 
-        <div id="tela-introducao1" class="tela">
-            <img src="tela_introducao1.png" alt="Introdução 1">
-            <button id="btn-continuar-introducao1">Continuar</button>
-        </div>
+    function preload() {
+      // Sem imagens, usaremos formas geométricas
+      this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
+    }
 
-        <div id="tela-introducao2" class="tela">
-            <img src="tela_introducao2.png" alt="Introdução 2">
-            <button id="btn-continuar-introducao2">Continuar</button>
-        </div>
+    function create() {
+      // Tela de apresentação
+      const title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
+        fontSize: '32px',
+        fill: '#fff',
+        fontFamily: 'monospace'
+      }).setOrigin(0.5);
+      const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'Iniciar', {
+        fontSize: '24px',
+        fill: '#fff'
+      }).setOrigin(0.5).setInteractive();
+      startButton.on('pointerdown', () => {
+        title.destroy();
+        startButton.destroy();
+        currentState = 'game';
+        startGame.call(this);
+      });
 
-        <div id="mapa-fases" class="tela">
-            <img src="mapa_fases.png" alt="Mapa de Fases">
-            <div class="niveis-container-botoes">
-                <button class="nivel-btn nivel-1" data-nivel="1">Nível 1</button>
-                <button class="nivel-btn nivel-2" data-nivel="2">Nível 2</button>
-                <button class="nivel-btn nivel-3" data-nivel="3">Nível 3</button>
-                <button class="nivel-btn nivel-4" data-nivel="4">Nível 4</button>
-                <button class="nivel-btn nivel-5" data-nivel="5">Nível 5</button>
-                <button class="nivel-btn nivel-6" data-nivel="6">Nível 6</button>
-                <button class="nivel-btn nivel-7" data-nivel="7">Nível 7</button>
-                <button class="nivel-btn nivel-8" data-nivel="8">Nível 8</button>
-                <button class="nivel-btn nivel-9" data-nivel="9">Nível 9</button>
-                <button class="nivel-btn nivel-10" data-nivel="10">Nível 10</button>
-            </div>
-        </div>
+      // Redimensionamento
+      this.scale.on('resize', resize, this);
+    }
 
-        <div id="briefings" class="tela" style="display: none;">
-            <img id="alvo1_briefing" class="tela-briefing" src="briefings/alvo1_briefing.png" alt="Briefing Nível 1"
-                style="display: none;">
-            <img id="alvo2_briefing" class="tela-briefing" src="briefings/alvo2_briefing.png" alt="Briefing Nível 2"
-                style="display: none;">
-            <img id="alvo3_briefing" class="tela-briefing" src="briefings/alvo3_briefing.png" alt="Briefing Nível 3"
-                style="display: none;">
-            <button id="btn-jogar-briefing">Jogar</button>
-        </div>
+    function startGame() {
+      // Fundo (vermelho escuro)
+      this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x3b1a1a).setOrigin(0);
 
-        <div id="game">
+      // 2. Silhueta Urbana:
+      const silhueta = this.add.image(this.cameras.main.centerX, this.cameras.main.height, 'silhueta_urbana').setOrigin(0.5, 1);
 
-            <!--img id="background" src="background.png" alt="Background"-->
+      // Canhões (3 torres)
+      const towerPositions = [0.2, 0.5, 0.8];
+      towerPositions.forEach((pos, index) => {
+        // Torre (haste vermelha com cúpula amarela)
+        const towerBase = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.65, 10, this.cameras.main.height * 0.15, 0xff0000);
+        const towerDome = this.add.circle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, this.cameras.main.width * 0.1, 0xffaa00);
+        // Canhão (branco)
+        const cannon = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, 10, 30, 0xffffff);
+        cannons.push({ sprite: cannon, index, x: this.cameras.main.width * pos, y: this.cameras.main.height * 0.55 });
+      });
 
-            <div id="game-controls">
-                <button id="pausar-continuar-btn">Pausar</button>
-                <button id="salvar-btn">Salvar Jogo</button>
-                <button id="terminar-partida-btn">Terminar Partida</button>
-            </div>
+      // Primeiro prédio
+      spawnBuilding.call(this);
 
-            <div id="top-bar">
-                <div id="tempo">00:00</div>
-                <div id="game-title">
-                    <p>SÃO GABRIEL</p>
-                    <p>RESISTÊNCIA FINAL</p>
-                </div>
-                <button id="menu-button">MENU</button>
-            </div>
+      // Iniciar onda de mísseis
+      spawnWave.call(this);
 
-            <div class="silhueta-urbana"></div>
+      // Controles de toque/clique
+      this.input.on('pointerdown', (pointer) => {
+        const third = this.cameras.main.width / 3;
+        let cannonIndex;
+        if (pointer.x < third) cannonIndex = 0;
+        else if (pointer.x < 2 * third) cannonIndex = 1;
+        else cannonIndex = 2;
+        fireAntiMissile.call(this, cannons[cannonIndex], pointer.x, pointer.y);
+      });
+    }
 
-            <div id="ford_t_container">
-                <img id="ford_t" src="ford_t.png" alt="Ford T">
-            </div>
+    function spawnBuilding() {
+      if (currentBuildingIndex >= 10) {
+        currentState = 'gameover';
+        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
+        return;
+      }
+      currentBuilding = this.add.rectangle(this.cameras.main.centerX, this.cameras.main.height * 0.85, this.cameras.main.width * 0.3, this.cameras.main.height * 0.2, buildingStates[0].color);
+      currentBuilding.health = 3;
+      currentBuilding.stateIndex = 0;
+    }
 
-            <img src="army_e.png" alt="Army E" class="army" id="army_e">
-            <img src="army_c.png" alt="Army C" class="army" id="army_c">
-            <img src="army_d.png" alt="Army D" class="army" id="army_d">
+    function spawnWave() {
+      waveCount++;
+      for (let i = 0; i < 5; i++) {
+        const x = Phaser.Math.Between(0, this.cameras.main.width);
+        const missile = this.add.rectangle(x, 0, 10, 30, 0x00ff00);
+        missile.speed = 200 + waveCount * 50;
+        missile.targetX = currentBuilding.x;
+        missiles.push(missile);
+      }
+    }
 
-            <div id="torre_e_container">
-                <img id="torre_e" src="torre_e.png" alt="Torre E">
-            </div>
+    function fireAntiMissile(cannon, targetX, targetY) {
+      const antiMissile = this.add.rectangle(cannon.x, cannon.y, 10, 30, 0xffffff);
+      antiMissile.targetX = targetX;
+      antiMissile.targetY = targetY;
+      antiMissile.speed = 300;
+      antiMissiles.push(antiMissile);
+    }
 
-            <div id="torre_c_e_d_container">
-                <img id="torre_c_e_d" src="torre_c_e_d.png" alt="Torre C e D">
-            </div>
+    function update() {
+      if (currentState !== 'game') return;
 
-            <div id="pedestal_d_container">
-                <img id="pedestal_d" src="pedestal_d.png" alt="Pedestal D">
-            </div>
+      // Animação dos mísseis inimigos
+      missiles.forEach((missile, index) => {
+        const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, this.cameras.main.height);
+        missile.x += Math.cos(angle) * missile.speed * (1 / 60);
+        missile.y += Math.sin(angle) * missile.speed * (1 / 60);
+        missile.rotation = angle + Math.PI / 2;
 
-            <img id="target" src="target.png" alt="Target" style="position:absolute; display:none;">
+        if (missile.y > this.cameras.main.height * 0.85) {
+          missiles.splice(index, 1);
+          missile.destroy();
+          // Danificar prédio
+          if (currentBuilding && currentBuilding.health > 0) {
+            currentBuilding.health--;
+            currentBuilding.stateIndex++;
+            if (currentBuilding.stateIndex < buildingStates.length) {
+              currentBuilding.fillColor = buildingStates[currentBuilding.stateIndex].color;
+            }
+            if (currentBuilding.health === 0) {
+              currentBuilding.destroy();
+              currentBuildingIndex++;
+              spawnBuilding.call(this);
+            }
+          }
+        }
+      });
 
-            <div id="tela-ativa"
-                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background-color: rgba(0, 0, 0, 0.8); flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <div id="briefing-container" style="display: flex; flex-direction: column; align-items: center;">
-                    <img id="briefing-img" src="" alt="Briefing"
-                        style="max-width: 80%; max-height: 80%; margin-bottom: 20px;">
-                </div>
-                <button id="btn-iniciar-jogo"
-                    style="margin-top: 20px; padding: 10px 20px; font-size: 1.2em; cursor: pointer;">Jogar</button>
-            </div>
+      // Animação dos antimísseis
+      antiMissiles.forEach((anti, index) => {
+        const angle = Phaser.Math.Angle.Between(anti.x, anti.y, anti.targetX, anti.targetY);
+        anti.x += Math.cos(angle) * anti.speed * (1 / 60);
+        anti.y += Math.sin(angle) * anti.speed * (1 / 60);
+        anti.rotation = angle + Math.PI / 2;
 
+        if (anti.y < 0 || Math.abs(anti.x - anti.targetX) < 5 && Math.abs(anti.y - anti.targetY) < 5) {
+          antiMissiles.splice(index, 1);
+          anti.destroy();
+        }
 
-            <div id="alvo1-container" class="alvo-container"
-                style="position: absolute; left: 197px; bottom: 48px; width: 507px; height: 363px;">
-                <div id="alvo1_predio" class="alvo1-camada alvo1-predio"></div>
-                <div id="alvo1_dano1" class="alvo1-camada alvo1-dano1" style="display: none;"></div>
-                <div id="alvo1_dano2" class="alvo1-camada alvo1-dano2" style="display: none;"></div>
-                <div id="alvo1_destruido" class="alvo1-camada alvo1-destruido" style="display: none;"></div>
-                <div id="alvo1_fundo" class="alvo1-camada alvo1-fundo" style="display: none;"></div>
-            </div>
+        // Colisão com mísseis
+        missiles.forEach((missile, mIndex) => {
+          if (Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
+            antiMissiles.splice(index, 1);
+            missiles.splice(mIndex, 1);
+            anti.destroy();
+            missile.destroy();
+            // Adicionar explosão (simples)
+            this.add.circle(anti.x, anti.y, 20, 0xffff00).setScale(0).setDepth(10)
+              .setScale(1).setAlpha(0).setDuration(500).setEase('Power2');
+          }
+        });
+      });
 
-            <div id="alvo2-container" class="alvo-container"
-                style="position: absolute; left: 197px; bottom: 48px; width: 507px; height: 363px; border: 1px solid red; display: none;">
-                <div id="alvo2_predio" class="alvo2-camada alvo2-predio"></div>
-                <div id="alvo2_dano1" class="alvo2-camada alvo2-dano1" style="display: none;"></div>
-                <div id="alvo2_dano2" class="alvo2-camada alvo2-dano2" style="display: none;"></div>
-                <div id="alvo2_destruido" class="alvo2-camada alvo2-destruido" style="display: none;"></div>
-                <div id="alvo2_fundo" class="alvo2-camada alvo2-fundo" style="display: none;"></div>
-            </div>
+      // Rotação dos canhões
+      cannons.forEach(cannon => {
+        const anti = antiMissiles.find(am => Math.abs(am.x - cannon.x) < 50);
+        if (anti) {
+          const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, anti.targetX, anti.targetY);
+          cannon.sprite.rotation = angle + Math.PI / 2;
+        }
+      });
 
-            <div id="alvo3-container" class="alvo-container"
-                style="position: absolute; left: 197px; bottom: 48px; width: 507px; height: 363px; border: 1px solid red; display: none;">
-                <div id="alvo3_predio" class="alvo3-camada alvo3-predio"></div>
-                <div id="alvo3_dano1" class="alvo3-camada alvo3-dano1" style="display: none;"></div>
-                <div id="alvo3_dano2" class="alvo3-camada alvo3-dano2" style="display: none;"></div>
-                <div id="alvo3_destruido" class="alvo3-camada alvo3-destruido" style="display: none;"></div>
-                <div id="alvo3_fundo" class="alvo3-camada alvo3-fundo" style="display: none;"></div>
-            </div>
+      // Nova onda se não houver mísseis
+      if (missiles.length === 0) {
+        spawnWave.call(this);
+      }
+    }
 
-            <img src="antimissil.png" alt="Míssil" class="missil" style="position: absolute; display: none;">
-            <button id="modo-jogo-btn">Modo Coordenado</button>
-            <img src="explosion.gif" class="explosion" id="explosion" style="display: none;">
-            <div id="mensagem-feedback"
-                style="display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background-color: yellow; padding: 10px; border: 1px solid black; z-index: 1000;">
-            </div>
-
-            <div id="tela-fim-de-fase" class="tela">
-                <img id="imagem-fim-de-fase" src="fim_fase_sucesso.png" alt="Fim de Fase">
-                <button id="btn-voltar-mapa">Voltar ao Mapa</button>
-            </div>
-        </div>
-
-    </div>
-
-    <script src="navegacao.js"></script>
-    <script src="main.js"></script>
+    function resize(gameSize) {
+      const width = gameSize.width;
+      const height = gameSize.height;
+      if (width / height > 16 / 9) {
+        config.width = height * (16 / 9);
+        config.height = height;
+      } else {
+        config.width = width;
+        config.height = width * (9 / 16);
+      }
+      this.cameras.resize(config.width, config.height);
+    }
+  </script>
 </body>
 
 </html>
