@@ -1,284 +1,319 @@
 <script type="text/javascript">
-  var gk_isXlsx = false;
-  var gk_xlsxFileLookup = {};
-  var gk_fileData = {};
-  function filledCell(cell) {
-    return cell !== '' && cell != null;
-  }
-  function loadFileData(filename) {
-    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-      try {
-        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-        var firstSheetName = workbook.SheetNames[0];
-        var worksheet = workbook.Sheets[firstSheetName];
-
-        // Convert sheet to JSON to filter blank rows
-        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-        // Filter out blank rows (rows where all cells are empty, null, or undefined)
-        var filteredData = jsonData.filter(row => row.some(filledCell));
-
-        // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-        var headerRowIndex = filteredData.findIndex((row, index) =>
-          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-        );
-        // Fallback
-        if (headerRowIndex === -1 || headerRowIndex > 25) {
-          headerRowIndex = 0;
-        }
-
-        // Convert filtered JSON back to CSV
-        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-        return csv;
-      } catch (e) {
-        console.error(e);
-        return "";
-      }
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+        return cell !== '' && cell != null;
     }
-    return gk_fileData[filename] || "";
-  }
+    function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                    headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+    }
 </script>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>São Gabriel Resistência Final</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #3b1a1a;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>São Gabriel Resistência Final</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #3b1a1a;
+        }
 
-    #gameCanvas {
-      width: 100vw;
-      height: 100vh;
-      max-width: 1920px;
-      max-height: 1080px;
-      margin: 0 auto;
-      display: block;
-    }
+        #gameCanvas {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1920px;
+            max-height: 1080px;
+            margin: 0 auto;
+            display: block;
+        }
 
-    @media (min-width: 768px) {
-      #gameCanvas {
-        max-height: 80vh;
-      }
-    }
-  </style>
+        @media (min-width: 768px) {
+            #gameCanvas {
+                max-height: 80vh;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div id="gameCanvas"></div>
-  <script>
-    const config = {
-      type: Phaser.AUTO,
-      parent: 'gameCanvas',
-      width: window.innerWidth,
-      height: window.innerHeight,
-      scene: {
-        preload: preload,
-        create: create,
-        update: update
-      },
-      scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      }
-    };
-
-    const game = new Phaser.Game(config);
-    let cannons = [];
-    let missiles = [];
-    let antiMissiles = [];
-    let currentBuilding = null;
-    let currentBuildingIndex = 0;
-    let currentState = 'title';
-    let waveCount = 0;
-    const buildingStates = [
-      { health: 3, color: 0x8b4b4b }, // Intacto
-      { health: 2, color: 0x6b3b3b }, // Dano1
-      { health: 1, color: 0x4b2b2b }, // Dano2
-      { health: 0, color: 0x2b1b1b }  // Destruído
-    ];
-
-    function preload() {
-      // Sem imagens, usaremos formas geométricas
-      this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
-    }
-
-    function create() {
-      // Tela de apresentação
-      const title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
-        fontSize: '32px',
-        fill: '#fff',
-        fontFamily: 'monospace'
-      }).setOrigin(0.5);
-      const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'Iniciar', {
-        fontSize: '24px',
-        fill: '#fff'
-      }).setOrigin(0.5).setInteractive();
-      startButton.on('pointerdown', () => {
-        title.destroy();
-        startButton.destroy();
-        currentState = 'game';
-        startGame.call(this);
-      });
-
-      // Redimensionamento
-      this.scale.on('resize', resize, this);
-    }
-
-    function startGame() {
-      // Fundo (vermelho escuro)
-      this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x3b1a1a).setOrigin(0);
-
-      // 2. Silhueta Urbana:
-      const silhueta = this.add.image(this.cameras.main.centerX, this.cameras.main.height, 'silhueta_urbana').setOrigin(0.5, 1);
-
-      // Canhões (3 torres)
-      const towerPositions = [0.2, 0.5, 0.8];
-      towerPositions.forEach((pos, index) => {
-        // Torre (haste vermelha com cúpula amarela)
-        const towerBase = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.65, 10, this.cameras.main.height * 0.15, 0xff0000);
-        const towerDome = this.add.circle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, this.cameras.main.width * 0.1, 0xffaa00);
-        // Canhão (branco)
-        const cannon = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, 10, 30, 0xffffff);
-        cannons.push({ sprite: cannon, index, x: this.cameras.main.width * pos, y: this.cameras.main.height * 0.55 });
-      });
-
-      // Primeiro prédio
-      spawnBuilding.call(this);
-
-      // Iniciar onda de mísseis
-      spawnWave.call(this);
-
-      // Controles de toque/clique
-      this.input.on('pointerdown', (pointer) => {
-        const third = this.cameras.main.width / 3;
-        let cannonIndex;
-        if (pointer.x < third) cannonIndex = 0;
-        else if (pointer.x < 2 * third) cannonIndex = 1;
-        else cannonIndex = 2;
-        fireAntiMissile.call(this, cannons[cannonIndex], pointer.x, pointer.y);
-      });
-    }
-
-    function spawnBuilding() {
-      if (currentBuildingIndex >= 10) {
-        currentState = 'gameover';
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
-        return;
-      }
-      currentBuilding = this.add.rectangle(this.cameras.main.centerX, this.cameras.main.height * 0.85, this.cameras.main.width * 0.3, this.cameras.main.height * 0.2, buildingStates[0].color);
-      currentBuilding.health = 3;
-      currentBuilding.stateIndex = 0;
-    }
-
-    function spawnWave() {
-      waveCount++;
-      for (let i = 0; i < 5; i++) {
-        const x = Phaser.Math.Between(0, this.cameras.main.width);
-        const missile = this.add.rectangle(x, 0, 10, 30, 0x00ff00);
-        missile.speed = 200 + waveCount * 50;
-        missile.targetX = currentBuilding.x;
-        missiles.push(missile);
-      }
-    }
-
-    function fireAntiMissile(cannon, targetX, targetY) {
-      const antiMissile = this.add.rectangle(cannon.x, cannon.y, 10, 30, 0xffffff);
-      antiMissile.targetX = targetX;
-      antiMissile.targetY = targetY;
-      antiMissile.speed = 300;
-      antiMissiles.push(antiMissile);
-    }
-
-    function update() {
-      if (currentState !== 'game') return;
-
-      // Animação dos mísseis inimigos
-      missiles.forEach((missile, index) => {
-        const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, this.cameras.main.height);
-        missile.x += Math.cos(angle) * missile.speed * (1 / 60);
-        missile.y += Math.sin(angle) * missile.speed * (1 / 60);
-        missile.rotation = angle + Math.PI / 2;
-
-        if (missile.y > this.cameras.main.height * 0.85) {
-          missiles.splice(index, 1);
-          missile.destroy();
-          // Danificar prédio
-          if (currentBuilding && currentBuilding.health > 0) {
-            currentBuilding.health--;
-            currentBuilding.stateIndex++;
-            if (currentBuilding.stateIndex < buildingStates.length) {
-              currentBuilding.fillColor = buildingStates[currentBuilding.stateIndex].color;
+    <div id="gameCanvas"></div>
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'gameCanvas',
+            width: 900,  // <-- Mude para a largura base do seu jogo
+            height: 1600, // <-- Mude para a altura base do seu jogo
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
             }
-            if (currentBuilding.health === 0) {
-              currentBuilding.destroy();
-              currentBuildingIndex++;
-              spawnBuilding.call(this);
+        };
+
+        const game = new Phaser.Game(config);
+        let cannons = [];
+        let missiles = [];
+        let antiMissiles = [];
+        let currentBuilding = null;
+        let currentBuildingIndex = 0;
+        let currentState = 'title';
+        let waveCount = 0;
+        const buildingStates = [
+            { health: 3, color: 0x8b4b4b }, // Intacto
+            { health: 2, color: 0x6b3b3b }, // Dano1
+            { health: 1, color: 0x4b2b2b }, // Dano2
+            { health: 0, color: 0x2b1b1b }  // Destruído
+        ];
+
+        function preload() {
+            // Sem imagens, usaremos formas geométricas
+            this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
+        }
+
+        function create() {
+            // Tela de apresentação
+            const title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
+                fontSize: '32px',
+                fill: '#fff',
+                fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'Iniciar', {
+                fontSize: '24px',
+                fill: '#fff'
+            }).setOrigin(0.5).setInteractive();
+            startButton.on('pointerdown', () => {
+                title.destroy();
+                startButton.destroy();
+                currentState = 'game';
+                startGame.call(this);
+            });
+
+            // Redimensionamento
+            this.scale.on('resize', resize, this);
+        }
+
+        function startGame() {
+            // Fundo (vermelho escuro)
+            this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x3b1a1a).setOrigin(0);
+
+            // 2. Silhueta Urbana:
+            const silhueta = this.add.image(this.cameras.main.centerX, this.cameras.main.height, 'silhueta_urbana').setOrigin(0.5, 1);
+
+            // Canhões (3 torres)
+            const towerPositions = [0.2, 0.5, 0.8];
+            towerPositions.forEach((pos, index) => {
+                // Torre (haste vermelha com cúpula amarela)
+                const towerBase = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.65, 10, this.cameras.main.height * 0.15, 0xff0000);
+                const towerDome = this.add.circle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, this.cameras.main.width * 0.1, 0xffaa00);
+                // Canhão (branco)
+                const cannon = this.add.rectangle(this.cameras.main.width * pos, this.cameras.main.height * 0.55, 10, 30, 0xffffff);
+                cannons.push({ sprite: cannon, index, x: this.cameras.main.width * pos, y: this.cameras.main.height * 0.55 });
+            });
+
+            // Primeiro prédio
+            spawnBuilding.call(this);
+
+            // Iniciar onda de mísseis
+            spawnWave.call(this);
+
+            // Controles de toque/clique
+            this.input.on('pointerdown', (pointer) => {
+                const third = this.cameras.main.width / 3;
+                let cannonIndex;
+                if (pointer.x < third) cannonIndex = 0;
+                else if (pointer.x < 2 * third) cannonIndex = 1;
+                else cannonIndex = 2;
+                fireAntiMissile.call(this, cannons[cannonIndex], pointer.x, pointer.y);
+            });
+        }
+
+        function spawnBuilding() {
+            if (currentBuildingIndex >= 10) {
+                currentState = 'gameover';
+                this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
+                return;
             }
-          }
-        }
-      });
-
-      // Animação dos antimísseis
-      antiMissiles.forEach((anti, index) => {
-        const angle = Phaser.Math.Angle.Between(anti.x, anti.y, anti.targetX, anti.targetY);
-        anti.x += Math.cos(angle) * anti.speed * (1 / 60);
-        anti.y += Math.sin(angle) * anti.speed * (1 / 60);
-        anti.rotation = angle + Math.PI / 2;
-
-        if (anti.y < 0 || Math.abs(anti.x - anti.targetX) < 5 && Math.abs(anti.y - anti.targetY) < 5) {
-          antiMissiles.splice(index, 1);
-          anti.destroy();
+            currentBuilding = this.add.rectangle(this.cameras.main.centerX, this.cameras.main.height * 0.85, this.cameras.main.width * 0.3, this.cameras.main.height * 0.2, buildingStates[0].color);
+            currentBuilding.health = 3;
+            currentBuilding.stateIndex = 0;
         }
 
-        // Colisão com mísseis
-        missiles.forEach((missile, mIndex) => {
-          if (Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
-            antiMissiles.splice(index, 1);
-            missiles.splice(mIndex, 1);
-            anti.destroy();
-            missile.destroy();
-            // Adicionar explosão (simples)
-            this.add.circle(anti.x, anti.y, 20, 0xffff00).setScale(0).setDepth(10)
-              .setScale(1).setAlpha(0).setDuration(500).setEase('Power2');
-          }
-        });
-      });
-
-      // Rotação dos canhões
-      cannons.forEach(cannon => {
-        const anti = antiMissiles.find(am => Math.abs(am.x - cannon.x) < 50);
-        if (anti) {
-          const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, anti.targetX, anti.targetY);
-          cannon.sprite.rotation = angle + Math.PI / 2;
+        function spawnWave() {
+            waveCount++;
+            for (let i = 0; i < 5; i++) {
+                const x = Phaser.Math.Between(0, this.cameras.main.width);
+                const missile = this.add.rectangle(x, 0, 10, 30, 0x00ff00);
+                missile.speed = 200 + waveCount * 50;
+                missile.targetX = currentBuilding.x;
+                missiles.push(missile);
+            }
         }
-      });
 
-      // Nova onda se não houver mísseis
-      if (missiles.length === 0) {
-        spawnWave.call(this);
-      }
+        function fireAntiMissile(cannon, targetX, targetY) {
+            const antiMissile = this.add.rectangle(cannon.x, cannon.y, 10, 30, 0xffffff);
+            antiMissile.targetX = targetX;
+            antiMissile.targetY = targetY;
+            antiMissile.speed = 300;
+            antiMissiles.push(antiMissile);
+        }
+
+        function update() {
+            if (currentState !== 'game') return;
+
+            // Animação dos mísseis inimigos
+            missiles.forEach((missile, index) => {
+                const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, this.cameras.main.height);
+                missile.x += Math.cos(angle) * missile.speed * (1 / 60);
+                missile.y += Math.sin(angle) * missile.speed * (1 / 60);
+                missile.rotation = angle + Math.PI / 2;
+
+                if (missile.y > this.cameras.main.height * 0.85) {
+                    missiles.splice(index, 1);
+                    missile.destroy();
+                    // Danificar prédio
+                    if (currentBuilding && currentBuilding.health > 0) {
+                        currentBuilding.health--;
+                        currentBuilding.stateIndex++;
+                        if (currentBuilding.stateIndex < buildingStates.length) {
+                            currentBuilding.fillColor = buildingStates[currentBuilding.stateIndex].color;
+                        }
+                        if (currentBuilding.health === 0) {
+                            currentBuilding.destroy();
+                            currentBuildingIndex++;
+                            spawnBuilding.call(this);
+                        }
+                    }
+                }
+            });
+
+            // Animação dos antimísseis
+            antiMissiles.forEach((anti, index) => {
+                const angle = Phaser.Math.Angle.Between(anti.x, anti.y, anti.targetX, anti.targetY);
+                anti.x += Math.cos(angle) * anti.speed * (1 / 60);
+                anti.y += Math.sin(angle) * anti.speed * (1 / 60);
+                anti.rotation = angle + Math.PI / 2;
+
+                if (anti.y < 0 || Math.abs(anti.x - anti.targetX) < 5 && Math.abs(anti.y - anti.targetY) < 5) {
+                    antiMissiles.splice(index, 1);
+                    anti.destroy();
+                }
+
+                // Colisão com mísseis
+                missiles.forEach((missile, mIndex) => {
+                    if (Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
+                        antiMissiles.splice(index, 1);
+                        missiles.splice(mIndex, 1);
+                        anti.destroy();
+                        missile.destroy();
+                        // Adicionar explosão (simples)
+                        this.add.circle(anti.x, anti.y, 20, 0xffff00).setScale(0).setDepth(10)
+                            .setScale(1).setAlpha(0).setDuration(500).setEase('Power2');
+                    }
+                });
+            });
+
+            // Rotação dos canhões
+            cannons.forEach(cannon => {
+                const anti = antiMissiles.find(am => Math.abs(am.x - cannon.x) < 50);
+                if (anti) {
+                    const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, anti.targetX, anti.targetY);
+                    cannon.sprite.rotation = angle + Math.PI / 2;
+                }
+            });
+
+            // Nova onda se não houver mísseis
+            if (missiles.length === 0) {
+                spawnWave.call(this);
+            }
+        }
+
+        // Adicione esta função FORA da sua cena do Phaser, no escopo global do seu script
+function resizeCanvasDOM() { // Renomeei para evitar conflito com qualquer função interna do Phaser
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return; // Garante que o canvas existe
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowRatio = windowWidth / windowHeight;
+
+    const gameWidth = 900;
+    const gameHeight = 1600;
+    const gameRatio = gameWidth / gameHeight; // 900 / 1600 = 0.5625
+
+    let newWidth;
+    let newHeight;
+
+    if (windowRatio < gameRatio) {
+        // A janela é mais "alta" que o jogo. Ajusta a largura do canvas para a largura da janela
+        newWidth = windowWidth;
+        newHeight = windowWidth / gameRatio; // Altura proporcional
+    } else {
+        // A janela é mais "larga" que o jogo. Ajusta a altura do canvas para a altura da janela
+        newHeight = windowHeight;
+        newWidth = windowHeight * gameRatio; // Largura proporcional
     }
 
-    function resize(gameSize) {
-      const width = gameSize.width;
-      const height = gameSize.height;
-      if (width / height > 16 / 9) {
-        config.width = height * (16 / 9);
-        config.height = height;
-      } else {
-        config.width = width;
-        config.height = width * (9 / 16);
-      }
-      this.cameras.resize(config.width, config.height);
-    }
-  </script>
+    canvas.style.width = newWidth + 'px';
+    canvas.style.height = newHeight + 'px';
+
+    // Centraliza o canvas (se necessário)
+    const marginLeft = (windowWidth - newWidth) / 2;
+    const marginTop = (windowHeight - newHeight) / 2;
+
+    canvas.style.marginLeft = marginLeft + 'px';
+    canvas.style.marginTop = marginTop + 'px';
+    canvas.style.position = 'absolute'; // Essencial para margin-top/left funcionar bem com centralização
+}
+
+// Chame a função de redimensionamento do canvas DOM:
+window.addEventListener('load', resizeCanvasDOM);
+window.addEventListener('resize', resizeCanvasDOM);
+// E também chame-a uma vez após a criação do objeto game do Phaser,
+// para garantir que o canvas seja ajustado logo no início.
+// Isso pode ser logo abaixo de `const game = new Phaser.Game(config);`
+// Exemplo:
+// const game = new Phaser.Game(config);
+// resizeCanvasDOM();
+    </script>
 </body>
 
 </html>
