@@ -1,4 +1,4 @@
-// Variáveis globais (se forem realmente globais a todo o seu jogo)
+// Variáveis globais
 let cannons = []; 
 let missiles = []; 
 let antiMissiles = []; 
@@ -18,7 +18,7 @@ const config = {
     type: Phaser.AUTO,
     width: 900,  
     height: 1000, 
-    parent: 'game-container', // <-- CRUCIAL: AGORA É 'game-container'
+    parent: 'game-container', 
     physics: {
         default: 'arcade',
         arcade: {
@@ -26,11 +26,11 @@ const config = {
         }
     },
     scale: {
-        mode: Phaser.Scale.RESIZE, // <-- ESTE É O MODO CORRETO E FINAL PARA RESPONSIVIDADE
+        mode: Phaser.Scale.RESIZE, 
         autoCenter: Phaser.Scale.CENTER_BOTH, 
-        parent: 'game-container', // <-- REPETE PARA CLAREZA, APONTA PARA 'game-container'
-        width: 900, // Tamanho de referência interno do seu jogo
-        height: 1000 // Tamanho de referência interno do seu jogo
+        parent: 'game-container', 
+        width: 900, 
+        height: 1000 
     },
     scene: {
         preload: preload,
@@ -72,9 +72,6 @@ function create() {
         currentState = 'game';
         startGame.call(this);
     });
-
-    // Removido: O setTimeout que envolvia o setInteractive (não é necessário com Phaser.Scale.RESIZE)
-    // Removido: this.scale.refresh(); // Não é mais necessário aqui, o Phaser fará isso automaticamente na inicialização
 }
 
 function startGame() {
@@ -84,69 +81,84 @@ function startGame() {
     // 2. Silhueta Urbana:
     const silhueta = this.add.image(this.cameras.main.centerX, this.cameras.main.height, 'silhueta_urbana').setOrigin(0.5, 1);
     silhueta.setDepth(20);
+    // AJUSTE A ESCALA DA SILHUETA AQUI SE ELA ESTIVER PEQUENA OU GRANDE DEMAIS
+    // Comece com 0.9 e ajuste para cima ou para baixo conforme necessário para que ela preencha a largura
+    silhueta.setScale(0.9); // Exemplo: 0.9 do tamanho original
 
     // --- DEFINIÇÕES DOS ASSETS ---
-    const originalTowerWidth = 218;
-    const originalTowerHeight = 818;
-    const originalCannonWidth = 39;
-    const originalCannonHeight = 141;
+    // Estes valores não são a largura/altura dos pixels da imagem, mas sim a base para os cálculos.
+    const originalTowerWidth = 218; // Largura do arquivo de imagem da torre
+    const originalTowerHeight = 818; // Altura do arquivo de imagem da torre
+    const originalCannonWidth = 39; // Largura do arquivo de imagem do canhão
+    const originalCannonHeight = 141; // Altura do arquivo de imagem do canhão
 
-    // --- CONFIGURAÇÕES DOS CANHÕES E TORRES BASEADAS NAS IMAGENS (AJUSTADO PARA VISIBILIDADE) ---
+    // CONFIGURAÇÕES DOS CANHÕES E TORRES
     const towerAndCannonDefinitions = [
         {
             name: 'Torre & Canhão Esquerdo (E)',
-            cannonXPercentage: 0.1144, cannonYPercentage: 0.49, cannonScale: 3.0, cannonOriginY: 0.5, 
-            towerXPercentage: 0.0167, towerYPercentage: 0.5538, towerTopOffset: 0,
-            cannonPenetrationIntoTower: 0, 
-            towerScaleAdjust: 0.5 
+            cannonXPercentage: 0.1144, 
+            // Novo ajuste: offset Y do canhão da base da torre (quanto mais baixo, maior o valor)
+            cannonYRelativeToTowerBottom: 0.3, // 0.3 significa que a base do canhão estará a 30% da altura da torre a partir do fundo
+            cannonScale: 1.5, // Reduzido para ficar menor
+            cannonOriginY: 0.5, 
+            towerXPercentage: 0.0167, 
+            // Novo ajuste: offset Y do centro da base da torre do *fundo da tela*
+            towerYOffsetFromBottom: 0, // 0 significa que a base da torre está no fundo da tela
+            towerScaleAdjust: 0.25, // Reduzido para ficar menor
+            towerDepth: 25 
         },
         {
             name: 'Torre & Canhão Central-Direito (C)',
-            cannonXPercentage: 0.6578, cannonYPercentage: 0.5825, cannonScale: 3.0, cannonOriginY: 0.5, 
-            towerXPercentage: 0.62, towerYPercentage: 0.60, towerTopOffset: 0,
-            cannonPenetrationIntoTower: 0, 
-            towerScaleAdjust: 0.4 
+            cannonXPercentage: 0.6578, 
+            cannonYRelativeToTowerBottom: 0.3, 
+            cannonScale: 1.5, 
+            cannonOriginY: 0.5, 
+            towerXPercentage: 0.62, 
+            towerYOffsetFromBottom: 0, 
+            towerScaleAdjust: 0.2, 
+            towerDepth: 11
         },
         {
-        name: 'Torre & Canhão Direito (D)',
-            cannonXPercentage: 0.8578, cannonYPercentage: 0.4844, cannonScale: 3.0, cannonOriginY: 0.5, 
-            towerXPercentage: 0.82, towerYPercentage: 0.50, towerTopOffset: 0,
-            cannonPenetrationIntoTower: 0, 
-            towerScaleAdjust: 0.4 
+            name: 'Torre & Canhão Direito (D)',
+            cannonXPercentage: 0.8578, 
+            cannonYRelativeToTowerBottom: 0.3, 
+            cannonScale: 1.5, 
+            cannonOriginY: 0.5, 
+            towerXPercentage: 0.82, 
+            towerYOffsetFromBottom: 0, 
+            towerScaleAdjust: 0.2, 
+            towerDepth: 11
         }
     ];
 
     // Reinicialização de 'cannons' e 'this.towers'
     cannons = [];
-    this.towers = []; // towers deve ser uma propriedade da cena para ser acessível em outras funções da cena
+    this.towers = []; 
 
     towerAndCannonDefinitions.forEach((config) => {
         // 1. Criar e posicionar a Torre
-        const towerY = this.cameras.main.height - 50; // Ajuste a altura da torre para ficar visível acima da silhueta se necessário
+        // Posiciona a torre de forma que sua base (origin Y = 1) esteja em 'towerY'
+        const towerY = this.cameras.main.height - config.towerYOffsetFromBottom; 
         const towerX = Math.round(this.cameras.main.width * config.towerXPercentage);
 
-        const tower = this.add.image(towerX, towerY, 'torre').setOrigin(0.5, 1);
+        const tower = this.add.image(towerX, towerY, 'torre').setOrigin(0.5, 1); 
         tower.setScale(config.towerScaleAdjust);
+        tower.setDepth(config.towerDepth); 
 
         // 2. Criar e posicionar o Canhão
         const cannonX = Math.round(this.cameras.main.width * config.cannonXPercentage);
-        const cannonY = tower.y - (tower.displayHeight / 2); // Posiciona o canhão no meio da torre para visualização (ajustar conforme imagem)
+        // Calcula a posição Y do canhão a partir do Y da base da torre,
+        // subtraindo uma porcentagem da altura *exibida* da torre.
+        const cannonY = tower.y - (tower.displayHeight * config.cannonYRelativeToTowerBottom); 
 
         const cannon = this.add.image(cannonX, cannonY, 'canhao');
         cannon.setScale(config.cannonScale);
         cannon.setOrigin(0.5, config.cannonOriginY);
-
-        // --- DEPTHS ---
-        cannon.setDepth(10); // Canhão mais na frente que a silhueta
-        if (config.name === 'Torre & Canhão Esquerdo (E)') {
-            tower.setDepth(25); // Torre da esquerda pode ser mais na frente
-        } else {
-            tower.setDepth(11); // Outras torres um pouco atrás do canhão
-        }
+        cannon.setDepth(10); 
 
         // Armazenar
         cannons.push({ sprite: cannon, x: cannon.x, y: cannon.y, tower: tower });
-        this.towers.push(tower); // Adicionar torre à propriedade da cena
+        this.towers.push(tower);
     });
 
     // Primeiro prédio
@@ -306,6 +318,3 @@ function update() {
         spawnWave.call(this);
     }
 }
-
-// REMOVIDA A FUNÇÃO resizeCanvasDOM() E SUAS CHAMADAS!
-// A lógica de escalonamento agora é TOTALMENTE gerida pelo Phaser.Scale.RESIZE.
