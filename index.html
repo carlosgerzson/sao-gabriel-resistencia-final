@@ -108,37 +108,35 @@
         ];
 
         function preload() {
-            // Sem imagens, usaremos formas geométricas
             this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
-            // NOVAS IMAGENS PARA TORRES E CANHÕES
-            this.load.image('torre', 'assets/torre_e.png'); // Certifique-se de que este é o caminho correto
-            this.load.image('canhao', 'assets/canhao.png'); // Certifique-se de que este é o caminho correto
-            this.load.image('antimissile', 'assets/antimissile.png'); // Se você já usa, ótimo, se não, adicione.
+            this.load.image('torre', 'assets/torre.png'); // CONFIRME 'torre_e.png' OU 'torre.png' AQUI
+            this.load.image('canhao', 'assets/canhao.png');
+            this.load.image('antimissile', 'assets/antimissile.png');
         }
 
         function create() {
             // Tela de apresentação
             const title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
-                fontSize: '32px',
+                fontSize: '48px', // Aumentado o tamanho da fonte para ser mais visível
                 fill: '#fff',
                 fontFamily: 'monospace'
-            }).setOrigin(0.5);
-            const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'Iniciar', {
-                fontSize: '24px',
+            }).setOrigin(0.5).setDepth(100); // Adicionado setDepth para garantir visibilidade
+
+            const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 100, 'TOCAR PARA INICIAR', { // Texto mais explícito e posição ajustada
+                fontSize: '36px', // Aumentado o tamanho da fonte
                 fill: '#fff'
-            }).setOrigin(0.5).setInteractive();
+            }).setOrigin(0.5).setInteractive().setDepth(100); // Adicionado setDepth e setInteractive
+
             startButton.on('pointerdown', () => {
+                // Log para depuração
+                console.log("Botão Iniciar clicado!");
                 title.destroy();
                 startButton.destroy();
                 currentState = 'game';
                 startGame.call(this);
             });
-
-            // Redimensionamento - ver resize DOM
-            // this.scale.on('resize', resize, this);
         }
 
-        // --- SUA FUNÇÃO STARTGAME ATUALIZADA ---
         function startGame() {
             // Fundo (vermelho escuro)
             this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x3b1a1a).setOrigin(0).setDepth(0);
@@ -147,94 +145,85 @@
             const silhueta = this.add.image(this.cameras.main.centerX, this.cameras.main.height, 'silhueta_urbana').setOrigin(0.5, 1);
             silhueta.setDepth(20);
 
-            // --- DEFINIÇÕES DOS ASSETS (não declaradas com 'const' se já existem globalmente ou serão usadas apenas localmente) ---
-            // Se 'originalTowerWidth', etc., não existem globalmente, elas serão criadas como variáveis locais aqui.
-            // Se elas já existem globalmente, simplesmente atribuiremos um novo valor a elas.
-            // COMO NÃO VEJO ESSAS CONSTS GLOBALMENTE NO SEU CÓDIGO FORNECIDO, VOU MANTER 'const' AQUI.
-            // O erro "já foi declarado" NÃO VEM DESTAS LINHAS. Ele viria se existissem em um escopo EXTERNO a startGame()
-            // e fossem definidas com 'const' novamente DENTRO de startGame().
-            // Se o erro persiste, por favor me diga o NOME EXATO da constante que está causando o erro.
-            const originalTowerWidth = 218;  
-            const originalTowerHeight = 818; 
-            const originalCannonWidth = 39;  
-            const originalCannonHeight = 141; 
-            
-            // As propriedades de câmera 'width' e 'height' NÃO PRECISAM DE NOVAS CONSTS.
-            // Use this.cameras.main.width e this.cameras.main.height diretamente.
-            // REMOVEMOS 'const gameWidth = ...' e 'const gameHeight = ...' daqui.
+            // --- DEFINIÇÕES DOS ASSETS ---
+            const originalTowerWidth = 218;
+            const originalTowerHeight = 818;
+            const originalCannonWidth = 39;
+            const originalCannonHeight = 141;
 
-            // --- CONFIGURAÇÕES DOS CANHÕES E TORRES BASEADAS NAS IMAGENS (SUBSTITUI O BLOCO ANTIGO) ---
+            // --- CONFIGURAÇÕES DOS CANHÕES E TORRES BASEADAS NAS IMAGENS (AJUSTADO PARA VISIBILIDADE) ---
             const towerAndCannonDefinitions = [
                 {
                     name: 'Torre & Canhão Esquerdo (E)',
-                    cannonXPercentage: 0.1144, cannonYPercentage: 0.525, cannonScale: 1.0, cannonOriginY: 0.8,
+                    cannonXPercentage: 0.1144, cannonYPercentage: 0.49, cannonScale: 3.0, cannonOriginY: 0.5, // CANNONSCALE AUMENTADO E ORIGIN Y AJUSTADO
                     towerXPercentage: 0.0167, towerYPercentage: 0.5538, towerTopOffset: 0,
-                    cannonPenetrationIntoTower: 0.3, towerScaleAdjust: 0.25 
+                    cannonPenetrationIntoTower: 0, // REMOVIDO PENETRAÇÃO PARA TESTE
+                    towerScaleAdjust: 0.5 // TOWERSCALEADJUST AUMENTADO DRÁSTICAMENTE
                 },
                 {
                     name: 'Torre & Canhão Central-Direito (C)',
-                    cannonXPercentage: 0.6578, cannonYPercentage: 0.5825, cannonScale: 0.8, cannonOriginY: 0.8,
+                    cannonXPercentage: 0.6578, cannonYPercentage: 0.5825, cannonScale: 3.0, cannonOriginY: 0.5, // CANNONSCALE AUMENTADO E ORIGIN Y AJUSTADO
                     towerXPercentage: 0.62, towerYPercentage: 0.60, towerTopOffset: 0,
-                    cannonPenetrationIntoTower: 0.4, towerScaleAdjust: 0.20 
+                    cannonPenetrationIntoTower: 0, // REMOVIDO PENETRAÇÃO PARA TESTE
+                    towerScaleAdjust: 0.4 // TOWERSCALEADJUST AUMENTADO
                 },
                 {
                     name: 'Torre & Canhão Direito (D)',
-                    cannonXPercentage: 0.8578, cannonYPercentage: 0.4844, cannonScale: 0.7, cannonOriginY: 0.8,
+                    cannonXPercentage: 0.8578, cannonYPercentage: 0.4844, cannonScale: 3.0, cannonOriginY: 0.5, // CANNONSCALE AUMENTADO E ORIGIN Y AJUSTADO
                     towerXPercentage: 0.82, towerYPercentage: 0.50, towerTopOffset: 0,
-                    cannonPenetrationIntoTower: 0.35, towerScaleAdjust: 0.22 
+                    cannonPenetrationIntoTower: 0, // REMOVIDO PENETRAÇÃO PARA TESTE
+                    towerScaleAdjust: 0.4 // TOWERSCALEADJUST AUMENTADO
                 }
             ];
 
-            // ATENÇÃO: 'cannons' já está declarado como 'let cannons = [];' no escopo global.
-            // Então, apenas reinicialize-o.
-            cannons = []; 
-            
-            // 'this.towers' é uma nova variável da cena. É seguro declará-la aqui.
-            this.towers = []; 
+            // Reinicialização de 'cannons' e 'this.towers'
+            cannons = [];
+            this.towers = [];
 
             towerAndCannonDefinitions.forEach((config) => {
                 // 1. Criar e posicionar a Torre
-                const towerY = this.cameras.main.height - 50; // Usar this.cameras.main.height
-                const towerX = Math.round(this.cameras.main.width * config.towerXPercentage); // Usar this.cameras.main.width
-                
+                const towerY = this.cameras.main.height - 50;
+                const towerX = Math.round(this.cameras.main.width * config.towerXPercentage);
+
                 const tower = this.add.image(towerX, towerY, 'torre').setOrigin(0.5, 1);
                 tower.setScale(config.towerScaleAdjust);
 
                 // 2. Criar e posicionar o Canhão
-                const cannonX = Math.round(this.cameras.main.width * config.cannonXPercentage); // Usar this.cameras.main.width
-                const cannonY = tower.y - tower.displayHeight + (originalCannonHeight * config.cannonScale * (1 - config.cannonPenetrationIntoTower));
+                const cannonX = Math.round(this.cameras.main.width * config.cannonXPercentage);
+                // Lógica simplificada para cannonY (sem penetração)
+                const cannonY = tower.y - (tower.displayHeight / 2); // Posiciona o canhão no meio da torre para visualização
+                // const cannonY = tower.y - tower.displayHeight + (originalCannonHeight * config.cannonScale * (1 - config.cannonPenetrationIntoTower)); // Linha original
 
                 const cannon = this.add.image(cannonX, cannonY, 'canhao');
                 cannon.setScale(config.cannonScale);
                 cannon.setOrigin(0.5, config.cannonOriginY);
 
                 // --- DEPTHS ---
-                cannon.setDepth(10); 
+                cannon.setDepth(10);
 
                 if (config.name === 'Torre & Canhão Esquerdo (E)') {
-                    tower.setDepth(25); 
+                    tower.setDepth(25);
                 } else {
-                    tower.setDepth(11); 
+                    tower.setDepth(11);
                 }
-                
+
                 // Armazenar
-                cannons.push({ sprite: cannon, x: cannon.x, y: cannon.y, tower: tower }); // 'cannons' global
-                this.towers.push(tower); // 'this.towers' propriedade da cena
+                cannons.push({ sprite: cannon, x: cannon.x, y: cannon.y, tower: tower });
+                this.towers.push(tower);
             });
 
             // Primeiro prédio
-            spawnBuilding.call(this); 
+            spawnBuilding.call(this);
 
             // Iniciar onda de mísseis
-            spawnWave.call(this); 
+            spawnWave.call(this);
 
             // Controles de toque/clique
             this.input.on('pointerdown', (pointer) => {
-                // Lógica de seleção do canhão mais próximo (SUBSTITUI A DIVISÃO POR TERÇOS)
                 let closestCannon = null;
                 let minDistance = Infinity;
 
-                cannons.forEach(cannon => { // Itera sobre 'cannons' global
+                cannons.forEach(cannon => {
                     const distance = Phaser.Math.Distance.Between(pointer.x, pointer.y, cannon.sprite.x, cannon.sprite.y);
                     if (distance < minDistance) {
                         minDistance = distance;
@@ -243,14 +232,8 @@
                 });
 
                 if (closestCannon) {
-                    fireAntiMissile.call(this, closestCannon, pointer.x, pointer.y); 
+                    fireAntiMissile.call(this, closestCannon, pointer.x, pointer.y);
                 }
-                // REMOVIDO: const third = this.cameras.main.width / 3;
-                // REMOVIDO: let cannonIndex;
-                // REMOVIDO: if (pointer.x < third) cannonIndex = 0;
-                // REMOVIDO: else if (pointer.x < 2 * third) cannonIndex = 1;
-                // REMOVIDO: else cannonIndex = 2;
-                // REMOVIDO: fireAntiMissile.call(this, cannons[cannonIndex], pointer.x, pointer.y);
             });
         }
 
@@ -299,7 +282,7 @@
 
             antiMissiles.push(antiMissile);
         }
-        
+
         // NOVA FUNÇÃO PARA TRATAR O IMPACTO DO MÍSSIL ANTI-DEFENSOR
         // Coloque esta função no mesmo nível das outras (spawnBuilding, spawnWave, fireAntiMissile)
         function onAntiMissileHit(x, y) {
