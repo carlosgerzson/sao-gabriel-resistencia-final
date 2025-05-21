@@ -2,7 +2,7 @@
 let cannons = []; 
 let missiles = []; 
 let antiMissiles = []; 
-let currentBuilding = null; // Agora será uma instância do retângulo do prédio.
+let currentBuilding = null; 
 let currentBuildingIndex = 0; 
 let currentState = 'title'; 
 let waveCount = 0; 
@@ -45,7 +45,7 @@ const game = new Phaser.Game(config);
 
 function preload() {
     console.log("Preloading assets...");
-    this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
+    this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png'); // Imagem do fundo (chão + cidade)
     this.load.image('torre_e', 'assets/torre_e.png'); 
     this.load.image('torre_c', 'assets/torre_c.png'); 
     this.load.image('torre_d', 'assets/torre_d.png'); 
@@ -90,7 +90,6 @@ function create() {
     });
 
     // Chama resize uma vez na inicialização para posicionar elementos da tela de título
-    // O Phaser já terá definido as dimensões iniciais do canvas.
     resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
@@ -100,6 +99,7 @@ function startGame() {
     gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0);
 
     // Silhueta Urbana (adicionada, mas será ajustada no resize)
+    // Coordenadas base: X=450 (centro), Y=1600 (base da tela)
     silhuetaSprite = this.add.image(BASE_WIDTH / 2, BASE_HEIGHT, 'silhueta_urbana').setOrigin(0.5, 1);
     silhuetaSprite.setDepth(20);
     
@@ -230,7 +230,7 @@ function resize(gameSize) {
     // --- Redimensiona e reposiciona os elementos ---
 
     // Fundo
-    if (gameBackgroundRect) { // Adicionada a verificação
+    if (gameBackgroundRect && gameBackgroundRect.active) { 
         gameBackgroundRect.x = 0;
         gameBackgroundRect.y = 0;
         gameBackgroundRect.displayWidth = width;
@@ -238,18 +238,28 @@ function resize(gameSize) {
     }
 
     // Silhueta Urbana
-    if (silhuetaSprite) { // Adicionada a verificação
+    if (silhuetaSprite && silhuetaSprite.active) { // Verifica se o sprite está ativo
         silhuetaSprite.x = width / 2; 
         silhuetaSprite.y = height;    
-        // Usamos a largura original do PNG para a escala, esticando para a largura da tela.
-        // Isso manterá a proporção do PNG, mas a silhueta pode não cobrir toda a altura se a proporção da tela for muito diferente.
+        
+        // CORREÇÃO: Escala a silhueta para que sua LARGURA ocupe a largura da tela atual,
+        // mas sua ALTURA é determinada para manter a PROPORÇÃO ORIGINAL da imagem.
+        // Isso deve evitar que ela "abuse" verticalmente.
         silhuetaSprite.setScale(width / silhuetaSprite.width);
-        // Se a silhueta tiver que se esticar verticalmente também para preencher a altura (com distorção),
-        // descomente e use a linha abaixo:
-        // silhuetaSprite.displayHeight = height; // Força a altura a preencher
+        // Se ainda estiver muito alta, podemos definir um displayHeight máximo
+        // Por exemplo, silhuetaSprite.displayHeight = Math.min(silhuetaSprite.displayHeight, height * 0.5); 
+        // ou ajustar o Y do origin para "cortar" de cima para baixo.
+        // Se ela for um "chão", então o ideal é ter uma altura fixa e escalar a largura.
+        // Se a silhueta_urbana.png é a imagem de chão e prédios no fundo,
+        // e você quer que ela ocupe uma porção fixa da altura da tela, podemos fazer:
+        // silhuetaSprite.displayHeight = height * 0.3; // Exemplo: 30% da altura da tela
+        // silhuetaSprite.displayWidth = width; // Para preencher a largura
+        // silhuetaSprite.y = height; // Ainda na base
+        // Por hora, vamos manter a escala que preenche a largura e mantém a proporção.
     }
 
     // Elementos da tela de título (se ainda existirem)
+    // Estes não precisam de verificação `if (sprite.active)` pois são destruídos ao iniciar o jogo.
     if (titleText && titleText.active) {
         titleText.x = width / 2;
         titleText.y = height / 2 - (50 * scaleFactorY); 
@@ -266,29 +276,30 @@ function resize(gameSize) {
         const sprite = item.sprite;
         const def = item.def;
 
-        // Reposiciona com base nas coordenadas da resolução base e no fator de escala X e Y
-        sprite.x = def.towerBaseX * scaleFactorX; 
-        sprite.y = def.towerBaseY * scaleFactorY; 
+        if (sprite && sprite.active) { // Adicionada a verificação
+            sprite.x = def.towerBaseX * scaleFactorX; 
+            sprite.y = def.towerBaseY * scaleFactorY; 
 
-        // Redimensiona o sprite para a largura e altura alvo, mas escalado pela proporção atual da tela.
-        // Isso causará o efeito de "esticar para preencher" que você descreveu como "boa responsividade".
-        sprite.displayWidth = def.towerTargetWidth * scaleFactorX;
-        sprite.displayHeight = def.towerTargetHeight * scaleFactorY;
+            sprite.displayWidth = def.towerTargetWidth * scaleFactorX;
+            sprite.displayHeight = def.towerTargetHeight * scaleFactorY;
+        }
     });
 
     allCannonsSprites.forEach(item => {
         const sprite = item.sprite;
         const def = item.def;
-
-        sprite.x = def.cannonX * scaleFactorX;
-        sprite.y = def.cannonY * scaleFactorY;
         
-        sprite.displayWidth = def.cannonTargetWidth * scaleFactorX;
-        sprite.displayHeight = def.cannonTargetHeight * scaleFactorY;
+        if (sprite && sprite.active) { // Adicionada a verificação
+            sprite.x = def.cannonX * scaleFactorX;
+            sprite.y = def.cannonY * scaleFactorY;
+            
+            sprite.displayWidth = def.cannonTargetWidth * scaleFactorX;
+            sprite.displayHeight = def.cannonTargetHeight * scaleFactorY;
+        }
     });
 
     // Ajusta o prédio
-    if (currentBuilding) { // Mudada a referência para 'currentBuilding' (a variável global)
+    if (currentBuilding && currentBuilding.active) { // Adicionada a verificação
         currentBuilding.x = (BASE_WIDTH / 2) * scaleFactorX;
         currentBuilding.y = 1360 * scaleFactorY; 
         currentBuilding.displayWidth = 270 * scaleFactorX;
@@ -303,21 +314,23 @@ function spawnBuilding() {
     if (currentBuildingIndex >= 10) {
         currentState = 'gameover';
         const gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
+        // O texto de game over também precisa ser redimensionado se for ficar ativo
+        // Vamos garantir que ele também se ajuste
+        if (gameOverText) {
+            const scaleFactorX = this.scale.width / BASE_WIDTH;
+            const scaleFactorY = this.scale.height / BASE_HEIGHT;
+            gameOverText.setFontSize(32 * Math.min(scaleFactorX, scaleFactorY));
+            gameOverText.x = this.scale.width / 2;
+            gameOverText.y = this.scale.height / 2;
+        }
         this.time.removeAllEvents(); 
-
-        // Garante que o texto de game over também seja redimensionado
-        // Como gameOverText é local, ele não pode ser acessado no resize.
-        // Se precisar redimensioná-lo, ele também precisaria ser uma variável global.
-        // Por enquanto, vamos deixá-lo sem redimensionamento dinâmico após o spawn.
         return;
     }
-    // Prédio Principal: Coordenadas e Tamanhos
-    currentBuilding = this.add.rectangle(BASE_WIDTH / 2, 1360, 270, 320, buildingStates[0].color); // Inicializa currentBuilding
+    currentBuilding = this.add.rectangle(BASE_WIDTH / 2, 1360, 270, 320, buildingStates[0].color); 
     currentBuilding.health = 3;
     currentBuilding.stateIndex = 0;
     currentBuilding.setDepth(1); 
     
-    // Redimensiona o prédio imediatamente após o spawn
     resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
@@ -329,12 +342,10 @@ function spawnWave() {
         const x = Phaser.Math.Between(0, this.scale.width);
         const missile = this.add.rectangle(x, 0, 10, 30, 0x00ff00);
         missile.speed = 200 + waveCount * 50;
-        // O targetX e targetY do míssil devem ser as coordenadas atuais do prédio na tela
-        if (currentBuilding) { // Verifica se o prédio existe antes de tentar acessar
+        if (currentBuilding) { 
             missile.targetX = currentBuilding.x; 
             missile.targetY = currentBuilding.y; 
         } else {
-            // Fallback para uma posição padrão se o prédio ainda não existe (improvável com o spawnBuilding)
             missile.targetX = this.scale.width / 2;
             missile.targetY = this.scale.height;
         }
@@ -386,15 +397,17 @@ function onAntiMissileHit(x, y) {
 function update() {
     if (currentState !== 'game') return;
 
+    // Movimento e colisão dos mísseis
     missiles.forEach((missile, index) => {
-        // Movimento e colisão ocorrem dentro do sistema de coordenadas da TELA ATUAL
+        if (!missile.active) return; // Garante que o míssil está ativo
+
         const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY); 
         missile.x += Math.cos(angle) * missile.speed * (1 / 60);
         missile.y += Math.sin(angle) * missile.speed * (1 / 60);
         missile.rotation = angle + Math.PI / 2; 
 
         // Colisão com o prédio
-        if (currentBuilding && missile.y > currentBuilding.y - currentBuilding.displayHeight / 2) { 
+        if (currentBuilding && currentBuilding.active && missile.y > currentBuilding.y - currentBuilding.displayHeight / 2) { 
             if (missile.x > currentBuilding.x - currentBuilding.displayWidth / 2 && 
                 missile.x < currentBuilding.x + currentBuilding.displayWidth / 2) {
 
@@ -417,24 +430,32 @@ function update() {
         }
     });
 
+    // Filtra mísseis e antemísseis que foram destruídos
     missiles = missiles.filter(missile => missile.active); 
     antiMissiles = antiMissiles.filter(anti => anti.active); 
 
+    // Colisão antemísseis com mísseis
     antiMissiles.forEach((anti) => { 
-        missiles.forEach((missile) => { 
+        // Itera sobre uma cópia da lista de mísseis para evitar problemas ao remover elementos
+        missiles.slice().forEach((missile) => { 
             if (anti.active && missile.active && Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
                 anti.destroy();
                 missile.destroy();
                 this.onAntiMissileHit(anti.x, anti.y); 
+                // Remova os mísseis e antemísseis destruídos da lista para evitar processamento futuro
+                missiles = missiles.filter(m => m.active);
+                antiMissiles = antiMissiles.filter(a => a.active);
             }
         });
     });
 
+    // Rotação dos canhões
     cannons.forEach(cannon => {
         let closestEnemyMissile = null;
         let minEnemyDistance = Infinity;
 
         missiles.forEach(missile => {
+            if (!missile.active) return; // Garante que o míssil está ativo
             const distance = Phaser.Math.Distance.Between(cannon.sprite.x, cannon.sprite.y, missile.x, missile.y);
             if (distance < minEnemyDistance) {
                 minEnemyDistance = distance;
@@ -443,9 +464,9 @@ function update() {
         });
 
         if (closestEnemyMissile) {
-            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyEnemyMissile.y);
+            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y); // CORREÇÃO AQUI
             cannon.sprite.rotation = angle + Math.PI / 2; 
-        } else if (currentBuilding) { 
+        } else if (currentBuilding && currentBuilding.active) { // Verifica se o prédio existe e está ativo
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         }
