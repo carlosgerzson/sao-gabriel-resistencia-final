@@ -117,24 +117,31 @@
         function create() {
             // Tela de apresentação
             const title = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
-                fontSize: '48px', // Aumentado o tamanho da fonte para ser mais visível
+                fontSize: '48px',
                 fill: '#fff',
                 fontFamily: 'monospace'
-            }).setOrigin(0.5).setDepth(100); // Adicionado setDepth para garantir visibilidade
+            }).setOrigin(0.5); // REMOVIDO .setDepth(100) aqui
 
-            const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 100, 'TOCAR PARA INICIAR', { // Texto mais explícito e posição ajustada
-                fontSize: '36px', // Aumentado o tamanho da fonte
+            const startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 100, 'TOCAR PARA INICIAR', {
+                fontSize: '36px',
                 fill: '#fff'
-            }).setOrigin(0.5).setInteractive().setDepth(100); // Adicionado setDepth e setInteractive
+            }).setOrigin(0.5).setInteractive(); // REMOVIDO .setDepth(100) aqui
 
-            startButton.on('pointerdown', () => {
-                // Log para depuração
+            startButton.on('pointerdown', (pointer) => {
+                // Log para depuração - MUITO IMPORTANTE!
                 console.log("Botão Iniciar clicado!");
+                console.log("Pointer X:", pointer.x, "Pointer Y:", pointer.y);
+                console.log("StartButton X:", startButton.x, "StartButton Y:", startButton.y);
+
                 title.destroy();
                 startButton.destroy();
                 currentState = 'game';
                 startGame.call(this);
             });
+
+            // Adicione esta linha no final da função create para forçar uma atualização da escala do Phaser
+            // sem depender do redimensionamento DOM manual no início.
+            this.scale.refresh();
         }
 
         function startGame() {
@@ -439,12 +446,12 @@
         }
 
         // Chame a função de redimensionamento do canvas DOM:
-        window.addEventListener('load', resizeCanvasDOM);
-        window.addEventListener('resize', resizeCanvasDOM);
+//        window.addEventListener('load', resizeCanvasDOM);
+//        window.addEventListener('resize', resizeCanvasDOM);
         // E também chame-a uma vez após a criação do objeto game do Phaser,
         // para garantir que o canvas seja ajustado logo no início.
         // Isso pode ser logo abaixo de `const game = new Phaser.Game(config);`
-        resizeCanvasDOM(); // Adicionado aqui para ser chamado após o game ser criado
+//        resizeCanvasDOM(); // Adicionado aqui para ser chamado após o game ser criado
     </script>
 </body>
 
