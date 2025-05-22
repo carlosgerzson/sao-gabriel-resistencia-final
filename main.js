@@ -53,6 +53,8 @@ function preload() {
     this.load.image('canhao_c', 'assets/canhao_c.png'); 
     this.load.image('canhao_d', 'assets/canhao_d.png'); 
     this.load.image('antimissile', 'assets/antimissile.png'); 
+    // SE 'alvo1_predio' É UMA IMAGEM, DESCOMENTE E CERTIFIQUE-SE DO CAMINHO CORRETO:
+    this.load.image('alvo1_predio', 'assets/alvo1_predio.png'); 
     console.log("Preload complete.");
 }
 
@@ -98,73 +100,62 @@ function startGame() {
     // Fundo (vermelho escuro) - Adicionado como um sprite para ser redimensionado
     gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0);
 
-    // Silhueta Urbana (adicionada, mas será ajustada no resize)
-    // Coordenadas base: X=450 (centro), Y=1600 (base da tela)
-    silhuetaSprite = this.add.image(BASE_WIDTH / 2, BASE_HEIGHT, 'silhueta_urbana').setOrigin(0.5, 1);
+    // Silhueta Urbana (agora com displayWidth/Height fixos para BASE_WIDTH/HEIGHT)
+    // X=450 (centro), Y=1600 (base da tela) - VALORES DO EDITOR
+    silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1);
     silhuetaSprite.setDepth(20);
+    silhuetaSprite.displayWidth = 900; // Valor do editor
+    silhuetaSprite.displayHeight = 384; // Valor do editor
     
-    // --- CONFIGURAÇÕES DE CANHÕES E TORRES (USANDO OS SEUS DADOS PRECISOS PARA 900x1600) ---
-    // ATENÇÃO: Verifique e ajuste os valores de originalWidth/Height com as dimensões REAIS dos seus PNGs.
+    // --- CONFIGURAÇÕES DE CANHÕES E TORRES (USANDO OS DADOS PRECISOS DO EDITOR PARA 900x1600) ---
     const towerAndCannonDefinitions = [
         {
             name: 'Torre Esquerda',
             towerAsset: 'torre_e',
-            towerBaseX: 112, 
-            towerBaseY: 1600, 
-            towerOriginalWidth: 218, // *** VERIFIQUE E AJUSTE COM A LARGURA REAL DO SEU PNG ***
-            towerOriginalHeight: 713, // *** VERIFIQUE E AJUSTE COM A ALTURA REAL DO SEU PNG ***
-            towerTargetWidth: 218, 
-            towerTargetHeight: 713, 
+            towerBaseX: 130, // Coordenada X do editor (torre_e)
+            towerBaseY: 1600, // Coordenada Y do editor (torre_e)
+            towerTargetWidth: 218, // displayWidth do editor
+            towerTargetHeight: 709, // displayHeight do editor
             towerDepth: 25,
 
             cannonAsset: 'canhao_e',
-            cannonX: 103, 
-            cannonY: 840, 
-            cannonOriginalWidth: 39, // *** VERIFIQUE E AJUSTE COM A LARGURA REAL DO SEU PNG ***
-            cannonOriginalHeight: 141, // *** VERIFIQUE E AJUSTE COM A ALTURA REAL DO SEU PNG ***
-            cannonTargetWidth: 39,
-            cannonTargetHeight: 141,
-            cannonDepth: 10
+            cannonX: 130, // Coordenada X do editor (canhao_e)
+            cannonY: 981, // Coordenada Y do editor (canhao_e) - CRUCIAL para o alinhamento
+            cannonTargetWidth: 39, // displayWidth do editor
+            cannonTargetHeight: 141, // displayHeight do editor
+            cannonDepth: 30 // Aumentado para garantir que o canhão esteja acima da torre
         },
         {
             name: 'Torre Central',
             towerAsset: 'torre_c',
-            towerBaseX: 610, 
-            towerBaseY: 1600, 
-            towerOriginalWidth: 147,
-            towerOriginalHeight: 636,
-            towerTargetWidth: 147,
-            towerTargetHeight: 636,
-            towerDepth: 11,
+            towerBaseX: 610, // Coordenada X do editor (torre_c)
+            towerBaseY: 1600, // Coordenada Y do editor (torre_c)
+            towerTargetWidth: 148, // displayWidth do editor
+            towerTargetHeight: 637, // displayHeight do editor
+            towerDepth: 25, 
 
             cannonAsset: 'canhao_c',
-            cannonX: 592, 
-            cannonY: 932, 
-            cannonOriginalWidth: 33, 
-            cannonOriginalHeight: 103, 
-            cannonTargetWidth: 33,
-            cannonTargetHeight: 103,
-            cannonDepth: 10
+            cannonX: 610, // Coordenada X do editor (canhao_c)
+            cannonY: 1035, // Coordenada Y do editor (canhao_c)
+            cannonTargetWidth: 33, // displayWidth do editor
+            cannonTargetHeight: 103, // displayHeight do editor
+            cannonDepth: 30 
         },
         {
             name: 'Torre Direita',
             towerAsset: 'torre_d',
-            towerBaseX: 793, 
-            towerBaseY: 1600, 
-            towerOriginalWidth: 189,
-            towerOriginalHeight: 787,
-            towerTargetWidth: 189,
-            towerTargetHeight: 787,
-            towerDepth: 11,
+            towerBaseX: 793, // Coordenada X do editor (torre_d)
+            towerBaseY: 1600, // Coordenada Y do editor (torre_d)
+            towerTargetWidth: 190, // displayWidth do editor
+            towerTargetHeight: 782, // displayHeight do editor
+            towerDepth: 25, 
 
             cannonAsset: 'canhao_d',
-            cannonX: 772, 
-            cannonY: 775, 
-            cannonOriginalWidth: 41, 
-            cannonOriginalHeight: 126, 
-            cannonTargetWidth: 41,
-            cannonTargetHeight: 126,
-            cannonDepth: 10
+            cannonX: 793, // Coordenada X do editor (canhao_d)
+            cannonY: 901, // Coordenada Y do editor (canhao_d)
+            cannonTargetWidth: 39, // displayWidth do editor
+            cannonTargetHeight: 125, // displayHeight do editor
+            cannonDepth: 30 
         }
     ];
 
@@ -239,27 +230,17 @@ function resize(gameSize) {
 
     // Silhueta Urbana
     if (silhuetaSprite && silhuetaSprite.active) { // Verifica se o sprite está ativo
-        silhuetaSprite.x = width / 2; 
-        silhuetaSprite.y = height;    
+        // Usa as coordenadas base do editor, que o resize vai escalar proporcionalmente
+        silhuetaSprite.x = 450 * scaleFactorX; 
+        silhuetaSprite.y = 1600 * scaleFactorY; 
         
-        // CORREÇÃO: Escala a silhueta para que sua LARGURA ocupe a largura da tela atual,
-        // mas sua ALTURA é determinada para manter a PROPORÇÃO ORIGINAL da imagem.
-        // Isso deve evitar que ela "abuse" verticalmente.
-        silhuetaSprite.setScale(width / silhuetaSprite.width);
-        // Se ainda estiver muito alta, podemos definir um displayHeight máximo
-        // Por exemplo, silhuetaSprite.displayHeight = Math.min(silhuetaSprite.displayHeight, height * 0.5); 
-        // ou ajustar o Y do origin para "cortar" de cima para baixo.
-        // Se ela for um "chão", então o ideal é ter uma altura fixa e escalar a largura.
-        // Se a silhueta_urbana.png é a imagem de chão e prédios no fundo,
-        // e você quer que ela ocupe uma porção fixa da altura da tela, podemos fazer:
-        // silhuetaSprite.displayHeight = height * 0.3; // Exemplo: 30% da altura da tela
-        // silhuetaSprite.displayWidth = width; // Para preencher a largura
-        // silhuetaSprite.y = height; // Ainda na base
-        // Por hora, vamos manter a escala que preenche a largura e mantém a proporção.
+        // Agora, o displayWidth/Height são definidos na BASE_WIDTH/HEIGHT
+        // e o resize os escala.
+        silhuetaSprite.displayWidth = 900 * scaleFactorX;
+        silhuetaSprite.displayHeight = 384 * scaleFactorY;
     }
 
     // Elementos da tela de título (se ainda existirem)
-    // Estes não precisam de verificação `if (sprite.active)` pois são destruídos ao iniciar o jogo.
     if (titleText && titleText.active) {
         titleText.x = width / 2;
         titleText.y = height / 2 - (50 * scaleFactorY); 
@@ -276,10 +257,11 @@ function resize(gameSize) {
         const sprite = item.sprite;
         const def = item.def;
 
-        if (sprite && sprite.active) { // Adicionada a verificação
+        if (sprite && sprite.active) { 
             sprite.x = def.towerBaseX * scaleFactorX; 
             sprite.y = def.towerBaseY * scaleFactorY; 
 
+            // Aplica o redimensionamento baseado nas dimensões alvo da definição
             sprite.displayWidth = def.towerTargetWidth * scaleFactorX;
             sprite.displayHeight = def.towerTargetHeight * scaleFactorY;
         }
@@ -289,17 +271,25 @@ function resize(gameSize) {
         const sprite = item.sprite;
         const def = item.def;
         
-        if (sprite && sprite.active) { // Adicionada a verificação
+        if (sprite && sprite.active) { 
             sprite.x = def.cannonX * scaleFactorX;
             sprite.y = def.cannonY * scaleFactorY;
             
+            // Aplica o redimensionamento baseado nas dimensões alvo da definição
             sprite.displayWidth = def.cannonTargetWidth * scaleFactorX;
             sprite.displayHeight = def.cannonTargetHeight * scaleFactorY;
         }
     });
 
     // Ajusta o prédio
-    if (currentBuilding && currentBuilding.active) { // Adicionada a verificação
+    if (currentBuilding && currentBuilding.active) { 
+        // Se 'alvo1_predio' for uma imagem, use as coordenadas do editor e o displayWidth/Height
+        // currentBuilding.x = 450 * scaleFactorX; // Exemplo de X para a imagem do editor
+        // currentBuilding.y = 1552 * scaleFactorY; // Exemplo de Y para a imagem do editor
+        // currentBuilding.displayWidth = 506 * scaleFactorX; // displayWidth do editor para alvo1_predio
+        // currentBuilding.displayHeight = 362 * scaleFactorY; // displayHeight do editor para alvo1_predio
+
+        // Mantém a lógica de retângulo se você não usar a imagem
         currentBuilding.x = (BASE_WIDTH / 2) * scaleFactorX;
         currentBuilding.y = 1360 * scaleFactorY; 
         currentBuilding.displayWidth = 270 * scaleFactorX;
@@ -314,8 +304,7 @@ function spawnBuilding() {
     if (currentBuildingIndex >= 10) {
         currentState = 'gameover';
         const gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
-        // O texto de game over também precisa ser redimensionado se for ficar ativo
-        // Vamos garantir que ele também se ajuste
+        
         if (gameOverText) {
             const scaleFactorX = this.scale.width / BASE_WIDTH;
             const scaleFactorY = this.scale.height / BASE_HEIGHT;
@@ -326,10 +315,24 @@ function spawnBuilding() {
         this.time.removeAllEvents(); 
         return;
     }
+    
+    // --- DECISÃO AQUI: Usar retângulo ou imagem 'alvo1_predio'? ---
+    // SE VOCÊ QUISER USAR A IMAGEM 'alvo1_predio.png' que você forneceu as dimensões:
+    // 1. Descomente a linha `this.load.image('alvo1_predio', 'assets/alvo1_predio.png');` no `preload`.
+    // 2. Comente a linha `currentBuilding = this.add.rectangle(...)` abaixo.
+    // 3. Descomente as 4 linhas abaixo que criam e dimensionam o sprite da imagem.
+    // currentBuilding = this.add.image(450, 1552, "alvo1_predio").setOrigin(0.5, 1); // X e Y do editor
+    // currentBuilding.displayWidth = 506; // displayWidth do editor para alvo1_predio
+    // currentBuilding.displayHeight = 362; // displayHeight do editor para alvo1_predio
+    // currentBuilding.setDepth(1); 
+    
+    // SE VOCÊ QUISER CONTINUAR USANDO O RETÂNGULO DE COR (como estava antes):
     currentBuilding = this.add.rectangle(BASE_WIDTH / 2, 1360, 270, 320, buildingStates[0].color); 
+    currentBuilding.setOrigin(0.5, 1); // Certifica que o retângulo também tem a origem na base para consistência
+    currentBuilding.setDepth(1); 
+
     currentBuilding.health = 3;
     currentBuilding.stateIndex = 0;
-    currentBuilding.setDepth(1); 
     
     resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
@@ -344,7 +347,7 @@ function spawnWave() {
         missile.speed = 200 + waveCount * 50;
         if (currentBuilding) { 
             missile.targetX = currentBuilding.x; 
-            missile.targetY = currentBuilding.y; 
+            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2; // Alvo no centro do prédio
         } else {
             missile.targetX = this.scale.width / 2;
             missile.targetY = this.scale.height;
@@ -441,7 +444,7 @@ function update() {
             if (anti.active && missile.active && Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
                 anti.destroy();
                 missile.destroy();
-                this.onAntiMissileHit(anti.x, anti.y); 
+                this.onAntiMissileHit(anti.x, anti.x); // Correção: onAntiMissileHit precisa de X e Y do impacto
                 // Remova os mísseis e antemísseis destruídos da lista para evitar processamento futuro
                 missiles = missiles.filter(m => m.active);
                 antiMissiles = antiMissiles.filter(a => a.active);
@@ -464,7 +467,7 @@ function update() {
         });
 
         if (closestEnemyMissile) {
-            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y); // CORREÇÃO AQUI
+            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y); 
             cannon.sprite.rotation = angle + Math.PI / 2; 
         } else if (currentBuilding && currentBuilding.active) { // Verifica se o prédio existe e está ativo
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
