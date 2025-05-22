@@ -215,41 +215,52 @@ function resize(gameSize) {
 
     this.cameras.main.setViewport(0, 0, width, height);
 
-    const scaleFactorX = width / BASE_WIDTH;
-    const scaleFactorY = height / BASE_HEIGHT;
+    // Calcula um fator de escala único para manter a proporção.
+    // Usamos o menor fator para garantir que o conteúdo inteiro seja visível (fit).
+    // Se quiséssemos preencher a tela inteira, mesmo que corte parte do conteúdo, usaríamos Math.max.
+    const scaleFactor = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+
+    // O offset serve para centralizar o conteúdo quando a proporção da tela não é a mesma da BASE_WIDTH/BASE_HEIGHT
+    const offsetX = (width - BASE_WIDTH * scaleFactor) * 0.5;
+    const offsetY = (height - BASE_HEIGHT * scaleFactor) * 0.5;
 
     // --- Redimensiona e reposiciona os elementos ---
 
     // Fundo
     if (gameBackgroundRect && gameBackgroundRect.active) { 
+        // O fundo geralmente é um caso especial, pode ser esticado para preencher a tela
+        // ou você pode querer que ele também mantenha a proporção e seja centralizado.
+        // Para preencher a tela e evitar barras pretas no fundo, vamos esticá-lo:
         gameBackgroundRect.x = 0;
         gameBackgroundRect.y = 0;
         gameBackgroundRect.displayWidth = width;
         gameBackgroundRect.displayHeight = height;
+        // Ou, se você quiser que o fundo mantenha a proporção, como os outros elementos:
+        // gameBackgroundRect.displayWidth = BASE_WIDTH * scaleFactor;
+        // gameBackgroundRect.displayHeight = BASE_HEIGHT * scaleFactor;
+        // gameBackgroundRect.x = offsetX;
+        // gameBackgroundRect.y = offsetY;
     }
 
     // Silhueta Urbana
-    if (silhuetaSprite && silhuetaSprite.active) { // Verifica se o sprite está ativo
-        // Usa as coordenadas base do editor, que o resize vai escalar proporcionalmente
-        silhuetaSprite.x = 450 * scaleFactorX; 
-        silhuetaSprite.y = 1600 * scaleFactorY; 
+    if (silhuetaSprite && silhuetaSprite.active) { 
+        silhuetaSprite.x = (450 * scaleFactor) + offsetX; 
+        silhuetaSprite.y = (1600 * scaleFactor) + offsetY; // BASE_HEIGHT é a base original, então 1600 * scaleFactor é a nova base
         
-        // Agora, o displayWidth/Height são definidos na BASE_WIDTH/HEIGHT
-        // e o resize os escala.
-        silhuetaSprite.displayWidth = 900 * scaleFactorX;
-        silhuetaSprite.displayHeight = 384 * scaleFactorY;
+        silhuetaSprite.displayWidth = 900 * scaleFactor;
+        silhuetaSprite.displayHeight = 384 * scaleFactor;
     }
 
     // Elementos da tela de título (se ainda existirem)
     if (titleText && titleText.active) {
-        titleText.x = width / 2;
-        titleText.y = height / 2 - (50 * scaleFactorY); 
-        titleText.setFontSize(48 * Math.min(scaleFactorX, scaleFactorY)); 
+        titleText.x = (BASE_WIDTH / 2 * scaleFactor) + offsetX;
+        titleText.y = (BASE_HEIGHT / 2 - 50) * scaleFactor + offsetY; 
+        titleText.setFontSize(48 * scaleFactor); // Escala a fonte também
     }
     if (startButtonText && startButtonText.active) {
-        startButtonText.x = width / 2;
-        startButtonText.y = height / 2 + (50 * scaleFactorY); 
-        startButtonText.setFontSize(36 * Math.min(scaleFactorX, scaleFactorY)); 
+        startButtonText.x = (BASE_WIDTH / 2 * scaleFactor) + offsetX;
+        startButtonText.y = (BASE_HEIGHT / 2 + 50) * scaleFactor + offsetY; 
+        startButtonText.setFontSize(36 * scaleFactor); // Escala a fonte também
     }
 
     // Ajusta a posição e escala de cada torre e canhão
@@ -258,12 +269,11 @@ function resize(gameSize) {
         const def = item.def;
 
         if (sprite && sprite.active) { 
-            sprite.x = def.towerBaseX * scaleFactorX; 
-            sprite.y = def.towerBaseY * scaleFactorY; 
+            sprite.x = (def.towerBaseX * scaleFactor) + offsetX; 
+            sprite.y = (def.towerBaseY * scaleFactor) + offsetY; 
 
-            // Aplica o redimensionamento baseado nas dimensões alvo da definição
-            sprite.displayWidth = def.towerTargetWidth * scaleFactorX;
-            sprite.displayHeight = def.towerTargetHeight * scaleFactorY;
+            sprite.displayWidth = def.towerTargetWidth * scaleFactor;
+            sprite.displayHeight = def.towerTargetHeight * scaleFactor;
         }
     });
 
@@ -272,31 +282,30 @@ function resize(gameSize) {
         const def = item.def;
         
         if (sprite && sprite.active) { 
-            sprite.x = def.cannonX * scaleFactorX;
-            sprite.y = def.cannonY * scaleFactorY;
+            sprite.x = (def.cannonX * scaleFactor) + offsetX;
+            sprite.y = (def.cannonY * scaleFactor) + offsetY;
             
-            // Aplica o redimensionamento baseado nas dimensões alvo da definição
-            sprite.displayWidth = def.cannonTargetWidth * scaleFactorX;
-            sprite.displayHeight = def.cannonTargetHeight * scaleFactorY;
+            sprite.displayWidth = def.cannonTargetWidth * scaleFactor;
+            sprite.displayHeight = def.cannonTargetHeight * scaleFactor;
         }
     });
 
     // Ajusta o prédio
     if (currentBuilding && currentBuilding.active) { 
         // Se 'alvo1_predio' for uma imagem, use as coordenadas do editor e o displayWidth/Height
-        // currentBuilding.x = 450 * scaleFactorX; // Exemplo de X para a imagem do editor
-        // currentBuilding.y = 1552 * scaleFactorY; // Exemplo de Y para a imagem do editor
-        // currentBuilding.displayWidth = 506 * scaleFactorX; // displayWidth do editor para alvo1_predio
-        // currentBuilding.displayHeight = 362 * scaleFactorY; // displayHeight do editor para alvo1_predio
+        // currentBuilding.x = (450 * scaleFactor) + offsetX; 
+        // currentBuilding.y = (1552 * scaleFactor) + offsetY; 
+        // currentBuilding.displayWidth = 506 * scaleFactor; 
+        // currentBuilding.displayHeight = 362 * scaleFactor; 
 
         // Mantém a lógica de retângulo se você não usar a imagem
-        currentBuilding.x = (BASE_WIDTH / 2) * scaleFactorX;
-        currentBuilding.y = 1360 * scaleFactorY; 
-        currentBuilding.displayWidth = 270 * scaleFactorX;
-        currentBuilding.displayHeight = 320 * scaleFactorY;
+        currentBuilding.x = (BASE_WIDTH / 2 * scaleFactor) + offsetX;
+        currentBuilding.y = (1360 * scaleFactor) + offsetY; 
+        currentBuilding.displayWidth = 270 * scaleFactor;
+        currentBuilding.displayHeight = 320 * scaleFactor;
     }
     
-    console.log(`Resized to: ${width}x${height}. Scale factors X: ${scaleFactorX.toFixed(2)}, Y: ${scaleFactorY.toFixed(2)}`);
+    console.log(`Resized to: ${width}x${height}. Scale factor: ${scaleFactor.toFixed(2)}. Offset X: ${offsetX.toFixed(2)}, Offset Y: ${offsetY.toFixed(2)}`);
 }
 
 
@@ -360,8 +369,8 @@ function fireAntiMissile(cannon, targetX, targetY) {
     const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile'); 
     const antiMissileTargetWidthBase = 50; 
     const scaleFactorX = this.scale.width / BASE_WIDTH;
-    const antiMissileCurrentWidth = antiMissileTargetWidthBase * scaleFactorX;
-    antiMissile.setScale(antiMissileCurrentWidth / antiMissile.width); 
+    const antiMissileCurrentWidth = antiMissileTargetWidthBase * scaleFactorX; // Ajusta a largura base do anti-míssil
+    antiMissile.setScale(antiMissileCurrentWidth / antiMissile.width); // Aplica a escala para essa largura base
     antiMissile.setDepth(5); 
 
     this.tweens.add({
@@ -444,7 +453,7 @@ function update() {
             if (anti.active && missile.active && Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
                 anti.destroy();
                 missile.destroy();
-                this.onAntiMissileHit(anti.x, anti.x); // Correção: onAntiMissileHit precisa de X e Y do impacto
+                this.onAntiMissileHit(anti.x, anti.y); // Passando as coordenadas corretas para a explosão
                 // Remova os mísseis e antemísseis destruídos da lista para evitar processamento futuro
                 missiles = missiles.filter(m => m.active);
                 antiMissiles = antiMissiles.filter(a => a.active);
