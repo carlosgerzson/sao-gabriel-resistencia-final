@@ -97,65 +97,64 @@ function create() {
 
 function startGame() {
     console.log("startGame function started.");
-    // Fundo (vermelho escuro) - Adicionado como um sprite para ser redimensionado
-    gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0);
+    // Fundo (vermelho escuro)
+    gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0); // DEPTH: 0 (mais ao fundo)
 
-    // Silhueta Urbana (agora com displayWidth/Height fixos para BASE_WIDTH/HEIGHT)
-    // X=450 (centro), Y=1600 (base da tela) - VALORES DO EDITOR
+    // Silhueta Urbana 
     silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1);
-    silhuetaSprite.setDepth(20);
-    silhuetaSprite.displayWidth = 900; // Valor do editor
-    silhuetaSprite.displayHeight = 384; // Valor do editor
+    silhuetaSprite.setDepth(20); // DEPTH: 20 (entre canhões e torre E)
+    silhuetaSprite.displayWidth = 900; 
+    silhuetaSprite.displayHeight = 384; 
     
-    // --- CONFIGURAÇÕES DE CANHÕES E TORRES (USANDO OS DADOS PRECISOS DO EDITOR PARA 900x1600) ---
+    // --- CONFIGURAÇÕES DE CANHÕES E TORRES (AJUSTE DE DEPTHS) ---
     const towerAndCannonDefinitions = [
         {
             name: 'Torre Esquerda',
             towerAsset: 'torre_e',
-            towerBaseX: 130, // Coordenada X do editor (torre_e)
-            towerBaseY: 1600, // Coordenada Y do editor (torre_e)
-            towerTargetWidth: 218, // displayWidth do editor
-            towerTargetHeight: 709, // displayHeight do editor
-            towerDepth: 25,
+            towerBaseX: 130, 
+            towerBaseY: 1600, 
+            towerTargetWidth: 218, 
+            towerTargetHeight: 709, 
+            towerDepth: 30, // DEPTH: 30 (bem na frente, conforme pedido)
 
             cannonAsset: 'canhao_e',
-            cannonX: 130, // Coordenada X do editor (canhao_e)
-            cannonY: 981, // Coordenada Y do editor (canhao_e) - CRUCIAL para o alinhamento
-            cannonTargetWidth: 39, // displayWidth do editor
-            cannonTargetHeight: 141, // displayHeight do editor
-            cannonDepth: 30 // Aumentado para garantir que o canhão esteja acima da torre
+            cannonX: 130, 
+            cannonY: 981, 
+            cannonTargetWidth: 39, 
+            cannonTargetHeight: 141, 
+            cannonDepth: 10 // DEPTH: 10 (bem atrás, conforme pedido)
         },
         {
             name: 'Torre Central',
             towerAsset: 'torre_c',
-            towerBaseX: 610, // Coordenada X do editor (torre_c)
-            towerBaseY: 1600, // Coordenada Y do editor (torre_c)
-            towerTargetWidth: 148, // displayWidth do editor
-            towerTargetHeight: 637, // displayHeight do editor
-            towerDepth: 25, 
+            towerBaseX: 610, 
+            towerBaseY: 1600, 
+            towerTargetWidth: 148, 
+            towerTargetHeight: 637, 
+            towerDepth: 18, // DEPTH: 18 (atrás da silhueta, mas à frente dos canhões)
 
             cannonAsset: 'canhao_c',
-            cannonX: 610, // Coordenada X do editor (canhao_c)
-            cannonY: 1035, // Coordenada Y do editor (canhao_c)
-            cannonTargetWidth: 33, // displayWidth do editor
-            cannonTargetHeight: 103, // displayHeight do editor
-            cannonDepth: 30 
+            cannonX: 610, 
+            cannonY: 1035, 
+            cannonTargetWidth: 33, 
+            cannonTargetHeight: 103, 
+            cannonDepth: 10 // DEPTH: 10
         },
         {
             name: 'Torre Direita',
             towerAsset: 'torre_d',
-            towerBaseX: 793, // Coordenada X do editor (torre_d)
-            towerBaseY: 1600, // Coordenada Y do editor (torre_d)
-            towerTargetWidth: 190, // displayWidth do editor
-            towerTargetHeight: 782, // displayHeight do editor
-            towerDepth: 25, 
+            towerBaseX: 793, 
+            towerBaseY: 1600, 
+            towerTargetWidth: 190, 
+            towerTargetHeight: 782, 
+            towerDepth: 18, // DEPTH: 18
 
             cannonAsset: 'canhao_d',
-            cannonX: 793, // Coordenada X do editor (canhao_d)
-            cannonY: 901, // Coordenada Y do editor (canhao_d)
-            cannonTargetWidth: 39, // displayWidth do editor
-            cannonTargetHeight: 125, // displayHeight do editor
-            cannonDepth: 30 
+            cannonX: 793, 
+            cannonY: 901, 
+            cannonTargetWidth: 39, 
+            cannonTargetHeight: 125, 
+            cannonDepth: 10 // DEPTH: 10
         }
     ];
 
@@ -337,8 +336,9 @@ function spawnBuilding() {
     
     // SE VOCÊ QUISER CONTINUAR USANDO O RETÂNGULO DE COR (como estava antes):
     currentBuilding = this.add.rectangle(BASE_WIDTH / 2, 1360, 270, 320, buildingStates[0].color); 
-    currentBuilding.setOrigin(0.5, 1); // Certifica que o retângulo também tem a origem na base para consistência
-    currentBuilding.setDepth(1); 
+    currentBuilding = this.add.rectangle(BASE_WIDTH / 2, 1360, 270, 320, buildingStates[0].color); 
+    currentBuilding.setOrigin(0.5, 1); 
+    currentBuilding.setDepth(25); // DEPTH: 25 (entre torre E e silhueta, ou ajustável)
 
     currentBuilding.health = 3;
     currentBuilding.stateIndex = 0;
@@ -361,6 +361,7 @@ function spawnWave() {
             missile.targetX = this.scale.width / 2;
             missile.targetY = this.scale.height;
         }
+         missile.setDepth(50); // DEPTH: 50 (mísseis sempre na frente, para atacar)
         missiles.push(missile);
     }
 }
@@ -371,7 +372,7 @@ function fireAntiMissile(cannon, targetX, targetY) {
     const scaleFactorX = this.scale.width / BASE_WIDTH;
     const antiMissileCurrentWidth = antiMissileTargetWidthBase * scaleFactorX; // Ajusta a largura base do anti-míssil
     antiMissile.setScale(antiMissileCurrentWidth / antiMissile.width); // Aplica a escala para essa largura base
-    antiMissile.setDepth(5); 
+    antiMissile.setDepth(55); 
 
     this.tweens.add({
         targets: antiMissile,
@@ -390,7 +391,7 @@ function fireAntiMissile(cannon, targetX, targetY) {
 
 function onAntiMissileHit(x, y) {
     const explosionCircle = this.add.circle(x, y, 5, 0xffff00); 
-    explosionCircle.setDepth(45); 
+    explosionCircle.setDepth(60); 
     explosionCircle.setScale(0); 
     explosionCircle.setAlpha(1); 
 
