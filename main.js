@@ -54,7 +54,7 @@ function preload() {
     this.load.image('canhao_d', 'assets/canhao_d.png'); 
     this.load.image('antimissile', 'assets/antimissile.png'); 
     // SE 'alvo1_predio' É UMA IMAGEM, DESCOMENTE E CERTIFIQUE-SE DO CAMINHO CORRETO:
-    this.load.image('alvo1_predio', 'assets/alvo1_predio.png'); 
+    this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png'); 
     console.log("Preload complete.");
 }
 
