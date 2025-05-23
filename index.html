@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>São Gabriel Resistência Final</title>
 
     <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -73,12 +74,11 @@
             /* REMOVA ISSO DEPOIS */
         }
 
-        /* O canvas do Phaser por padrão terá a tag <canvas>, vamos garantir que se comporte como bloco */
-        canvas {
+        #game-container canvas {
             display: block;
             /* Essencial para remover margens padrão */
+            /* Você pode remover a borda vermelha se não precisar dela para depuração */
             border: 2px solid red;
-            /* REMOVA ISSO DEPOIS */
         }
     </style>
 </head>
