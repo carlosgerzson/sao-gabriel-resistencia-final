@@ -1,11 +1,11 @@
 // Variáveis globais
-let cannons = []; 
-let missiles = []; 
-let antiMissiles = []; 
-let currentBuilding = null; 
-let currentBuildingIndex = 0; 
-let currentState = 'title'; 
-let waveCount = 0; 
+let cannons = [];
+let missiles = [];
+let antiMissiles = [];
+let currentBuilding = null;
+let currentBuildingIndex = 0;
+let currentState = 'title';
+let waveCount = 0;
 
 // Para manter a proporção dos elementos em relação à nossa resolução base
 const BASE_WIDTH = 900;
@@ -20,9 +20,9 @@ const buildingStates = [
 
 const config = {
     type: Phaser.AUTO,
-    width: BASE_WIDTH,  
-    height: BASE_HEIGHT, 
-    parent: 'game-container', 
+    width: BASE_WIDTH,
+    height: BASE_HEIGHT,
+    parent: 'game-container',
     physics: {
         default: 'arcade',
         arcade: {
@@ -30,8 +30,8 @@ const config = {
         }
     },
     scale: {
-        mode: Phaser.Scale.RESIZE, 
-        autoCenter: Phaser.Scale.CENTER_BOTH, 
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container'
     },
     scene: {
@@ -45,25 +45,25 @@ const game = new Phaser.Game(config);
 
 function preload() {
     console.log("Preloading assets...");
-    this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png'); 
-    this.load.image('torre_e', 'assets/torre_e.png'); 
-    this.load.image('torre_c', 'assets/torre_c.png'); 
-    this.load.image('torre_d', 'assets/torre_d.png'); 
-    this.load.image('canhao_e', 'assets/canhao_e.png'); 
-    this.load.image('canhao_c', 'assets/canhao_c.png'); 
-    this.load.image('canhao_d', 'assets/canhao_d.png'); 
-    this.load.image('antimissile', 'assets/antimissile.png'); 
+    this.load.image('silhueta_urbana', 'assets/silhueta_urbana.png');
+    this.load.image('torre_e', 'assets/torre_e.png');
+    this.load.image('torre_c', 'assets/torre_c.png');
+    this.load.image('torre_d', 'assets/torre_d.png');
+    this.load.image('canhao_e', 'assets/canhao_e.png');
+    this.load.image('canhao_c', 'assets/canhao_c.png');
+    this.load.image('canhao_d', 'assets/canhao_d.png');
+    this.load.image('antimissile', 'assets/antimissile.png');
     // AGORA SEMPRE CARREGANDO A IMAGEM DO PRÉDIO
-    this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png'); 
+    this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png');
     console.log("Preload complete.");
 }
 
 // Variáveis para referências dos sprites, para que possam ser acessadas na função resize
 let silhuetaSprite;
-let titleText, startButtonText;
-let allCannonsSprites = []; 
-let allTowerSprites = []; 
-let gameBackgroundRect; 
+let titleText, startButtonText, gameOverText; // gameOverText declarado como global aqui
+let allCannonsSprites = [];
+let allTowerSprites = [];
+let gameBackgroundRect;
 
 // Variáveis para os offsets e fator de escala calculados em resize
 let currentScaleFactor = 1;
@@ -72,19 +72,19 @@ let currentOffsetY = 0;
 
 function create() {
     console.log("Create function started.");
-    
+
     this.scale.on('resize', resize, this);
 
     titleText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 - 50, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
-        fontSize: '48px', 
+        fontSize: '48px',
         fill: '#fff',
         fontFamily: 'monospace'
     }).setOrigin(0.5);
 
     startButtonText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 + 50, 'TOCAR PARA INICIAR', {
-        fontSize: '36px', 
+        fontSize: '36px',
         fill: '#fff'
-    }).setOrigin(0.5).setInteractive(); 
+    }).setOrigin(0.5).setInteractive();
 
     startButtonText.on('pointerdown', (pointer) => {
         console.log("Botão Iniciar clicado!");
@@ -105,78 +105,78 @@ function startGame() {
     // Silhueta Urbana 
     silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1);
     silhuetaSprite.setDepth(20); // DEPTH: 20
-    silhuetaSprite.displayWidth = 900; 
-    silhuetaSprite.displayHeight = 384; 
-    
+    silhuetaSprite.displayWidth = 900;
+    silhuetaSprite.displayHeight = 384;
+
     // --- CONFIGURAÇÕES DE CANHÕES E TORRES (COM OS DEPTHS REVISADOS) ---
     const towerAndCannonDefinitions = [
         {
             name: 'Torre Esquerda',
             towerAsset: 'torre_e',
-            towerBaseX: 130, 
-            towerBaseY: 1600, 
-            towerTargetWidth: 218, 
-            towerTargetHeight: 709, 
+            towerBaseX: 130,
+            towerBaseY: 1600,
+            towerTargetWidth: 218,
+            towerTargetHeight: 709,
             towerDepth: 30, // DEPTH: 30 (Torre E na frente)
 
             cannonAsset: 'canhao_e',
-            cannonX: 130, 
-            cannonY: 981, 
-            cannonTargetWidth: 39, 
-            cannonTargetHeight: 141, 
+            cannonX: 130,
+            cannonY: 981,
+            cannonTargetWidth: 39,
+            cannonTargetHeight: 141,
             cannonDepth: 10 // DEPTH: 10 (Canhão atrás de tudo)
         },
         {
             name: 'Torre Central',
             towerAsset: 'torre_c',
-            towerBaseX: 610, 
-            towerBaseY: 1600, 
-            towerTargetWidth: 148, 
-            towerTargetHeight: 637, 
+            towerBaseX: 610,
+            towerBaseY: 1600,
+            towerTargetWidth: 148,
+            towerTargetHeight: 637,
             towerDepth: 18, // DEPTH: 18 (Torre C e D atrás da silhueta)
 
             cannonAsset: 'canhao_c',
-            cannonX: 610, 
-            cannonY: 1035, 
-            cannonTargetWidth: 33, 
-            cannonTargetHeight: 103, 
+            cannonX: 610,
+            cannonY: 1035,
+            cannonTargetWidth: 33,
+            cannonTargetHeight: 103,
             cannonDepth: 10 // DEPTH: 10
         },
         {
             name: 'Torre Direita',
             towerAsset: 'torre_d',
-            towerBaseX: 793, 
-            towerBaseY: 1600, 
-            towerTargetWidth: 190, 
-            towerTargetHeight: 782, 
+            towerBaseX: 793,
+            towerBaseY: 1600,
+            towerTargetWidth: 190,
+            towerTargetHeight: 782,
             towerDepth: 18, // DEPTH: 18
 
             cannonAsset: 'canhao_d',
-            cannonX: 793, 
-            cannonY: 901, 
-            cannonTargetWidth: 39, 
-            cannonTargetHeight: 125, 
+            cannonX: 793,
+            cannonY: 901,
+            cannonTargetWidth: 39,
+            cannonTargetHeight: 125,
             cannonDepth: 10 // DEPTH: 10
         }
     ];
 
     cannons = [];
-    allCannonsSprites = []; 
-    this.towers = []; 
-    allTowerSprites = []; 
+    allCannonsSprites = [];
+    this.towers = [];
+    allTowerSprites = [];
 
     towerAndCannonDefinitions.forEach((def) => {
-        const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset).setOrigin(0.5, 1); 
-        tower.setDepth(def.towerDepth); 
-        allTowerSprites.push({ sprite: tower, def: def }); 
+        const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset).setOrigin(0.5, 1);
+        tower.setDepth(def.towerDepth);
+        allTowerSprites.push({ sprite: tower, def: def });
 
         const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
-        cannon.setOrigin(0.5, 1); 
-        cannon.setDepth(def.cannonDepth); 
-        allCannonsSprites.push({ sprite: cannon, def: def }); 
+        cannon.setOrigin(0.5, 1);
+        cannon.setDepth(def.cannonDepth);
+        allCannonsSprites.push({ sprite: cannon, def: def });
 
-        cannons.push({ sprite: cannon, tower: tower }); 
-        this.towers.push(tower); 
+        cannons.push({ sprite: cannon, tower: tower });
+        this.towers.push(tower);
     });
 
     // Primeiro prédio
@@ -187,7 +187,7 @@ function startGame() {
 
     // Controles de toque/clique
     this.input.on('pointerdown', (pointer) => {
-        if (currentState !== 'game') return; 
+        if (currentState !== 'game') return;
 
         let closestCannon = null;
         let minDistance = Infinity;
@@ -213,8 +213,8 @@ function startGame() {
 
 
 function resize(gameSize) {
-    const width = gameSize.width; 
-    const height = gameSize.height; 
+    const width = gameSize.width;
+    const height = gameSize.height;
 
     this.cameras.main.setViewport(0, 0, width, height);
 
@@ -226,43 +226,51 @@ function resize(gameSize) {
     // --- Redimensiona e reposiciona os elementos ---
 
     // Fundo da Área de Jogo
-    if (gameBackgroundRect && gameBackgroundRect.active) { 
+    // AQUI ESTÁ A MUDANÇA CRÍTICA:
+    // Posicionar o gameBackgroundRect de acordo com os offsets calculados
+    if (gameBackgroundRect && gameBackgroundRect.active) {
         gameBackgroundRect.x = currentOffsetX;
         gameBackgroundRect.y = currentOffsetY;
         gameBackgroundRect.displayWidth = BASE_WIDTH * currentScaleFactor;
         gameBackgroundRect.displayHeight = BASE_HEIGHT * currentScaleFactor;
     }
 
-    // Silhueta Urbana
-    if (silhuetaSprite && silhuetaSprite.active) { 
-        silhuetaSprite.x = (450 * currentScaleFactor) + currentOffsetX; 
-        silhuetaSprite.y = (1600 * currentScaleFactor) + currentOffsetY; 
-        
+    // Agora, para *todos* os outros sprites, ajustamos suas posições com base em
+    // suas coordenadas BASE (do editor) mais os offsets CALCULADOS.
+    // Isso garante que eles se movam junto com a área centralizada do jogo.
+
+    if (silhuetaSprite && silhuetaSprite.active) {
+        silhuetaSprite.x = (450 * currentScaleFactor) + currentOffsetX;
+        silhuetaSprite.y = (1600 * currentScaleFactor) + currentOffsetY;
         silhuetaSprite.displayWidth = 900 * currentScaleFactor;
         silhuetaSprite.displayHeight = 384 * currentScaleFactor;
     }
 
-    // Elementos da tela de título (se ainda existirem)
     if (titleText && titleText.active) {
         titleText.x = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
-        titleText.y = (BASE_HEIGHT / 2 - 50) * currentScaleFactor + currentOffsetY; 
-        titleText.setFontSize(48 * currentScaleFactor); 
+        titleText.y = (BASE_HEIGHT / 2 - 50) * currentScaleFactor + currentOffsetY;
+        titleText.setFontSize(48 * currentScaleFactor);
     }
     if (startButtonText && startButtonText.active) {
         startButtonText.x = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
-        startButtonText.y = (BASE_HEIGHT / 2 + 50) * currentScaleFactor + currentOffsetY; 
-        startButtonText.setFontSize(36 * currentScaleFactor); 
+        startButtonText.y = (BASE_HEIGHT / 2 + 50) * currentScaleFactor + currentOffsetY;
+        startButtonText.setFontSize(36 * currentScaleFactor);
     }
 
-    // Ajusta a posição e escala de cada torre e canhão
+    // O ajuste do Game Over TEXTO é o mais crítico aqui, pois é ele que está deslocando
+    // AGORA: gameOverText é uma variável global e está sendo atualizada corretamente aqui
+    if (gameOverText && gameOverText.active) {
+        gameOverText.x = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
+        gameOverText.y = (BASE_HEIGHT / 2 * currentScaleFactor) + currentOffsetY;
+        gameOverText.setFontSize(32 * currentScaleFactor);
+    }
+
     allTowerSprites.forEach(item => {
         const sprite = item.sprite;
         const def = item.def;
-
-        if (sprite && sprite.active) { 
-            sprite.x = (def.towerBaseX * currentScaleFactor) + currentOffsetX; 
-            sprite.y = (def.towerBaseY * currentScaleFactor) + currentOffsetY; 
-
+        if (sprite && sprite.active) {
+            sprite.x = (def.towerBaseX * currentScaleFactor) + currentOffsetX;
+            sprite.y = (def.towerBaseY * currentScaleFactor) + currentOffsetY;
             sprite.displayWidth = def.towerTargetWidth * currentScaleFactor;
             sprite.displayHeight = def.towerTargetHeight * currentScaleFactor;
         }
@@ -271,11 +279,9 @@ function resize(gameSize) {
     allCannonsSprites.forEach(item => {
         const sprite = item.sprite;
         const def = item.def;
-        
-        if (sprite && sprite.active) { 
+        if (sprite && sprite.active) {
             sprite.x = (def.cannonX * currentScaleFactor) + currentOffsetX;
             sprite.y = (def.cannonY * currentScaleFactor) + currentOffsetY;
-            
             sprite.displayWidth = def.cannonTargetWidth * currentScaleFactor;
             sprite.displayHeight = def.cannonTargetHeight * currentScaleFactor;
         }
@@ -283,12 +289,38 @@ function resize(gameSize) {
 
     // Ajusta o prédio (AGORA SEMPRE USANDO A IMAGEM alvo1_predio.png)
     if (currentBuilding && currentBuilding.active) { 
-        currentBuilding.x = (450 * currentScaleFactor) + currentOffsetX; // Coordenada X do editor
-        currentBuilding.y = (1552 * currentScaleFactor) + currentOffsetY; // Coordenada Y do editor
-        currentBuilding.displayWidth = 506 * currentScaleFactor; // displayWidth do editor para alvo1_predio
-        currentBuilding.displayHeight = 362 * currentScaleFactor; // displayHeight do editor para alvo1_predio
+        currentBuilding.x = (450 * currentScaleFactor) + currentOffsetX; 
+        currentBuilding.y = (1552 * currentScaleFactor) + currentOffsetY; 
+        currentBuilding.displayWidth = 506 * currentScaleFactor; 
+        currentBuilding.displayHeight = 362 * currentScaleFactor; 
     }
-    
+
+    // Mísseis e Anti-Mísseis (Correção para que os alvos e displays sejam atualizados)
+    missiles.forEach(missile => {
+        if (missile.active) {
+            if (currentBuilding && currentBuilding.active) {
+                // targetX/Y deve ser a coordenada ESCALADA DO PRÉDIO, que já inclui o offset
+                missile.targetX = currentBuilding.x; 
+                missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2;
+            } else { // Se o prédio for destruído, o alvo é o centro inferior da área do jogo
+                missile.targetX = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
+                missile.targetY = (BASE_HEIGHT * currentScaleFactor) + currentOffsetY;
+            }
+            const missileBaseWidth = 10; 
+            const missileBaseHeight = 30; 
+            missile.displayWidth = missileBaseWidth * currentScaleFactor;
+            missile.displayHeight = missileBaseHeight * currentScaleFactor;
+        }
+    });
+
+    antiMissiles.forEach(anti => {
+        if (anti.active) {
+            const antiMissileTargetWidthBase = 50; 
+            anti.displayWidth = antiMissileTargetWidthBase * currentScaleFactor;
+            anti.displayHeight = anti.height * (anti.displayWidth / anti.width); 
+        }
+    });
+
     console.log(`Resized to: ${width}x${height}. Scale factor: ${currentScaleFactor.toFixed(2)}. Offset X: ${currentOffsetX.toFixed(2)}, Offset Y: ${currentOffsetY.toFixed(2)}`);
 }
 
@@ -296,21 +328,21 @@ function resize(gameSize) {
 function spawnBuilding() {
     if (currentBuildingIndex >= 10) {
         currentState = 'gameover';
-        const gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
-        
-        if (gameOverText) {
-            gameOverText.setFontSize(32 * currentScaleFactor);
-            gameOverText.x = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
-            gameOverText.y = (BASE_HEIGHT / 2 * currentScaleFactor) + currentOffsetY;
-        }
-        this.time.removeAllEvents(); 
+        // CORREÇÃO AQUI: ATRIBUI A INSTÂNCIA DO TEXTO À VARIÁVEL GLOBAL gameOverText
+        gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
+        gameOverText.setDepth(100); // Garante que o texto de Game Over esteja acima de tudo
+
+        // A lógica de redimensionamento para gameOverText já está na função resize()
+        // e será chamada imediatamente após esta atribuição devido ao this.scale.on('resize', resize, this);
+        resize.call(this, { width: this.scale.width, height: this.scale.height }); // Força um resize imediato para posicionar
+        this.time.removeAllEvents();
         return;
     }
-    
+
     // USANDO A IMAGEM 'alvo1_predio.png' DEFINITIVAMENTE
     currentBuilding = this.add.image(450, 1552, "alvo1_predio").setOrigin(0.5, 1); // X e Y do editor
     currentBuilding.setDepth(25); // DEPTH: 25 (entre torre E e silhueta)
-    
+
     currentBuilding.health = 3; // Isso será modificado na próxima etapa para o sistema de camadas de dano
     currentBuilding.stateIndex = 0; // Usado para referenciar buildingStates
 
@@ -318,51 +350,51 @@ function spawnBuilding() {
 }
 
 function spawnWave() {
-    if (currentState !== 'game') return; 
+    if (currentState !== 'game') return;
 
     waveCount++;
     for (let i = 0; i < 5; i++) {
-        const x_base = Phaser.Math.Between(0, BASE_WIDTH); 
+        const x_base = Phaser.Math.Between(0, BASE_WIDTH);
         const spawnX = (x_base * currentScaleFactor) + currentOffsetX;
-        const spawnY = currentOffsetY; 
+        const spawnY = currentOffsetY;
 
-        const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00); 
+        const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
         missile.speed = 200 + waveCount * 50;
-        
-        if (currentBuilding) { 
-            missile.targetX = currentBuilding.x; 
-            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2; 
+
+        if (currentBuilding) {
+            missile.targetX = currentBuilding.x;
+            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2;
         } else {
             missile.targetX = (BASE_WIDTH / 2 * currentScaleFactor) + currentOffsetX;
             missile.targetY = (BASE_HEIGHT * currentScaleFactor) + currentOffsetY;
         }
-        
-        const missileBaseWidth = 10; 
-        const missileBaseHeight = 30; 
+
+        const missileBaseWidth = 10;
+        const missileBaseHeight = 30;
         missile.displayWidth = missileBaseWidth * currentScaleFactor;
         missile.displayHeight = missileBaseHeight * currentScaleFactor;
 
-        missile.setDepth(50); 
+        missile.setDepth(50);
         missiles.push(missile);
     }
 }
 
-function fireAntiMissile(cannon, targetGameX, targetGameY) { 
-    const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile'); 
-    const antiMissileTargetWidthBase = 50; 
-    
+function fireAntiMissile(cannon, targetGameX, targetGameY) {
+    const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile');
+    const antiMissileTargetWidthBase = 50;
+
     antiMissile.displayWidth = antiMissileTargetWidthBase * currentScaleFactor;
-    antiMissile.displayHeight = antiMissile.height * (antiMissile.displayWidth / antiMissile.width); 
-    antiMissile.setDepth(55); 
+    antiMissile.displayHeight = antiMissile.height * (antiMissile.displayWidth / antiMissile.width);
+    antiMissile.setDepth(55);
 
     this.tweens.add({
         targets: antiMissile,
-        x: (targetGameX * currentScaleFactor) + currentOffsetX, 
-        y: (targetGameY * currentScaleFactor) + currentOffsetY, 
-        duration: 500, 
+        x: (targetGameX * currentScaleFactor) + currentOffsetX,
+        y: (targetGameY * currentScaleFactor) + currentOffsetY,
+        duration: 500,
         ease: 'Linear',
         onComplete: () => {
-            antiMissile.destroy(); 
+            antiMissile.destroy();
             this.onAntiMissileHit((targetGameX * currentScaleFactor) + currentOffsetX, (targetGameY * currentScaleFactor) + currentOffsetY);
         }
     });
@@ -371,19 +403,19 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
 }
 
 function onAntiMissileHit(x, y) {
-    const explosionCircle = this.add.circle(x, y, 5, 0xffff00); 
-    explosionCircle.setDepth(60); 
-    explosionCircle.setScale(0); 
-    explosionCircle.setAlpha(1); 
+    const explosionCircle = this.add.circle(x, y, 5, 0xffff00);
+    explosionCircle.setDepth(60);
+    explosionCircle.setScale(0);
+    explosionCircle.setAlpha(1);
 
     this.tweens.add({
         targets: explosionCircle,
-        scale: 1, 
-        alpha: 0, 
-        ease: 'Linear', 
-        duration: 300, 
+        scale: 1,
+        alpha: 0,
+        ease: 'Linear',
+        duration: 300,
         onComplete: () => {
-            explosionCircle.destroy(); 
+            explosionCircle.destroy();
         }
     });
 }
@@ -392,28 +424,28 @@ function update() {
     if (currentState !== 'game') return;
 
     missiles.forEach((missile, index) => {
-        if (!missile.active) return; 
+        if (!missile.active) return;
 
-        const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY); 
+        const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY);
         missile.x += Math.cos(angle) * missile.speed * (1 / 60);
         missile.y += Math.sin(angle) * missile.speed * (1 / 60);
-        missile.rotation = angle + Math.PI / 2; 
+        missile.rotation = angle + Math.PI / 2;
 
         // Colisão com o prédio
-        if (currentBuilding && currentBuilding.active && missile.y > currentBuilding.y - currentBuilding.displayHeight / 2) { 
-            if (missile.x > currentBuilding.x - currentBuilding.displayWidth / 2 && 
+        if (currentBuilding && currentBuilding.active && missile.y > currentBuilding.y - currentBuilding.displayHeight / 2) {
+            if (missile.x > currentBuilding.x - currentBuilding.displayWidth / 2 &&
                 missile.x < currentBuilding.x + currentBuilding.displayWidth / 2) {
 
                 missiles.splice(index, 1);
                 missile.destroy();
-                
+
                 // A LÓGICA DE DANO DO PRÉDIO SERÁ REVISADA NA PRÓXIMA ETAPA
                 if (currentBuilding.health > 0) {
                     currentBuilding.health--;
                     currentBuilding.stateIndex++;
                     // A COR DO RETÂNGULO NÃO SERÁ MAIS USADA SE FOR IMAGEM
                     // if (currentBuilding.stateIndex < buildingStates.length) {
-                    //     currentBuilding.fillColor = buildingStates[currentBuilding.stateIndex].color;
+                    //    currentBuilding.fillColor = buildingStates[currentBuilding.stateIndex].color;
                     // }
                     if (currentBuilding.health === 0) {
                         currentBuilding.destroy();
@@ -425,15 +457,15 @@ function update() {
         }
     });
 
-    missiles = missiles.filter(missile => missile.active); 
-    antiMissiles = antiMissiles.filter(anti => anti.active); 
+    missiles = missiles.filter(missile => missile.active);
+    antiMissiles = antiMissiles.filter(anti => anti.active);
 
-    antiMissiles.forEach((anti) => { 
-        missiles.slice().forEach((missile) => { 
+    antiMissiles.forEach((anti) => {
+        missiles.slice().forEach((missile) => {
             if (anti.active && missile.active && Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
                 anti.destroy();
                 missile.destroy();
-                this.onAntiMissileHit(anti.x, anti.y); 
+                this.onAntiMissileHit(anti.x, anti.y);
                 missiles = missiles.filter(m => m.active);
                 antiMissiles = antiMissiles.filter(a => a.active);
             }
@@ -445,7 +477,7 @@ function update() {
         let minEnemyDistance = Infinity;
 
         missiles.forEach(missile => {
-            if (!missile.active) return; 
+            if (!missile.active) return;
             const distance = Phaser.Math.Distance.Between(cannon.sprite.x, cannon.sprite.y, missile.x, missile.y);
             if (distance < minEnemyDistance) {
                 minEnemyDistance = distance;
@@ -454,9 +486,9 @@ function update() {
         });
 
         if (closestEnemyMissile) {
-            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y); 
-            cannon.sprite.rotation = angle + Math.PI / 2; 
-        } else if (currentBuilding && currentBuilding.active) { 
+            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y);
+            cannon.sprite.rotation = angle + Math.PI / 2;
+        } else if (currentBuilding && currentBuilding.active) {
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         }

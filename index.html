@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>São Gabriel Resistência Final</title>
 
     <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    
+
     <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
@@ -42,39 +43,52 @@
             return gk_fileData[filename] || "";
         }
     </script>
-    
+
     <style>
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Crucial para evitar barras de rolagem */
-            background-color: #080808; /* Cor de fundo do seu jogo, se o canvas não preencher 100% */
+            overflow: hidden;
+            /* Importantíssimo para evitar scrollbars */
             width: 100%;
             height: 100%;
-        }
-        /* O game-container é o elemento pai onde o canvas do Phaser será injetado */
-        #game-container { 
-            width: 100vw; /* Ocupa 100% da largura da viewport */
-            height: 100vh; /* Ocupa 100% da altura da viewport */
+            background-color: black;
+            /* Estes 3 garantem que o body é um flex container e centraliza seu conteúdo */
             display: flex;
-            justify-content: center; /* Centraliza horizontalmente o canvas dentro do container */
-            align-items: center; /* Centraliza verticalmente o canvas dentro do container */
-            background-color: #3b1a1a; /* Cor de fundo do seu jogo, se o canvas não preencher 100% */
+            justify-content: center;
+            align-items: center;
         }
+
+        /* O game-container é o elemento pai onde o canvas do Phaser será injetado */
+        #game-container {
+            width: 100%;
+            height: 100%;
+            /* O game-container também deve ser flex para o canvas poder ser centralizado dentro dele pelo Phaser */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Adicione uma borda temporária para visualização */
+            border: 2px solid blue;
+            /* REMOVA ISSO DEPOIS */
+        }
+
         /* O canvas do Phaser por padrão terá a tag <canvas>, vamos garantir que se comporte como bloco */
         canvas {
-            display: block; 
-            /* Se for necessário, pode adicionar max-width e max-height aqui, 
-               mas o Phaser.Scale.RESIZE geralmente se adapta melhor sem isso */
+            display: block;
+            /* Essencial para remover margens padrão */
+            border: 2px solid red;
+            /* REMOVA ISSO DEPOIS */
         }
     </style>
 </head>
 
 <body>
-    <div id="game-container"></div> 
+    <div id="game-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    
-    <script src="main.js"></script> 
+
+    <script src="main.js"></script>
 </body>
+
 </html>
