@@ -30,7 +30,7 @@ const config = {
         }
     },
     scale: {
-        mode: Phaser.Scale.FIT, // ALTERADO PARA Phaser.Scale.FIT
+        mode: Phaser.Scale.resize, // ALTERADO PARA Phaser.Scale.resize
         autoCenter: Phaser.Scale.NO_CENTER, // <<<<< ESSA É A MUDANÇA NECESSÁRIA
         parent: 'game-container'
     },
