@@ -30,8 +30,8 @@ const config = {
         }
     },
     scale: {
-        mode: Phaser.Scale.FIT, // Mantido como FIT
-        autoCenter: Phaser.Scale.NONE, // ALTERADO AQUI: Removido autoCenter
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.NONE,
         parent: 'game-container'
     },
     scene: {
@@ -52,8 +52,8 @@ function preload() {
     this.load.image('canhao_e', 'assets/canhao_e.png');
     this.load.image('canhao_c', 'assets/canhao_c.png');
     this.load.image('canhao_d', 'assets/canhao_d.png');
+    // Mantemos o carregamento, mas o uso será desabilitado na função fireAntiMissile por enquanto
     this.load.image('antimissile', 'assets/antimissile.png');
-    // AGORA SEMPRE CARREGANDO A IMAGEM DO PRÉDIO
     this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png');
     console.log("Preload complete.");
 }
@@ -66,9 +66,7 @@ let allTowerSprites = [];
 let gameBackgroundRect;
 
 // Variáveis para os offsets e fator de escala calculados em resize
-// Com FIT, estas variáveis se tornam menos críticas para o posicionamento de elementos
-// internos, mas ainda podem ser úteis para depuração ou lógica específica.
-let currentScaleFactor = 1; // Manteremos, mas seu uso será reduzido
+let currentScaleFactor = 1;
 let currentOffsetX = 0;
 let currentOffsetY = 0;
 
@@ -102,17 +100,13 @@ function create() {
 
 function startGame() {
     console.log("startGame function started.");
-    // Fundo da Área de Jogo (vermelho escuro) - Cor definitiva do jogo
-    // Com FIT, o retângulo de fundo deve ter o tamanho BASE para cobrir o mundo do jogo
-    gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0); // DEPTH: 0
+    gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0);
 
-    // Silhueta Urbana
     silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1);
-    silhuetaSprite.setDepth(20); // DEPTH: 20
-    silhuetaSprite.displayWidth = 900; // Define as dimensões base
-    silhuetaSprite.displayHeight = 384; // Define as dimensões base
+    silhuetaSprite.setDepth(20);
+    silhuetaSprite.displayWidth = 900;
+    silhuetaSprite.displayHeight = 384;
 
-    // --- CONFIGURAÇÕES DE CANHÕES E TORRES (COM OS DEPTHS REVISADOS) ---
     const towerAndCannonDefinitions = [
         {
             name: 'Torre Esquerda',
@@ -121,14 +115,14 @@ function startGame() {
             towerBaseY: 1600,
             towerTargetWidth: 218,
             towerTargetHeight: 709,
-            towerDepth: 30, // DEPTH: 30 (Torre E na frente)
+            towerDepth: 30,
 
             cannonAsset: 'canhao_e',
             cannonX: 130,
             cannonY: 981,
             cannonTargetWidth: 39,
             cannonTargetHeight: 141,
-            cannonDepth: 10 // DEPTH: 10 (Canhão atrás de tudo)
+            cannonDepth: 10
         },
         {
             name: 'Torre Central',
@@ -172,43 +166,35 @@ function startGame() {
     towerAndCannonDefinitions.forEach((def) => {
         const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset).setOrigin(0.5, 1);
         tower.setDepth(def.towerDepth);
-        tower.displayWidth = def.towerTargetWidth; // Definir displayWidth/Height aqui no START
-        tower.displayHeight = def.towerTargetHeight; // para que o FIT os escala corretamente
+        tower.displayWidth = def.towerTargetWidth;
+        tower.displayHeight = def.towerTargetHeight;
         allTowerSprites.push({ sprite: tower, def: def });
 
         const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
         cannon.setOrigin(0.5, 1);
         cannon.setDepth(def.cannonDepth);
-        cannon.displayWidth = def.cannonTargetWidth; // Definir displayWidth/Height aqui no START
-        cannon.displayHeight = def.cannonTargetHeight; // para que o FIT os escala corretamente
+        cannon.displayWidth = def.cannonTargetWidth;
+        cannon.displayHeight = def.cannonTargetHeight;
         allCannonsSprites.push({ sprite: cannon, def: def });
 
         cannons.push({ sprite: cannon, tower: tower });
         this.towers.push(tower);
     });
 
-    // Primeiro prédio
     spawnBuilding.call(this);
 
-    // Iniciar onda de mísseis a cada 5 segundos
     this.time.addEvent({ delay: 5000, callback: spawnWave, callbackScope: this, loop: true });
 
-    // Controles de toque/clique
     this.input.on('pointerdown', (pointer) => {
         if (currentState !== 'game') return;
 
         let closestCannon = null;
         let minDistance = Infinity;
 
-        // Com FIT, o pointer.x/y já estão nas coordenadas do mundo do jogo escalado
-        // ou seja, se o jogo tem BASE_WIDTH x BASE_HEIGHT, e está escalado,
-        // o clique em (450, 800) corresponde ao centro do mundo do jogo,
-        // independentemente da escala da tela.
         const gamePointerX = pointer.x;
         const gamePointerY = pointer.y;
 
         cannons.forEach(cannon => {
-            // A distância é calculada entre as coordenadas do mundo do jogo
             const distance = Phaser.Math.Distance.Between(gamePointerX, gamePointerY, cannon.sprite.x, cannon.sprite.y);
             if (distance < minDistance) {
                 minDistance = distance;
@@ -224,115 +210,78 @@ function startGame() {
     resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
-// FUNÇÃO RESIZE SIMPLIFICADA PARA Phaser.Scale.FIT
-// Com FIT, o Phaser já faz a maior parte do trabalho de escala e centralização do canvas.
-// Nossos elementos internos devem ser posicionados em relação à nossa BASE_WIDTH/BASE_HEIGHT,
-// e o Phaser cuida de escalá-los junto com o canvas.
 function resize(gameSize) {
-    // Define a viewport da câmera para o tamanho da tela atual
     this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
 
-    // O zoom do Phaser é o fator de escala que ele está aplicando ao nosso mundo de jogo (BASE_WIDTH/BASE_HEIGHT)
     const currentPhaserZoom = this.scale.zoom;
 
-    // Calcular os offsets do canvas em relação à tela para usar na lógica de "coordenadas reais da tela"
-    // (APENAS SE ABSOLUTAMENTE NECESSÁRIO, normalmente para coisas fora do mundo do jogo)
-    // Para o nosso caso, no entanto, a maioria das coordenadas são do "mundo do jogo"
-    // currentOffsetX = (gameSize.width - BASE_WIDTH * currentPhaserZoom) * 0.5;
-    // currentOffsetY = (gameSize.height - BASE_HEIGHT * currentPhaserZoom) * 0.5;
-
-    // Fundo da Área de Jogo: Deve cobrir o mundo de jogo (BASE_WIDTH x BASE_HEIGHT)
     if (gameBackgroundRect && gameBackgroundRect.active) {
         gameBackgroundRect.x = 0;
         gameBackgroundRect.y = 0;
-        gameBackgroundRect.displayWidth = BASE_WIDTH; // Já estão no tamanho base
-        gameBackgroundRect.displayHeight = BASE_HEIGHT; // Já estão no tamanho base
+        gameBackgroundRect.displayWidth = BASE_WIDTH;
+        gameBackgroundRect.displayHeight = BASE_HEIGHT;
     }
 
-    // Títulos e Botões (Textos) - posicionar no mundo do jogo e ajustar fontSize
     if (titleText && titleText.active) {
         titleText.x = BASE_WIDTH / 2;
         titleText.y = BASE_HEIGHT / 2 - 50;
-        titleText.setFontSize(48 * currentPhaserZoom); // Font size ainda precisa ser escalado
+        titleText.setFontSize(48 * currentPhaserZoom);
     }
     if (startButtonText && startButtonText.active) {
         startButtonText.x = BASE_WIDTH / 2;
         startButtonText.y = BASE_HEIGHT / 2 + 50;
-        startButtonText.setFontSize(36 * currentPhaserZoom); // Font size ainda precisa ser escalado
+        startButtonText.setFontSize(36 * currentPhaserZoom);
     }
 
-    // Game Over Text - posicionar no mundo do jogo e ajustar fontSize
     if (gameOverText && gameOverText.active) {
         gameOverText.x = BASE_WIDTH / 2;
         gameOverText.y = BASE_HEIGHT / 2;
-        gameOverText.setFontSize(32 * currentPhaserZoom); // Font size ainda precisa ser escalado
+        gameOverText.setFontSize(32 * currentPhaserZoom);
     }
 
-    // Todos os Sprites (Silhueta, Torres, Canhões, Prédio)
-    // Com o Phaser.Scale.FIT, as posições x, y e os displayWidth/Height
-    // que você definiu na `startGame` já são automaticamente escalados pelo Phaser.
-    // Não precisamos alterá-los aqui, a menos que haja uma lógica complexa de reposicionamento.
-
-    // Apenas para garantir que o prédio e silhueta retenham suas propriedades de display,
-    // embora o FIT cuide da escala geral, eles já estão setados no startGame.
     if (silhuetaSprite && silhuetaSprite.active) {
-        silhuetaSprite.x = 450; // Coordenadas base
-        silhuetaSprite.y = 1600; // Coordenadas base
-        silhuetaSprite.displayWidth = 900; // Tamanho base
-        silhuetaSprite.displayHeight = 384; // Tamanho base
+        silhuetaSprite.x = 450;
+        silhuetaSprite.y = 1600;
+        silhuetaSprite.displayWidth = 900;
+        silhuetaSprite.displayHeight = 384;
     }
     if (currentBuilding && currentBuilding.active) {
-        currentBuilding.x = 450; // Coordenadas base
-        currentBuilding.y = 1552; // Coordenadas base
-        currentBuilding.displayWidth = 506; // Tamanho base
-        currentBuilding.displayHeight = 362; // Tamanho base
+        currentBuilding.x = 450;
+        currentBuilding.y = 1552;
+        currentBuilding.displayWidth = 506;
+        currentBuilding.displayHeight = 362;
     }
 
-    // --- CORREÇÃO FINAL para Mísseis e Anti-Mísseis ---
-    // Com FIT, as coordenadas x, y dos mísseis JÁ SÃO coordenadas do mundo do jogo.
-    // O que precisa ser ajustado são os targetX/Y (se baseados em elementos móveis)
-    // e o displayWidth/Height, que devem ser mantidos nas suas dimensões BASE.
     missiles.forEach(missile => {
         if (missile.active) {
             const missileBaseWidth = 10;
             const missileBaseHeight = 30;
 
-            missile.displayWidth = missileBaseWidth; // O Phaser se encarrega da escala visual
+            missile.displayWidth = missileBaseWidth;
             missile.displayHeight = missileBaseHeight;
 
-            // Recalcula o alvo do míssil com base nas coordenadas do MUNDO DO JOGO
             let targetNewX, targetNewY;
             if (currentBuilding && currentBuilding.active) {
                 targetNewX = currentBuilding.x;
                 targetNewY = currentBuilding.y - currentBuilding.displayHeight / 2;
             } else {
-                targetNewX = BASE_WIDTH / 2; // Alvo no centro inferior do MUNDO DO JOGO
+                targetNewX = BASE_WIDTH / 2;
                 targetNewY = BASE_HEIGHT;
             }
 
             missile.targetX = targetNewX;
             missile.targetY = targetNewY;
-
-            // Não precisamos remapear missile.x e missile.y manualmente aqui,
-            // pois eles já estão se movendo dentro do sistema de coordenadas do mundo do jogo,
-            // e o Phaser.Scale.FIT escala o canvas todo. A rotação já é recalculada no update().
         }
     });
 
     antiMissiles.forEach(anti => {
         if (anti.active) {
-            const antiMissileTargetWidthBase = 50;
-            anti.displayWidth = antiMissileTargetWidthBase; // O Phaser se encarrega da escala visual
-            anti.displayHeight = anti.height * (anti.displayWidth / anti.width);
-
-            // Assim como os mísseis, não precisamos remapear x,y. O tween já opera no mundo do jogo.
-            // Apenas garantir que o `x` e `y` do tween foram definidos com coordenadas base.
-            // A parte do `fireAntiMissile` onde o `x` e `y` do tween são setados precisará ser revisada
-            // para não usar `currentScaleFactor` e `currentOffsetX/Y` se estivermos em FIT.
-            // Vamos corrigir isso no `fireAntiMissile` também!
+            // Se for um retângulo, displayWidth/Height não são definidos da mesma forma que imagens.
+            // Eles já usam o width/height diretamente.
+            // anti.displayWidth = anti.width;
+            // anti.displayHeight = anti.height;
         }
     });
-
 
     console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${currentPhaserZoom.toFixed(2)}`);
 }
@@ -344,8 +293,6 @@ function spawnBuilding() {
         gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
         gameOverText.setDepth(100);
 
-        // Com FIT, a chamada imediata ao resize não é tão crítica para posicionamento inicial,
-        // mas garante que o fontSize seja ajustado.
         resize.call(this, { width: this.scale.width, height: this.scale.height });
         this.time.removeAllEvents();
         return;
@@ -356,7 +303,6 @@ function spawnBuilding() {
     currentBuilding.health = 3;
     currentBuilding.stateIndex = 0;
 
-    // Setar o displayWidth/Height aqui no spawn também, para que o FIT os escala corretamente
     currentBuilding.displayWidth = 506;
     currentBuilding.displayHeight = 362;
 
@@ -369,11 +315,10 @@ function spawnWave() {
     waveCount++;
     for (let i = 0; i < 5; i++) {
         const x_base = Phaser.Math.Between(0, BASE_WIDTH);
-        // Com FIT, spawnX e spawnY são em coordenadas do MUNDO DO JOGO (BASE_WIDTH, BASE_HEIGHT)
         const spawnX = x_base;
-        const spawnY = 0; // Topo do mundo do jogo
+        const spawnY = 0;
 
-        const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
+        const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00); // Míssil verde
         missile.speed = 200 + waveCount * 50;
 
         if (currentBuilding) {
@@ -386,8 +331,8 @@ function spawnWave() {
 
         const missileBaseWidth = 10;
         const missileBaseHeight = 30;
-        missile.displayWidth = missileBaseWidth; // Define o tamanho base
-        missile.displayHeight = missileBaseHeight; // O FIT escala isso automaticamente
+        missile.displayWidth = missileBaseWidth;
+        missile.displayHeight = missileBaseHeight;
 
         missile.setDepth(50);
         missiles.push(missile);
@@ -395,24 +340,19 @@ function spawnWave() {
 }
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
-    const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile');
-    const antiMissileTargetWidthBase = 50;
-
-    antiMissile.displayWidth = antiMissileTargetWidthBase; // Define o tamanho base
-    antiMissile.displayHeight = antiMissile.height * (antiMissile.displayWidth / antiMissile.width);
+    // ALTERADO AQUI: Usando um retângulo para o anti-míssil
+    const antiMissile = this.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000); // Retângulo vermelho
     antiMissile.setDepth(55);
 
     this.tweens.add({
         targets: antiMissile,
-        // Com FIT, as coordenadas x e y do tween já são coordenadas do MUNDO DO JOGO
-        x: targetGameX, // Já vêm do input.on('pointerdown') em coordenadas do mundo do jogo
-        y: targetGameY, // Já vêm do input.on('pointerdown') em coordenadas do mundo do jogo
-        duration: 500,
+        x: targetGameX,
+        y: targetGameY,
+        duration: 500, // Duração do tween
         ease: 'Linear',
         onComplete: () => {
             antiMissile.destroy();
-            // A explosão também deve ser nas coordenadas do MUNDO DO JOGO
-            this.onAntiMissileHit(targetGameX, targetGameY);
+            this.onAntiMissileHit(targetGameX, targetGameY); // Chama a função de explosão
         }
     });
 
@@ -420,50 +360,96 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
 }
 
 function onAntiMissileHit(x, y) {
-    // Com FIT, x e y já são coordenadas do MUNDO DO JOGO
-    const explosionCircle = this.add.circle(x, y, 5, 0xffff00);
+    // Explosão do anti-míssil (amarela)
+    const explosionCircle = this.add.circle(x, y, 50, 0xffff00); // Raio inicial 50px
     explosionCircle.setDepth(60);
-    explosionCircle.setScale(0); // Escala inicial
+    explosionCircle.setScale(0); // Começa invisível
     explosionCircle.setAlpha(1);
 
     this.tweens.add({
         targets: explosionCircle,
-        scale: 1 * this.scale.zoom, // A escala do círculo de explosão deve ser baseada no zoom do Phaser
-                                    // ou podemos apenas deixar em 1 e depender do tween e do escalonamento geral.
-                                    // Para consistência com outros elementos, vamos tentar 1.
-        alpha: 0,
-        ease: 'Linear',
-        duration: 300,
+        scale: 1, // Escala até 1 (para o raio de 50px)
+        alpha: 0, // Fica transparente
+        ease: 'Cubic.easeOut', // Efeito de saída suave
+        duration: 200, // Duração da animação
         onComplete: () => {
             explosionCircle.destroy();
+            // Lógica para detectar e destruir mísseis inimigos dentro do raio da explosão
+            handleExplosionCollision.call(this, x, y, 50); // Raio de detecção de 50px
         }
     });
+}
+
+function onBuildingHit(x, y) {
+    // Explosão do míssil inimigo atingindo o prédio (laranja)
+    const buildingHitExplosion = this.add.circle(x, y, 30, 0xffa500); // Raio inicial 30px
+    buildingHitExplosion.setDepth(60);
+    buildingHitExplosion.setScale(0);
+    buildingHitExplosion.setAlpha(1);
+
+    this.tweens.add({
+        targets: buildingHitExplosion,
+        scale: 1,
+        alpha: 0,
+        ease: 'Cubic.easeOut',
+        duration: 150, // Mais rápida
+        onComplete: () => {
+            buildingHitExplosion.destroy();
+        }
+    });
+}
+
+function handleExplosionCollision(explosionX, explosionY, explosionRadius) {
+    // Itera os mísseis inimigos de trás para frente para remoção segura
+    for (let i = missiles.length - 1; i >= 0; i--) {
+        const missile = missiles[i];
+        // Garante que o míssil ainda está ativo antes de verificar a colisão
+        if (!missile || !missile.active) {
+            missiles.splice(i, 1); // Remove se já estiver inativo
+            continue;
+        }
+
+        // Calcula a distância do míssil ao centro da explosão
+        const distance = Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y);
+
+        // Se o míssil está dentro do raio da explosão
+        if (distance < explosionRadius) {
+            missile.destroy();
+            missiles.splice(i, 1); // Remove o míssil do array
+        }
+    }
 }
 
 function update() {
     if (currentState !== 'game') return;
 
-    missiles.forEach((missile, index) => {
-        if (!missile.active) return;
+    // --- Processamento de Mísseis Inimigos e Colisão com Prédio ---
+    for (let i = missiles.length - 1; i >= 0; i--) {
+        const missile = missiles[i];
+        if (!missile.active) {
+            missiles.splice(i, 1);
+            continue;
+        }
 
-        // Com FIT, missile.x, missile.y, missile.targetX, missile.targetY
-        // já estão todos no mesmo sistema de coordenadas do mundo do jogo.
         const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY);
         missile.x += Math.cos(angle) * missile.speed * (1 / 60);
         missile.y += Math.sin(angle) * missile.speed * (1 / 60);
         missile.rotation = angle + Math.PI / 2;
 
         // Colisão com o prédio
-        if (currentBuilding && currentBuilding.active && missile.y > currentBuilding.y - currentBuilding.displayHeight / 2) {
-            if (missile.x > currentBuilding.x - currentBuilding.displayWidth / 2 &&
-                missile.x < currentBuilding.x + currentBuilding.displayWidth / 2) {
+        if (currentBuilding && currentBuilding.active) {
+            const buildingTopY = currentBuilding.y - currentBuilding.displayHeight / 2;
+            const buildingLeftX = currentBuilding.x - currentBuilding.displayWidth / 2;
+            const buildingRightX = currentBuilding.x + currentBuilding.displayWidth / 2;
 
-                missiles.splice(index, 1);
+            if (missile.y >= buildingTopY && missile.x >= buildingLeftX && missile.x <= buildingRightX) {
+                this.onBuildingHit(missile.x, missile.y); // Explosão ao atingir o prédio
                 missile.destroy();
+                missiles.splice(i, 1);
 
                 if (currentBuilding.health > 0) {
                     currentBuilding.health--;
-                    currentBuilding.stateIndex++;
+                    // currentBuilding.stateIndex++; // Descomente para mudar aparência do prédio
                     if (currentBuilding.health === 0) {
                         currentBuilding.destroy();
                         currentBuildingIndex++;
@@ -472,31 +458,29 @@ function update() {
                 }
             }
         }
-    });
+    }
 
-    missiles = missiles.filter(missile => missile.active);
-    antiMissiles = antiMissiles.filter(anti => anti.active);
+    // --- Processamento de Anti-Mísseis e Colisão com Mísseis Inimigos (Pré-explosão) ---
+    // A colisão principal entre anti-mísseis e mísseis inimigos
+    // agora acontece dentro do `handleExplosionCollision` chamado no `onComplete` do tween do anti-míssil.
+    // O loop abaixo remove anti-mísseis que já terminaram seus tweens e foram destruídos.
+    for (let i = antiMissiles.length - 1; i >= 0; i--) {
+        const anti = antiMissiles[i];
+        if (!anti.active) { // Se o anti-míssil não está ativo (foi destruído pelo seu tween)
+            antiMissiles.splice(i, 1);
+        }
+        // Não há lógica de colisão aqui, pois ela é disparada pelo 'onComplete' do tween do anti-míssil.
+    }
 
-    antiMissiles.forEach((anti) => {
-        missiles.slice().forEach((missile) => {
-            // Distância é calculada nas coordenadas do mundo do jogo
-            if (anti.active && missile.active && Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < 20) {
-                anti.destroy();
-                missile.destroy();
-                this.onAntiMissileHit(anti.x, anti.y); // Passa coordenadas do mundo do jogo
-                missiles = missiles.filter(m => m.active);
-                antiMissiles = antiMissiles.filter(a => a.active);
-            }
-        });
-    });
 
+    // --- Rotação dos Canhões ---
     cannons.forEach(cannon => {
         let closestEnemyMissile = null;
         let minEnemyDistance = Infinity;
 
+        // Procura o míssil inimigo mais próximo
         missiles.forEach(missile => {
             if (!missile.active) return;
-            // Distância é calculada nas coordenadas do mundo do jogo
             const distance = Phaser.Math.Distance.Between(cannon.sprite.x, cannon.sprite.y, missile.x, missile.y);
             if (distance < minEnemyDistance) {
                 minEnemyDistance = distance;
@@ -505,16 +489,16 @@ function update() {
         });
 
         if (closestEnemyMissile) {
-            // Ângulo é calculado nas coordenadas do mundo do jogo
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         } else if (currentBuilding && currentBuilding.active) {
-            // Ângulo é calculado nas coordenadas do mundo do jogo
+            // Se não há mísseis inimigos, mira no prédio atual
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         }
     });
 
+    // --- Spawn de Nova Onda ---
     if (missiles.length === 0 && currentState === 'game') {
         spawnWave.call(this);
     }
