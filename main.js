@@ -31,7 +31,7 @@ const config = {
     },
     scale: {
         mode: Phaser.Scale.FIT, // Mantido como FIT
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        autoCenter: Phaser.Scale.NONE, // ALTERADO AQUI: Removido autoCenter
         parent: 'game-container'
     },
     scene: {
@@ -53,6 +53,7 @@ function preload() {
     this.load.image('canhao_c', 'assets/canhao_c.png');
     this.load.image('canhao_d', 'assets/canhao_d.png');
     this.load.image('antimissile', 'assets/antimissile.png');
+    // AGORA SEMPRE CARREGANDO A IMAGEM DO PRÉDIO
     this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png');
     console.log("Preload complete.");
 }
@@ -75,15 +76,7 @@ let currentOffsetY = 0;
 function create() {
     console.log("Create function started.");
 
-    // Removemos o listener de 'resize' aqui para o modo FIT.
-    // Com FIT, o Phaser já lida com a escala e centralização do canvas
-    // e do mundo do jogo. Nosso "mundo" de BASE_WIDTH x BASE_HEIGHT
-    // sempre estará visível e proporcional.
-    // A única exceção é se você tem elementos de UI que *não* fazem parte do mundo do jogo
-    // e precisam ser realinhados com as bordas *reais* da janela,
-    // mas para o jogo em si, o FIT é suficiente.
-    // Se a fonte dos textos não escalar corretamente, podemos adicionar um listener
-    // específico para ajustar apenas o `fontSize` no `create` ou `startGame`.
+    this.scale.on('resize', resize, this);
 
     titleText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 - 50, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
         fontSize: '48px',
@@ -104,8 +97,7 @@ function create() {
         startGame.call(this);
     });
 
-    // Removido a chamada a resize aqui.
-    // Para a tela de título, as posições fixas em BASE_WIDTH/BASE_HEIGHT são suficientes.
+    resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
 function startGame() {
@@ -115,31 +107,28 @@ function startGame() {
     gameBackgroundRect = this.add.rectangle(0, 0, BASE_WIDTH, BASE_HEIGHT, 0x3b1a1a).setOrigin(0).setDepth(0); // DEPTH: 0
 
     // Silhueta Urbana
-    // Posições e tamanhos já são definidos no sistema de coordenadas BASE_WIDTH x BASE_HEIGHT
-    silhuetaSprite = this.add.image(BASE_WIDTH / 2, BASE_HEIGHT, 'silhueta_urbana').setOrigin(0.5, 1); // X: centro, Y: base do mundo
+    silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1);
     silhuetaSprite.setDepth(20); // DEPTH: 20
-    silhuetaSprite.displayWidth = BASE_WIDTH; // Ocupa a largura total da base
-    // Mantém a proporção da silhueta em relação à largura base
-    silhuetaSprite.displayHeight = silhuetaSprite.texture.height * (silhuetaSprite.displayWidth / silhuetaSprite.texture.width);
-
+    silhuetaSprite.displayWidth = 900; // Define as dimensões base
+    silhuetaSprite.displayHeight = 384; // Define as dimensões base
 
     // --- CONFIGURAÇÕES DE CANHÕES E TORRES (COM OS DEPTHS REVISADOS) ---
     const towerAndCannonDefinitions = [
         {
             name: 'Torre Esquerda',
             towerAsset: 'torre_e',
-            towerBaseX: 130, // Posição X no mundo base
-            towerBaseY: 1600, // Posição Y no mundo base (ancorada na base)
-            towerTargetWidth: 218, // Largura no mundo base
-            towerTargetHeight: 709, // Altura no mundo base
-            towerDepth: 30,
+            towerBaseX: 130,
+            towerBaseY: 1600,
+            towerTargetWidth: 218,
+            towerTargetHeight: 709,
+            towerDepth: 30, // DEPTH: 30 (Torre E na frente)
 
             cannonAsset: 'canhao_e',
-            cannonX: 130, // Posição X no mundo base
-            cannonY: 981, // Posição Y no mundo base
-            cannonTargetWidth: 39, // Largura no mundo base
-            cannonTargetHeight: 141, // Altura no mundo base
-            cannonDepth: 10
+            cannonX: 130,
+            cannonY: 981,
+            cannonTargetWidth: 39,
+            cannonTargetHeight: 141,
+            cannonDepth: 10 // DEPTH: 10 (Canhão atrás de tudo)
         },
         {
             name: 'Torre Central',
@@ -181,20 +170,17 @@ function startGame() {
     allTowerSprites = [];
 
     towerAndCannonDefinitions.forEach((def) => {
-        // As posições (x, y) e dimensões (displayWidth, displayHeight)
-        // devem ser as do SEU MUNDO BASE (900x1600).
-        // O Phaser se encarrega de escalá-las e centralizá-las na tela.
         const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset).setOrigin(0.5, 1);
         tower.setDepth(def.towerDepth);
-        tower.displayWidth = def.towerTargetWidth;
-        tower.displayHeight = def.towerTargetHeight;
+        tower.displayWidth = def.towerTargetWidth; // Definir displayWidth/Height aqui no START
+        tower.displayHeight = def.towerTargetHeight; // para que o FIT os escala corretamente
         allTowerSprites.push({ sprite: tower, def: def });
 
         const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
         cannon.setOrigin(0.5, 1);
         cannon.setDepth(def.cannonDepth);
-        cannon.displayWidth = def.cannonTargetWidth;
-        cannon.displayHeight = def.cannonTargetHeight;
+        cannon.displayWidth = def.cannonTargetWidth; // Definir displayWidth/Height aqui no START
+        cannon.displayHeight = def.cannonTargetHeight; // para que o FIT os escala corretamente
         allCannonsSprites.push({ sprite: cannon, def: def });
 
         cannons.push({ sprite: cannon, tower: tower });
@@ -214,8 +200,8 @@ function startGame() {
         let closestCannon = null;
         let minDistance = Infinity;
 
-        // Com FIT, pointer.x/y já estão nas coordenadas do mundo do jogo escalado.
-        // Ou seja, se o jogo tem BASE_WIDTH x BASE_HEIGHT, e está escalado,
+        // Com FIT, o pointer.x/y já estão nas coordenadas do mundo do jogo escalado
+        // ou seja, se o jogo tem BASE_WIDTH x BASE_HEIGHT, e está escalado,
         // o clique em (450, 800) corresponde ao centro do mundo do jogo,
         // independentemente da escala da tela.
         const gamePointerX = pointer.x;
@@ -235,8 +221,7 @@ function startGame() {
         }
     });
 
-    // Removido a chamada a resize aqui.
-    // Uma vez que os sprites são criados com as dimensões BASE, o FIT cuida do resto.
+    resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
 // FUNÇÃO RESIZE SIMPLIFICADA PARA Phaser.Scale.FIT
@@ -244,49 +229,112 @@ function startGame() {
 // Nossos elementos internos devem ser posicionados em relação à nossa BASE_WIDTH/BASE_HEIGHT,
 // e o Phaser cuida de escalá-los junto com o canvas.
 function resize(gameSize) {
-    // Com FIT, não é necessário ajustar a viewport da câmera.
-    // this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+    // Define a viewport da câmera para o tamanho da tela atual
+    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
 
     // O zoom do Phaser é o fator de escala que ele está aplicando ao nosso mundo de jogo (BASE_WIDTH/BASE_HEIGHT)
     const currentPhaserZoom = this.scale.zoom;
 
+    // Calcular os offsets do canvas em relação à tela para usar na lógica de "coordenadas reais da tela"
+    // (APENAS SE ABSOLUTAMENTE NECESSÁRIO, normalmente para coisas fora do mundo do jogo)
+    // Para o nosso caso, no entanto, a maioria das coordenadas são do "mundo do jogo"
+    // currentOffsetX = (gameSize.width - BASE_WIDTH * currentPhaserZoom) * 0.5;
+    // currentOffsetY = (gameSize.height - BASE_HEIGHT * currentPhaserZoom) * 0.5;
+
     // Fundo da Área de Jogo: Deve cobrir o mundo de jogo (BASE_WIDTH x BASE_HEIGHT)
-    // Suas dimensões e posição já estão fixas em startGame e não precisam ser alteradas.
-    // if (gameBackgroundRect && gameBackgroundRect.active) {
-    //     gameBackgroundRect.x = 0;
-    //     gameBackgroundRect.y = 0;
-    //     gameBackgroundRect.displayWidth = BASE_WIDTH;
-    //     gameBackgroundRect.displayHeight = BASE_HEIGHT;
-    // }
+    if (gameBackgroundRect && gameBackgroundRect.active) {
+        gameBackgroundRect.x = 0;
+        gameBackgroundRect.y = 0;
+        gameBackgroundRect.displayWidth = BASE_WIDTH; // Já estão no tamanho base
+        gameBackgroundRect.displayHeight = BASE_HEIGHT; // Já estão no tamanho base
+    }
 
     // Títulos e Botões (Textos) - posicionar no mundo do jogo e ajustar fontSize
-    // Textos precisam de um ajuste de font size se você quiser que eles escalem bem.
-    // Suas posições (x,y) são coordenadas do mundo do jogo e não precisam ser mudadas.
     if (titleText && titleText.active) {
-        // titleText.x = BASE_WIDTH / 2; // Já definido em create
-        // titleText.y = BASE_HEIGHT / 2 - 50; // Já definido em create
-        titleText.setFontSize(48 * currentPhaserZoom); // Font size precisa ser escalado
+        titleText.x = BASE_WIDTH / 2;
+        titleText.y = BASE_HEIGHT / 2 - 50;
+        titleText.setFontSize(48 * currentPhaserZoom); // Font size ainda precisa ser escalado
     }
     if (startButtonText && startButtonText.active) {
-        // startButtonText.x = BASE_WIDTH / 2; // Já definido em create
-        // startButtonText.y = BASE_HEIGHT / 2 + 50; // Já definido em create
-        startButtonText.setFontSize(36 * currentPhaserZoom); // Font size precisa ser escalado
+        startButtonText.x = BASE_WIDTH / 2;
+        startButtonText.y = BASE_HEIGHT / 2 + 50;
+        startButtonText.setFontSize(36 * currentPhaserZoom); // Font size ainda precisa ser escalado
     }
 
     // Game Over Text - posicionar no mundo do jogo e ajustar fontSize
     if (gameOverText && gameOverText.active) {
-        // gameOverText.x = BASE_WIDTH / 2; // Já definido em spawnBuilding
-        // gameOverText.y = BASE_HEIGHT / 2; // Já definido em spawnBuilding
-        gameOverText.setFontSize(32 * currentPhaserZoom); // Font size precisa ser escalado
+        gameOverText.x = BASE_WIDTH / 2;
+        gameOverText.y = BASE_HEIGHT / 2;
+        gameOverText.setFontSize(32 * currentPhaserZoom); // Font size ainda precisa ser escalado
     }
 
     // Todos os Sprites (Silhueta, Torres, Canhões, Prédio)
     // Com o Phaser.Scale.FIT, as posições x, y e os displayWidth/Height
-    // que você definiu na `startGame` (e `spawnBuilding`) já são automaticamente escalados pelo Phaser.
-    // Não precisamos alterá-los aqui no resize.
+    // que você definiu na `startGame` já são automaticamente escalados pelo Phaser.
+    // Não precisamos alterá-los aqui, a menos que haja uma lógica complexa de reposicionamento.
 
-    // Apenas para depuração, você pode manter os logs de zoom
-    // console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${currentPhaserZoom.toFixed(2)}`);
+    // Apenas para garantir que o prédio e silhueta retenham suas propriedades de display,
+    // embora o FIT cuide da escala geral, eles já estão setados no startGame.
+    if (silhuetaSprite && silhuetaSprite.active) {
+        silhuetaSprite.x = 450; // Coordenadas base
+        silhuetaSprite.y = 1600; // Coordenadas base
+        silhuetaSprite.displayWidth = 900; // Tamanho base
+        silhuetaSprite.displayHeight = 384; // Tamanho base
+    }
+    if (currentBuilding && currentBuilding.active) {
+        currentBuilding.x = 450; // Coordenadas base
+        currentBuilding.y = 1552; // Coordenadas base
+        currentBuilding.displayWidth = 506; // Tamanho base
+        currentBuilding.displayHeight = 362; // Tamanho base
+    }
+
+    // --- CORREÇÃO FINAL para Mísseis e Anti-Mísseis ---
+    // Com FIT, as coordenadas x, y dos mísseis JÁ SÃO coordenadas do mundo do jogo.
+    // O que precisa ser ajustado são os targetX/Y (se baseados em elementos móveis)
+    // e o displayWidth/Height, que devem ser mantidos nas suas dimensões BASE.
+    missiles.forEach(missile => {
+        if (missile.active) {
+            const missileBaseWidth = 10;
+            const missileBaseHeight = 30;
+
+            missile.displayWidth = missileBaseWidth; // O Phaser se encarrega da escala visual
+            missile.displayHeight = missileBaseHeight;
+
+            // Recalcula o alvo do míssil com base nas coordenadas do MUNDO DO JOGO
+            let targetNewX, targetNewY;
+            if (currentBuilding && currentBuilding.active) {
+                targetNewX = currentBuilding.x;
+                targetNewY = currentBuilding.y - currentBuilding.displayHeight / 2;
+            } else {
+                targetNewX = BASE_WIDTH / 2; // Alvo no centro inferior do MUNDO DO JOGO
+                targetNewY = BASE_HEIGHT;
+            }
+
+            missile.targetX = targetNewX;
+            missile.targetY = targetNewY;
+
+            // Não precisamos remapear missile.x e missile.y manualmente aqui,
+            // pois eles já estão se movendo dentro do sistema de coordenadas do mundo do jogo,
+            // e o Phaser.Scale.FIT escala o canvas todo. A rotação já é recalculada no update().
+        }
+    });
+
+    antiMissiles.forEach(anti => {
+        if (anti.active) {
+            const antiMissileTargetWidthBase = 50;
+            anti.displayWidth = antiMissileTargetWidthBase; // O Phaser se encarrega da escala visual
+            anti.displayHeight = anti.height * (anti.displayWidth / anti.width);
+
+            // Assim como os mísseis, não precisamos remapear x,y. O tween já opera no mundo do jogo.
+            // Apenas garantir que o `x` e `y` do tween foram definidos com coordenadas base.
+            // A parte do `fireAntiMissile` onde o `x` e `y` do tween são setados precisará ser revisada
+            // para não usar `currentScaleFactor` e `currentOffsetX/Y` se estivermos em FIT.
+            // Vamos corrigir isso no `fireAntiMissile` também!
+        }
+    });
+
+
+    console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${currentPhaserZoom.toFixed(2)}`);
 }
 
 
@@ -296,14 +344,14 @@ function spawnBuilding() {
         gameOverText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'Game Over\nTodos os Prédios Destruídos', { fontSize: '32px', fill: '#fff', align: 'center' }).setOrigin(0.5);
         gameOverText.setDepth(100);
 
-        // Chamar resize aqui para garantir que o fontSize do Game Over seja ajustado.
+        // Com FIT, a chamada imediata ao resize não é tão crítica para posicionamento inicial,
+        // mas garante que o fontSize seja ajustado.
         resize.call(this, { width: this.scale.width, height: this.scale.height });
         this.time.removeAllEvents();
         return;
     }
 
-    // Posições e tamanhos já são definidos no sistema de coordenadas BASE_WIDTH x BASE_HEIGHT
-    currentBuilding = this.add.image(BASE_WIDTH / 2, 1552, "alvo1_predio").setOrigin(0.5, 1);
+    currentBuilding = this.add.image(450, 1552, "alvo1_predio").setOrigin(0.5, 1);
     currentBuilding.setDepth(25);
     currentBuilding.health = 3;
     currentBuilding.stateIndex = 0;
@@ -312,8 +360,7 @@ function spawnBuilding() {
     currentBuilding.displayWidth = 506;
     currentBuilding.displayHeight = 362;
 
-    // Removido a chamada a resize aqui.
-    // O prédio já é criado com as dimensões BASE e o FIT o escala.
+    resize.call(this, { width: this.scale.width, height: this.scale.height });
 }
 
 function spawnWave() {
@@ -321,8 +368,9 @@ function spawnWave() {
 
     waveCount++;
     for (let i = 0; i < 5; i++) {
+        const x_base = Phaser.Math.Between(0, BASE_WIDTH);
         // Com FIT, spawnX e spawnY são em coordenadas do MUNDO DO JOGO (BASE_WIDTH, BASE_HEIGHT)
-        const spawnX = Phaser.Math.Between(0, BASE_WIDTH);
+        const spawnX = x_base;
         const spawnY = 0; // Topo do mundo do jogo
 
         const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
@@ -336,9 +384,10 @@ function spawnWave() {
             missile.targetY = BASE_HEIGHT;
         }
 
-        // Definir o tamanho base do míssil. O FIT escala isso automaticamente.
-        missile.displayWidth = 10;
-        missile.displayHeight = 30;
+        const missileBaseWidth = 10;
+        const missileBaseHeight = 30;
+        missile.displayWidth = missileBaseWidth; // Define o tamanho base
+        missile.displayHeight = missileBaseHeight; // O FIT escala isso automaticamente
 
         missile.setDepth(50);
         missiles.push(missile);
@@ -347,9 +396,10 @@ function spawnWave() {
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
     const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile');
-    // Define o tamanho base do anti-míssil. O FIT escala isso automaticamente.
-    antiMissile.displayWidth = 50;
-    antiMissile.displayHeight = antiMissile.texture.height * (antiMissile.displayWidth / antiMissile.texture.width);
+    const antiMissileTargetWidthBase = 50;
+
+    antiMissile.displayWidth = antiMissileTargetWidthBase; // Define o tamanho base
+    antiMissile.displayHeight = antiMissile.height * (antiMissile.displayWidth / antiMissile.width);
     antiMissile.setDepth(55);
 
     this.tweens.add({
@@ -371,16 +421,16 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
 
 function onAntiMissileHit(x, y) {
     // Com FIT, x e y já são coordenadas do MUNDO DO JOGO
-    // O raio do círculo de explosão deve ser um valor do mundo do jogo (base).
-    const explosionRadiusBase = 50; // Um raio base
-    const explosionCircle = this.add.circle(x, y, explosionRadiusBase / 2, 0xffff00); // Raio inicial
+    const explosionCircle = this.add.circle(x, y, 5, 0xffff00);
     explosionCircle.setDepth(60);
     explosionCircle.setScale(0); // Escala inicial
     explosionCircle.setAlpha(1);
 
     this.tweens.add({
         targets: explosionCircle,
-        scale: 1, // Escala de 0 para 1 (o tamanho final é o que definimos como raio base)
+        scale: 1 * this.scale.zoom, // A escala do círculo de explosão deve ser baseada no zoom do Phaser
+                                    // ou podemos apenas deixar em 1 e depender do tween e do escalonamento geral.
+                                    // Para consistência com outros elementos, vamos tentar 1.
         alpha: 0,
         ease: 'Linear',
         duration: 300,
