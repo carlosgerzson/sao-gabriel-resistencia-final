@@ -340,11 +340,14 @@ function spawnWave() {
 }
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
+    // Captura a referência da cena (this) antes do tween
+    const scene = this; // <--- CORREÇÃO AQUI
+
     // ALTERADO AQUI: Usando um retângulo para o anti-míssil
-    const antiMissile = this.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000); // Retângulo vermelho
+    const antiMissile = scene.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000); // Retângulo vermelho
     antiMissile.setDepth(55);
 
-    this.tweens.add({
+    scene.tweens.add({ // <--- USANDO scene.tweens AQUI
         targets: antiMissile,
         x: targetGameX,
         y: targetGameY,
@@ -352,7 +355,8 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
         ease: 'Linear',
         onComplete: () => {
             antiMissile.destroy();
-            this.onAntiMissileHit(targetGameX, targetGameY); // Chama a função de explosão
+            // Chamando a função de explosão usando a referência da cena
+            scene.onAntiMissileHit(targetGameX, targetGameY); // <--- CORREÇÃO AQUI
         }
     });
 
