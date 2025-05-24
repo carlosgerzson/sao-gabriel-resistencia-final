@@ -340,23 +340,23 @@ function spawnWave() {
 }
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
-    // Captura a referência da cena (this) antes do tween
-    const scene = this; // <--- CORREÇÃO AQUI
+    // Não precisamos mais de 'const scene = this;' aqui se usarmos arrow function para o onComplete.
+    // Mas se mantiver, não há problema, desde que o 'this' no onComplete seja uma arrow function.
 
-    // ALTERADO AQUI: Usando um retângulo para o anti-míssil
-    const antiMissile = scene.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000); // Retângulo vermelho
+    const antiMissile = this.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000);
     antiMissile.setDepth(55);
 
-    scene.tweens.add({ // <--- USANDO scene.tweens AQUI
+    this.tweens.add({ // O 'this' aqui é a cena, como esperado
         targets: antiMissile,
         x: targetGameX,
         y: targetGameY,
-        duration: 500, // Duração do tween
+        duration: 500,
         ease: 'Linear',
-        onComplete: () => {
+        // USE AQUI UMA ARROW FUNCTION PARA O CALLBACK
+        onComplete: () => { // <--- MUDE ISTO: transformei em arrow function
             antiMissile.destroy();
-            // Chamando a função de explosão usando a referência da cena
-            scene.onAntiMissileHit(targetGameX, targetGameY); // <--- CORREÇÃO AQUI
+            // Agora, 'this' dentro desta arrow function se refere à cena (que é o 'this' de fireAntiMissile)
+            this.onAntiMissileHit(targetGameX, targetGameY);
         }
     });
 
