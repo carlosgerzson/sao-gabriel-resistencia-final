@@ -21,18 +21,18 @@ const buildingStates = [
 
 const config = {
     type: Phaser.AUTO,
-    width: BASE_WIDTH, // Largura de referência
-    height: BASE_HEIGHT, // Altura de referência
+    width: BASE_WIDTH,
+    height: BASE_HEIGHT,
     parent: 'game-container',
     physics: {
         default: 'arcade',
         arcade: {
-            // debug: true
+            debug: true // MUDAR PARA TRUE
         }
     },
     scale: {
-        mode: Phaser.Scale.RESIZE, // ALTERADO PARA Phaser.Scale.RESIZE
-        autoCenter: Phaser.Scale.NO_CENTER, // Mantido NO_CENTER para centralização via CSS
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.NO_CENTER,
         parent: 'game-container'
     },
     scene: {
@@ -261,6 +261,8 @@ function resize(gameSize) {
         silhuetaSprite.displayWidth = width; // Ocupa 100% da largura
         // A altura da silhueta será proporcional à sua largura para evitar distorção
         silhuetaSprite.displayHeight = silhuetaSprite.texture.height * (silhuetaSprite.displayWidth / silhuetaSprite.texture.width);
+        console.log(`Silhueta: X=<span class="math-inline">\{silhuetaSprite\.x\}, Y\=</span>{silhuetaSprite.y}, DW=<span class="math-inline">\{silhuetaSprite\.displayWidth\}, DH\=</span>{silhuetaSprite.displayHeight}`);
+    }
     }
 
     // --- Torres e Canhões (Grupo do Bottom) ---
@@ -279,6 +281,7 @@ function resize(gameSize) {
             tower.y = height - (towerOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
             tower.displayWidth = def.towerTargetWidth * currentWidthScale; // Escala largura
             tower.displayHeight = def.towerTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
+            console.log(`Tower <span class="math-inline">\{def\.name\}\: X\=</span>{tower.x}, Y=<span class="math-inline">\{tower\.y\}, DW\=</span>{tower.displayWidth}, DH=<span class="math-inline">\{tower\.displayHeight\}, OriginalTextureWidth\=</span>{tower.texture.width}, OriginalTextureHeight=${tower.texture.height}`);
         }
     });
 
@@ -295,6 +298,7 @@ function resize(gameSize) {
             cannon.y = height - (cannonOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
             cannon.displayWidth = def.cannonTargetWidth * currentWidthScale; // Escala largura
             cannon.displayHeight = def.cannonTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
+            console.log(`Cannon for <span class="math-inline">\{def\.name\}\: X\=</span>{cannon.x}, Y=<span class="math-inline">\{cannon\.y\}, DW\=</span>{cannon.displayWidth}, DH=<span class="math-inline">\{cannon\.displayHeight\}, OriginalTextureWidth\=</span>{cannon.texture.width}, OriginalTextureHeight=${cannon.texture.height}`);
         }
     });
 
@@ -310,7 +314,9 @@ function resize(gameSize) {
         currentBuilding.displayWidth = 506 * currentWidthScale;
         currentBuilding.displayHeight = 362 * currentWidthScale;
         currentBuilding.y = height - silhuetaSprite.displayHeight + (currentBuilding.displayHeight / 2) - (buildingBaseOffsetFromSilhouette * currentWidthScale);
+        console.log(`Building: X=<span class="math-inline">\{currentBuilding\.x\}, Y\=</span>{currentBuilding.y}, DW=<span class="math-inline">\{currentBuilding\.displayWidth\}, DH\=</span>{currentBuilding.displayHeight}`);
     }
+    
 
     // --- Mísseis e Anti-Mísseis ---
     // Eles já estão se movendo em coordenadas do mundo do jogo, que agora são as dimensões do canvas.
@@ -345,7 +351,7 @@ function resize(gameSize) {
     });
 
     console.log(`Resized to: ${width}x${height}.`);
-}
+
 
 function spawnBuilding() {
     if (currentBuildingIndex >= 10) {
