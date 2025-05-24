@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>São Gabriel Resistência Final</title>
 
     <!-- <script type="text/javascript">
@@ -51,7 +53,8 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Importantíssimo para evitar scrollbars */
+            overflow: hidden;
+            /* Importantíssimo para evitar scrollbars */
             width: 100%;
             height: 100%;
             background-color: black;
@@ -65,27 +68,39 @@
         #game-container {
             width: 100%;
             height: 100%;
-            /* O game-container também deve ser flex para o canvas poder ser centralizado dentro dele pelo Phaser */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Adicione uma borda temporária para visualização */
-            border: 2px solid blue; /* REMOVA ISSO DEPOIS */
+            position: relative;
+            /* ESSENCIAL: Torna o game-container um contexto de posicionamento */
+            /* REMOVA as propriedades de Flexbox daqui para evitar conflitos */
+            /* display: flex; */
+            /* justify-content: center; */
+            /* align-items: center; */
+            border: 2px solid blue;
+            /* Mantenha a borda para depuração */
         }
 
         /* Estiliza APENAS o canvas dentro do game-container */
         #game-container canvas {
-            display: block; /* Essencial para remover margens padrão */
-            /* Removendo margin-top negativo, o Phaser deve cuidar da centralização */
-            /* Mantendo a borda vermelha para depuração, como solicitado */
-            border: 2px solid red; /* REMOVA ISSO DEPOIS */
+            display: block;
+            /* Essencial para remover margens padrão */
+            position: absolute;
+            /* Posiciona o canvas absolutamente dentro do seu pai (#game-container) */
+            top: 50%;
+            /* Move o topo do elemento para 50% da altura do pai */
+            left: 50%;
+            /* Move a esquerda do elemento para 50% da largura do pai */
+            transform: translate(-50%, -50%);
+            /* Ajusta o elemento em -50% do seu PRÓPRIO tamanho para centralização perfeita */
+            border: 2px solid red;
+            /* Mantenha a borda para depuração */
         }
     </style>
 </head>
+
 <body>
     <div id="game-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="main.js"></script>
 </body>
+
 </html>
