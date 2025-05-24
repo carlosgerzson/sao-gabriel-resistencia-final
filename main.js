@@ -165,11 +165,11 @@ function startGame() {
 
     towerAndCannonDefinitions.forEach((def) => {
         // Criar sprites sem definir displayWidth/Height aqui, a função resize fará isso
-        const tower = this.add.image(0, 0, def.towerAsset).setOrigin(0.5, 1);
+        const tower = this.add.image(0, 0, def.towerAsset).setOrigin(0.5, 1); // Origem centro-base
         tower.setDepth(def.towerDepth);
         allTowerSprites.push({ sprite: tower, def: def });
 
-        const cannon = this.add.image(0, 0, def.cannonAsset).setOrigin(0.5, 1);
+        const cannon = this.add.image(0, 0, def.cannonAsset).setOrigin(0.5, 1); // Origem centro-base
         cannon.setDepth(def.cannonDepth);
         allCannonsSprites.push({ sprite: cannon, def: def });
 
@@ -230,45 +230,53 @@ function resize(gameSize) {
     }
 
     // --- Títulos e Botões (Tela de Título) ---
+    // Usamos a largura como base para escala do texto, já que a largura é sempre 100%
+    const scaleForText = width / BASE_WIDTH;
+
     if (titleText && titleText.active) {
         titleText.x = width / 2;
-        titleText.y = height / 2 - (50 * (height / BASE_HEIGHT)); // Escala Y proporcionalmente
-        titleText.setFontSize(48 * (width / BASE_WIDTH)); // Escala a fonte com base na largura
+        titleText.y = height / 2 - (50 * scaleForText); // Ajusta Y com base na escala de largura
+        titleText.setFontSize(48 * scaleForText); // Escala a fonte com base na largura
     }
     if (startButtonText && startButtonText.active) {
         startButtonText.x = width / 2;
-        startButtonText.y = height / 2 + (50 * (height / BASE_HEIGHT)); // Escala Y proporcionalmente
-        startButtonText.setFontSize(36 * (width / BASE_WIDTH)); // Escala a fonte com base na largura
+        startButtonText.y = height / 2 + (50 * scaleForText); // Ajusta Y com base na escala de largura
+        startButtonText.setFontSize(36 * scaleForText); // Escala a fonte com base na largura
     }
 
     // Game Over Text - posicionar no mundo do jogo e ajustar fontSize
     if (gameOverText && gameOverText.active) {
         gameOverText.x = width / 2;
         gameOverText.y = height / 2;
-        gameOverText.setFontSize(32 * (width / BASE_WIDTH)); // Escala a fonte com base na largura
+        gameOverText.setFontSize(32 * scaleForText); // Escala a fonte com base na largura
     }
 
     // --- Silhueta Urbana (Grupo do Bottom) ---
+    // Calcular a escala de largura baseada na largura atual do canvas
+    const currentWidthScale = width / BASE_WIDTH;
+
     if (silhuetaSprite && silhuetaSprite.active) {
         silhuetaSprite.x = width / 2;
         silhuetaSprite.y = height; // Ancorado no fundo (origem 0.5, 1)
         silhuetaSprite.displayWidth = width; // Ocupa 100% da largura
         // A altura da silhueta será proporcional à sua largura para evitar distorção
-        silhuetaSprite.displayHeight = silhuetaSprite.texture.height * (width / silhuetaSprite.texture.width);
+        silhuetaSprite.displayHeight = silhuetaSprite.texture.height * (silhuetaSprite.displayWidth / silhuetaSprite.texture.width);
     }
 
     // --- Torres e Canhões (Grupo do Bottom) ---
-    // Calcular a escala de largura baseada na largura atual do canvas
-    const currentWidthScale = width / BASE_WIDTH;
-
     allTowerSprites.forEach(item => {
         const tower = item.sprite;
         const def = item.def;
         if (tower && tower.active) {
             // Posicionar X proporcionalmente à largura atual
             tower.x = def.towerBaseX * currentWidthScale;
-            // Posicionar Y em relação à base da tela
-            tower.y = height - (BASE_HEIGHT - def.towerBaseY) * (height / BASE_HEIGHT); // Ajusta Y proporcionalmente à altura
+            // Posicionar Y em relação à base da tela (origem 0.5,1)
+            // tower.y = height; // Se a torre for desenhada da base para cima, e a base estiver no fundo da tela
+            // Se a torre tiver um offset Y na definição original, precisamos aplicá-lo
+            const towerOriginalBottom = def.towerBaseY; // Posição Y da base da torre na resolução BASE_HEIGHT
+            const towerOffsetFromOriginalBottom = BASE_HEIGHT - towerOriginalBottom; // Distância do fundo da tela original
+
+            tower.y = height - (towerOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
             tower.displayWidth = def.towerTargetWidth * currentWidthScale; // Escala largura
             tower.displayHeight = def.towerTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
         }
@@ -280,8 +288,11 @@ function resize(gameSize) {
         if (cannon && cannon.active) {
             // Posicionar X proporcionalmente à largura atual
             cannon.x = def.cannonX * currentWidthScale;
-            // Posicionar Y em relação à base da tela
-            cannon.y = height - (BASE_HEIGHT - def.cannonY) * (height / BASE_HEIGHT); // Ajusta Y proporcionalmente à altura
+            // Posicionar Y em relação à base da tela (origem 0.5,1)
+            const cannonOriginalBottom = def.cannonY; // Posição Y da base do canhão na resolução BASE_HEIGHT
+            const cannonOffsetFromOriginalBottom = BASE_HEIGHT - cannonOriginalBottom; // Distância do fundo da tela original
+
+            cannon.y = height - (cannonOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
             cannon.displayWidth = def.cannonTargetWidth * currentWidthScale; // Escala largura
             cannon.displayHeight = def.cannonTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
         }
@@ -291,12 +302,14 @@ function resize(gameSize) {
     if (currentBuilding && currentBuilding.active) {
         currentBuilding.x = width / 2; // Centralizado horizontalmente
         // Posicionar Y em relação à base da tela, logo acima da silhueta/canhões
-        // Ajustar a posição Y para que o prédio fique acima da silhueta
         // A silhueta tem origem 0.5, 1 (base) e sua displayHeight é ajustada pela largura.
-        // A altura do prédio também será ajustada pela largura
+        // O prédio também tem origem 0.5, 1 (base).
+        // Queremos que a base do prédio fique acima do topo da silhueta.
+        // Adicionamos um pequeno offset (e escalamos ele) para garantir que não haja sobreposição indesejada.
+        const buildingBaseOffsetFromSilhouette = 20; // Offset visual do prédio acima da silhueta na resolução base
         currentBuilding.displayWidth = 506 * currentWidthScale;
         currentBuilding.displayHeight = 362 * currentWidthScale;
-        currentBuilding.y = height - silhuetaSprite.displayHeight + (currentBuilding.displayHeight / 2); // Ajusta Y para ficar acima da silhueta
+        currentBuilding.y = height - silhuetaSprite.displayHeight + (currentBuilding.displayHeight / 2) - (buildingBaseOffsetFromSilhouette * currentWidthScale);
     }
 
     // --- Mísseis e Anti-Mísseis ---
@@ -313,7 +326,7 @@ function resize(gameSize) {
             let targetNewX, targetNewY;
             if (currentBuilding && currentBuilding.active) {
                 targetNewX = currentBuilding.x;
-                targetNewY = currentBuilding.y - currentBuilding.displayHeight / 2;
+                targetNewY = currentBuilding.y - currentBuilding.displayHeight / 2; // Centro do prédio
             } else {
                 targetNewX = width / 2; // Alvo no centro inferior do MUNDO DO JOGO
                 targetNewY = height; // Fundo da tela
@@ -371,17 +384,18 @@ function spawnWave() {
         // O alvo do míssil deve ser o prédio atual, ou o centro da base da tela
         if (currentBuilding && currentBuilding.active) {
             missile.targetX = currentBuilding.x;
-            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2;
+            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2; // Mirar no centro do prédio
         } else {
-            missile.targetX = this.scale.width / 2;
+            missile.targetX = this.scale.width / 2; // Alvo no centro inferior do MUNDO DO JOGO
             missile.targetY = this.scale.height; // Fundo da tela
         }
 
         // Definir o tamanho base do míssil, que será escalado na função resize
         const missileBaseWidth = 10;
         const missileBaseHeight = 30;
-        missile.displayWidth = missileBaseWidth * (this.scale.width / BASE_WIDTH); // Escala largura
-        missile.displayHeight = missileBaseHeight * (this.scale.width / BASE_WIDTH); // Escala altura proporcionalmente à largura
+        const currentWidthScale = this.scale.width / BASE_WIDTH;
+        missile.displayWidth = missileBaseWidth * currentWidthScale; // Escala largura
+        missile.displayHeight = missileBaseHeight * currentWidthScale; // Escala altura proporcionalmente à largura
 
         missile.setDepth(50);
         missiles.push(missile);
@@ -391,9 +405,10 @@ function spawnWave() {
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
     const antiMissile = this.add.image(cannon.sprite.x, cannon.sprite.y, 'antimissile');
     const antiMissileTargetWidthBase = 50;
+    const currentWidthScale = this.scale.width / BASE_WIDTH;
 
     // Escalar o anti-míssil com base na largura atual da tela
-    antiMissile.displayWidth = antiMissileTargetWidthBase * (this.scale.width / BASE_WIDTH);
+    antiMissile.displayWidth = antiMissileTargetWidthBase * currentWidthScale;
     antiMissile.displayHeight = antiMissile.texture.height * (antiMissile.displayWidth / antiMissile.texture.width);
     antiMissile.setDepth(55);
 
@@ -415,7 +430,8 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
 function onAntiMissileHit(x, y) {
     // A escala do círculo de explosão deve ser relativa à largura atual da tela
     const explosionRadiusBase = 50; // Raio base da explosão
-    const currentRadius = explosionRadiusBase * (this.scale.width / BASE_WIDTH);
+    const currentWidthScale = this.scale.width / BASE_WIDTH;
+    const currentRadius = explosionRadiusBase * currentWidthScale;
 
     const explosionCircle = this.add.circle(x, y, currentRadius, 0xffff00);
     explosionCircle.setDepth(60);
