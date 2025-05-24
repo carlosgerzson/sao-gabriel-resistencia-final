@@ -21,8 +21,8 @@ const buildingStates = [
 
 const config = {
     type: Phaser.AUTO,
-    width: BASE_WIDTH,
-    height: BASE_HEIGHT,
+    width: BASE_WIDTH, // Largura de referência
+    height: BASE_HEIGHT, // Altura de referência
     parent: 'game-container',
     physics: {
         default: 'arcade',
@@ -32,7 +32,7 @@ const config = {
     },
     scale: {
         mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.NO_CENTER,
+        autoCenter: Phaser.Scale.NO_CENTER, // Mantido NO_CENTER para centralização via CSS
         parent: 'game-container'
     },
     scene: {
@@ -119,7 +119,7 @@ function startGame() {
 
             cannonAsset: 'canhao_e',
             cannonX: 130,
-            cannonY: 981,
+            cannonY: 981, // Posição Y de referência na BASE_HEIGHT
             cannonTargetWidth: 39,
             cannonTargetHeight: 141,
             cannonDepth: 10
@@ -214,8 +214,28 @@ function startGame() {
 // FUNÇÃO RESIZE para Phaser.Scale.RESIZE
 // Esta função é chamada sempre que a tela redimensiona e no início do jogo.
 function resize(gameSize) {
-    const width = gameSize.width; // Largura atual do canvas
-    const height = gameSize.height; // Altura atual do canvas
+    // Garanta que width e height sejam definidas a partir de gameSize ou do scale manager
+    let width = this.scale.width;
+    let height = this.scale.height;
+
+    // Se gameSize é fornecido, use-o (ele é mais preciso para o evento 'resize')
+    if (gameSize) {
+        width = gameSize.width;
+        height = gameSize.height;
+    }
+
+    // Se por algum motivo as dimensões ainda forem inválidas (ex: 0), defina valores padrão ou retorne
+    if (width === 0 || height === 0) {
+        console.warn("Resize called with zero dimensions, skipping layout adjustment. Current scale:", this.scale.width, this.scale.height);
+        // Tente usar as dimensões base como último recurso se o scale manager retornar zero
+        if (this.scale.width === 0 || this.scale.height === 0) {
+            width = BASE_WIDTH;
+            height = BASE_HEIGHT;
+            console.warn("Using BASE_WIDTH/BASE_HEIGHT as fallback for resize dimensions.");
+        } else {
+            return; // Se ainda for 0, algo está muito errado, melhor não tentar renderizar.
+        }
+    }
 
     // Define a viewport da câmera para o tamanho da tela atual
     this.cameras.main.setViewport(0, 0, width, height);
@@ -261,8 +281,7 @@ function resize(gameSize) {
         silhuetaSprite.displayWidth = width; // Ocupa 100% da largura
         // A altura da silhueta será proporcional à sua largura para evitar distorção
         silhuetaSprite.displayHeight = silhuetaSprite.texture.height * (silhuetaSprite.displayWidth / silhuetaSprite.texture.width);
-        console.log(`Silhueta: X=<span class="math-inline">\{silhuetaSprite\.x\}, Y\=</span>{silhuetaSprite.y}, DW=<span class="math-inline">\{silhuetaSprite\.displayWidth\}, DH\=</span>{silhuetaSprite.displayHeight}`);
-    }
+        console.log(`Silhueta: X=${silhuetaSprite.x}, Y=${silhuetaSprite.y}, DW=${silhuetaSprite.displayWidth}, DH=${silhuetaSprite.displayHeight}`);
     }
 
     // --- Torres e Canhões (Grupo do Bottom) ---
@@ -270,18 +289,19 @@ function resize(gameSize) {
         const tower = item.sprite;
         const def = item.def;
         if (tower && tower.active) {
-            // Posicionar X proporcionalmente à largura atual
-            tower.x = def.towerBaseX * currentWidthScale;
-            // Posicionar Y em relação à base da tela (origem 0.5,1)
-            // tower.y = height; // Se a torre for desenhada da base para cima, e a base estiver no fundo da tela
-            // Se a torre tiver um offset Y na definição original, precisamos aplicá-lo
-            const towerOriginalBottom = def.towerBaseY; // Posição Y da base da torre na resolução BASE_HEIGHT
-            const towerOffsetFromOriginalBottom = BASE_HEIGHT - towerOriginalBottom; // Distância do fundo da tela original
+            const originalWidth = tower.texture.width;
+            const originalHeight = tower.texture.height;
 
-            tower.y = height - (towerOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
-            tower.displayWidth = def.towerTargetWidth * currentWidthScale; // Escala largura
-            tower.displayHeight = def.towerTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
-            console.log(`Tower <span class="math-inline">\{def\.name\}\: X\=</span>{tower.x}, Y=<span class="math-inline">\{tower\.y\}, DW\=</span>{tower.displayWidth}, DH=<span class="math-inline">\{tower\.displayHeight\}, OriginalTextureWidth\=</span>{tower.texture.width}, OriginalTextureHeight=${tower.texture.height}`);
+            const targetScaledWidth = def.towerTargetWidth * currentWidthScale;
+
+            tower.x = def.towerBaseX * currentWidthScale;
+            // Posicionar Y mantendo a proporção Y da base em relação à BASE_HEIGHT
+            tower.y = (def.towerBaseY / BASE_HEIGHT) * height;
+
+            tower.displayWidth = targetScaledWidth;
+            tower.displayHeight = originalHeight * (tower.displayWidth / originalWidth);
+
+            console.log(`Tower ${def.name}: X=${tower.x}, Y=${tower.y}, DW=${tower.displayWidth}, DH=${tower.displayHeight}, OriginalTextureWidth=${originalWidth}, OriginalTextureHeight=${originalHeight}`);
         }
     });
 
@@ -289,44 +309,50 @@ function resize(gameSize) {
         const cannon = item.sprite;
         const def = item.def;
         if (cannon && cannon.active) {
-            // Posicionar X proporcionalmente à largura atual
-            cannon.x = def.cannonX * currentWidthScale;
-            // Posicionar Y em relação à base da tela (origem 0.5,1)
-            const cannonOriginalBottom = def.cannonY; // Posição Y da base do canhão na resolução BASE_HEIGHT
-            const cannonOffsetFromOriginalBottom = BASE_HEIGHT - cannonOriginalBottom; // Distância do fundo da tela original
+            const originalWidth = cannon.texture.width;
+            const originalHeight = cannon.texture.height;
 
-            cannon.y = height - (cannonOffsetFromOriginalBottom * (height / BASE_HEIGHT)); // Escala o offset Y para a nova altura
-            cannon.displayWidth = def.cannonTargetWidth * currentWidthScale; // Escala largura
-            cannon.displayHeight = def.cannonTargetHeight * currentWidthScale; // Escala altura proporcionalmente à largura
-            console.log(`Cannon for <span class="math-inline">\{def\.name\}\: X\=</span>{cannon.x}, Y=<span class="math-inline">\{cannon\.y\}, DW\=</span>{cannon.displayWidth}, DH=<span class="math-inline">\{cannon\.displayHeight\}, OriginalTextureWidth\=</span>{cannon.texture.width}, OriginalTextureHeight=${cannon.texture.height}`);
+            const targetScaledWidth = def.cannonTargetWidth * currentWidthScale;
+
+            cannon.x = def.cannonX * currentWidthScale;
+            // Posicionar Y mantendo a proporção Y da base em relação à BASE_HEIGHT
+            cannon.y = (def.cannonY / BASE_HEIGHT) * height;
+
+            cannon.displayWidth = targetScaledWidth;
+            cannon.displayHeight = originalHeight * (cannon.displayWidth / originalWidth);
+
+            console.log(`Cannon for ${def.name}: X=${cannon.x}, Y=${cannon.y}, DW=${cannon.displayWidth}, DH=${cannon.displayHeight}, OriginalTextureWidth=${originalWidth}, OriginalTextureHeight=${originalHeight}`);
         }
     });
 
     // --- Prédio (Alvo Principal) ---
     if (currentBuilding && currentBuilding.active) {
-        currentBuilding.x = width / 2; // Centralizado horizontalmente
-        // Posicionar Y em relação à base da tela, logo acima da silhueta/canhões
-        // A silhueta tem origem 0.5, 1 (base) e sua displayHeight é ajustada pela largura.
-        // O prédio também tem origem 0.5, 1 (base).
-        // Queremos que a base do prédio fique acima do topo da silhueta.
-        // Adicionamos um pequeno offset (e escalamos ele) para garantir que não haja sobreposição indesejada.
-        const buildingBaseOffsetFromSilhouette = 20; // Offset visual do prédio acima da silhueta na resolução base
-        currentBuilding.displayWidth = 506 * currentWidthScale;
-        currentBuilding.displayHeight = 362 * currentWidthScale;
-        currentBuilding.y = height - silhuetaSprite.displayHeight + (currentBuilding.displayHeight / 2) - (buildingBaseOffsetFromSilhouette * currentWidthScale);
-        console.log(`Building: X=<span class="math-inline">\{currentBuilding\.x\}, Y\=</span>{currentBuilding.y}, DW=<span class="math-inline">\{currentBuilding\.displayWidth\}, DH\=</span>{currentBuilding.displayHeight}`);
+        const originalWidth = currentBuilding.texture.width;
+        const originalHeight = currentBuilding.texture.height;
+
+        // A coordenada Y da base do prédio na imagem original (considerando o assets/alvo1_predio.png de 506x362)
+        // Se a imagem do prédio foi feita para que sua base esteja em Y=1552 na BASE_HEIGHT de 1600
+        const buildingOriginalBaseY = 1552;
+
+        currentBuilding.x = width / 2;
+        const targetScaledWidth = 506 * currentWidthScale; // Largura desejada para o prédio na resolução base
+        currentBuilding.displayWidth = targetScaledWidth;
+        currentBuilding.displayHeight = originalHeight * (currentBuilding.displayWidth / originalWidth); // Manter proporção
+
+        // Posicionar Y mantendo a proporção Y da base em relação à BASE_HEIGHT
+        currentBuilding.y = (buildingOriginalBaseY / BASE_HEIGHT) * height;
+
+        console.log(`Building: X=${currentBuilding.x}, Y=${currentBuilding.y}, DW=${currentBuilding.displayWidth}, DH=${currentBuilding.y}, OriginalTextureWidth=${originalWidth}, OriginalTextureHeight=${originalHeight}`);
     }
-    
 
     // --- Mísseis e Anti-Mísseis ---
-    // Eles já estão se movendo em coordenadas do mundo do jogo, que agora são as dimensões do canvas.
-    // Apenas ajuste o displayWidth/Height para que eles escalem com a largura da tela.
     missiles.forEach(missile => {
         if (missile.active) {
             const missileBaseWidth = 10;
             const missileBaseHeight = 30;
-            missile.displayWidth = missileBaseWidth * currentWidthScale;
-            missile.displayHeight = missileBaseHeight * currentWidthScale;
+            const currentMissileScale = width / BASE_WIDTH; // Usar a mesma escala baseada na largura
+            missile.displayWidth = missileBaseWidth * currentMissileScale;
+            missile.displayHeight = missileBaseHeight * currentMissileScale;
 
             // Recalcula o alvo do míssil com base nas novas posições dos elementos
             let targetNewX, targetNewY;
@@ -334,8 +360,8 @@ function resize(gameSize) {
                 targetNewX = currentBuilding.x;
                 targetNewY = currentBuilding.y - currentBuilding.displayHeight / 2; // Centro do prédio
             } else {
-                targetNewX = width / 2; // Alvo no centro inferior do MUNDO DO JOGO
-                targetNewY = height; // Fundo da tela
+                targetNewX = width / 2; // Alvo no centro horizontal da tela
+                targetNewY = height;    // Alvo no fundo da tela
             }
             missile.targetX = targetNewX;
             missile.targetY = targetNewY;
@@ -345,13 +371,18 @@ function resize(gameSize) {
     antiMissiles.forEach(anti => {
         if (anti.active) {
             const antiMissileTargetWidthBase = 50;
-            anti.displayWidth = antiMissileTargetWidthBase * currentWidthScale;
+            const currentAntiMissileScale = width / BASE_WIDTH; // Usar a mesma escala baseada na largura
+            anti.displayWidth = antiMissileTargetWidthBase * currentAntiMissileScale;
             anti.displayHeight = anti.texture.height * (anti.displayWidth / anti.texture.width); // Mantém proporção do anti-míssil
         }
     });
 
     console.log(`Resized to: ${width}x${height}.`);
+} // <<< FIM DA FUNÇÃO RESIZE
 
+// O restante do seu código (spawnBuilding, spawnWave, fireAntiMissile, onAntiMissileHit, update)
+// está fora da função resize e não foi modificado nesta iteração.
+// O erro de sintaxe `}` extra antes de `function spawnBuilding()` foi corrigido.
 
 function spawnBuilding() {
     if (currentBuildingIndex >= 10) {
