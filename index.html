@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>São Gabriel Resistência Final</title>
 
-    <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
         var gk_fileData = {};
@@ -43,15 +39,19 @@
             }
             return gk_fileData[filename] || "";
         }
-    </script>
+    </script> -->
 
     <style>
+        /* Reset básico e box-sizing para melhor controle de layout */
+        * {
+            box-sizing: border-box;
+        }
+
         html,
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            /* Importantíssimo para evitar scrollbars */
+            overflow: hidden; /* Importantíssimo para evitar scrollbars */
             width: 100%;
             height: 100%;
             background-color: black;
@@ -70,25 +70,22 @@
             justify-content: center;
             align-items: center;
             /* Adicione uma borda temporária para visualização */
-            border: 2px solid blue;
-            /* REMOVA ISSO DEPOIS */
+            border: 2px solid blue; /* REMOVA ISSO DEPOIS */
         }
 
+        /* Estiliza APENAS o canvas dentro do game-container */
         #game-container canvas {
-            display: block;
-            /* Essencial para remover margens padrão */
-            /* Você pode remover a borda vermelha se não precisar dela para depuração */
-            border: 2px solid red;
+            display: block; /* Essencial para remover margens padrão */
+            /* Removendo margin-top negativo, o Phaser deve cuidar da centralização */
+            /* Mantendo a borda vermelha para depuração, como solicitado */
+            border: 2px solid red; /* REMOVA ISSO DEPOIS */
         }
     </style>
 </head>
-
 <body>
     <div id="game-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-
     <script src="main.js"></script>
 </body>
-
 </html>
