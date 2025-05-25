@@ -1,7 +1,7 @@
 // Variáveis globais
 let cannons = [];
-let missiles = [];
-let antiMissiles = [];
+let missiles = []; // Array para mísseis inimigos
+let antiMissiles = []; // Array para anti-mísseis
 let currentBuilding = null;
 let currentBuildingIndex = 0;
 let currentState = 'title';
@@ -23,12 +23,13 @@ const config = {
     width: BASE_WIDTH,
     height: BASE_HEIGHT,
     parent: 'game-container',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            // debug: true
-        }
-    },
+    // Physics Arcade removida conforme sua solicitação de não usar colisões em tempo real.
+    // physics: {
+    //     default: 'arcade',
+    //     arcade: {
+    //         // debug: true
+    //     }
+    // },
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.NONE,
@@ -81,21 +82,25 @@ function create() {
     // ***************************************************************
     this.onAntiMissileHit = function(x, y) {
         // Explosão do anti-míssil (amarela)
-        const explosionCircle = this.add.circle(x, y, 50, 0xffff00); // Raio inicial 50px
+        const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8); // Começa com raio 0
         explosionCircle.setDepth(60);
-        explosionCircle.setScale(0); // Começa invisível
-        explosionCircle.setAlpha(1);
+        // explosionCircle.setScale(0); // Não é mais necessário com raio inicial 0
+        // explosionCircle.setAlpha(1); // Já definido no construtor do círculo
+
+        // Parâmetros ajustados para raio e duração da explosão
+        const explosionVisualRadius = 100; // Raio final maior
+        const explosionAnimationDuration = 500; // Duração da animação mais longa
 
         this.tweens.add({
             targets: explosionCircle,
-            scale: 1, // Escala até 1 (para o raio de 50px)
+            radius: explosionVisualRadius, // Escala até o raio desejado
             alpha: 0, // Fica transparente
-            ease: 'Cubic.easeOut', // Efeito de saída suave
-            duration: 200, // Duração da animação
+            ease: 'Quadratic.Out', // Efeito de saída suave
+            duration: explosionAnimationDuration, // Duração da animação
             onComplete: () => {
                 explosionCircle.destroy();
                 // Lógica para detectar e destruir mísseis inimigos dentro do raio da explosão
-                this.handleExplosionCollision(x, y, 50); // Chamando o método da cena
+                this.handleExplosionCollision(x, y, explosionVisualRadius + 50); // Chamando o método da cena, com raio de dano maior
             }
         });
     }.bind(this); // Garante que 'this' dentro de onAntiMissileHit é a cena
@@ -121,11 +126,12 @@ function create() {
 
     this.handleExplosionCollision = function(explosionX, explosionY, explosionRadius) {
         // Itera os mísseis inimigos de trás para frente para remoção segura
+        // Isso é crucial ao modificar um array enquanto itera sobre ele
         for (let i = missiles.length - 1; i >= 0; i--) {
             const missile = missiles[i];
             // Garante que o míssil ainda está ativo antes de verificar a colisão
             if (!missile || !missile.active) {
-                missiles.splice(i, 1); // Remove se já estiver inativo
+                missiles.splice(i, 1); // Remove se já estiver inativo/destruído
                 continue;
             }
 
@@ -249,32 +255,21 @@ function startGame() {
 
     spawnBuilding.call(this); // Chama spawnBuilding no contexto da cena
 
-    this.time.addEvent({ delay: 5000, callback: spawnWave, callbackScope: this, loop: true });
+    // Ajuste a frequência de spawn de ondas para 2 segundos (2000ms)
+    this.time.addEvent({ delay: 2000, callback: spawnWave, callbackScope: this, loop: true });
 
     this.input.on('pointerdown', (pointer) => {
         if (currentState !== 'game') return;
 
-        // Comentar ou remover esta parte para testar todos disparando
-        // let closestCannon = null;
-        // let minDistance = Infinity;
-
         const gamePointerX = pointer.x;
         const gamePointerY = pointer.y;
 
-        // *******************************************************************
-        // MUDANÇA AQUI: FAZER TODOS OS CANHÕES DISPARAREM PARA FINS DE TESTE
-        // *******************************************************************
+        // FAZER TODOS OS CANHÕES DISPARAREM (para fins de teste, conforme solicitado)
         cannons.forEach(cannon => { // Itera sobre CADA canhão
-            // Calcula o ângulo para onde ESTE canhão deve apontar (para o ponto de clique)
             const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
-
-            // Gira o sprite deste canhão para apontar para o clique
             cannon.sprite.rotation = cannonAngle + Math.PI / 2;
-
-            // Agora, chame fireAntiMissile com ESTE canhão e o ponto de clique
             fireAntiMissile.call(this, cannon, gamePointerX, gamePointerY);
         });
-        // *******************************************************************
     });
 
     resize.call(this, { width: this.scale.width, height: this.scale.height });
@@ -383,7 +378,7 @@ function spawnWave() {
     if (currentState !== 'game') return;
 
     waveCount++;
-    // Reduz a velocidade base e o incremento
+    // Reduz a velocidade base e o incremento para mísseis inimigos mais lentos
     const baseSpeed = 100; // Era 200, agora 100
     const speedIncrementPerWave = 20; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
 
@@ -415,39 +410,26 @@ function spawnWave() {
             missile.displayHeight = missileBaseHeight;
 
             missile.setDepth(50);
-            missiles.push(missile);
+            missiles.push(missile); // Adiciona ao array global de mísseis inimigos
         }, [], this); // O 'this' no último parâmetro é o `scope` para o callback
     }
 }
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
     // Calcula o ângulo que o canhão DEVERIA ter para apontar para o clique
-    // (Este é o mesmo angle usado para a rotação do anti-míssil)
     const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, targetGameX, targetGameY);
 
-    // ***************************************************************
     // CÁLCULO DA POSIÇÃO DE LANÇAMENTO NA PONTA DO CANHÃO
-    // ***************************************************************
-    // O sprite do canhão tem origem (0.5, 1) - sua base está em cannon.sprite.y
-    // O comprimento total do canhão é closestCannon.sprite.displayHeight.
-    // Ajuste este multiplicador (0.9) para a ponta exata da "boca" do canhão
-    // 1.0 seria a extremidade superior do sprite, 0.9 um pouco abaixo.
-    const lengthToCannonTip = cannon.sprite.displayHeight * 0.9;
+    const lengthToCannonTip = cannon.sprite.displayHeight * 0.9; // Mantido 0.9
 
-    // Calcula a posição X e Y da ponta do canhão com base na sua rotação
-    // x_offset = Math.sin(angle_radians) * length
-    // y_offset = -Math.cos(angle_radians) * length (negativo porque Y cresce para baixo em Phaser)
     const launchX = cannon.sprite.x + Math.sin(cannonAngle) * lengthToCannonTip;
     const launchY = cannon.sprite.y - Math.cos(cannonAngle) * lengthToCannonTip;
-    // ***************************************************************
 
-    const antiMissile = this.add.rectangle(launchX, launchY, 15, 60, 0xff0000); // Cria na nova posição, 15x60
-    antiMissile.setOrigin(0.5, 1); // MUITO IMPORTANTE: Define a origem na parte inferior central do retângulo
-    antiMissile.setDepth(55); // Anti-míssil deve estar à frente da silhueta e canhões
+    const antiMissile = this.add.rectangle(launchX, launchY, 15, 60, 0xff0000); // Cria o retângulo
+    antiMissile.setOrigin(0.5, 1);
+    antiMissile.setDepth(55);
 
-    // Define a rotação inicial do anti-míssil para que ele já aponte para o alvo
-    // O + Math.PI / 2 é um ajuste comum para que retângulos/imagens apontem "para cima"
-    antiMissile.rotation = cannonAngle + Math.PI / 2; // Usa o mesmo angle do canhão para sincronizar
+    antiMissiles.push(antiMissile); // Adiciona ao array global de anti-mísseis
 
     this.tweens.add({
         targets: antiMissile,
@@ -456,18 +438,14 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
         duration: 500, // Duração do tween
         ease: 'Linear',
         onUpdate: (tween, target) => {
-            // A cada atualização do tween, recalcula o ângulo para que o anti-míssil
-            // continue a apontar para o seu alvo, dando a sensação de um projétil guiado.
             const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
             target.rotation = currentAngle + Math.PI / 2;
         },
         onComplete: () => {
-            antiMissile.destroy();
-            this.onAntiMissileHit(targetGameX, targetGameY); // Chama o método da cena
+            antiMissile.destroy(); // Destroi o anti-míssil
+            this.onAntiMissileHit(targetGameX, targetGameY); // Chama a explosão no ponto final
         }
     });
-
-    antiMissiles.push(antiMissile);
 }
 
 
@@ -477,7 +455,7 @@ function update() {
     // --- Processamento de Mísseis Inimigos e Colisão com Prédio ---
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
-        if (!missile || !missile.active) { // Adicionado !missile para mais robustez
+        if (!missile || !missile.active) {
             missiles.splice(i, 1);
             continue;
         }
@@ -511,60 +489,12 @@ function update() {
         }
     }
 
-    // --- Processamento de Anti-Mísseis e Colisão com Mísseis Inimigos DURANTE O VOO ---
-    // (Esta seção está comentada/removida conforme sua preferência,
-    // a explosão do anti-míssil ainda ocorre apenas no ponto de clique final do tween.)
-    /*
-    for (let i = antiMissiles.length - 1; i >= 0; i--) {
-        const anti = antiMissiles[i];
-        if (!anti || !anti.active) {
-            antiMissiles.splice(i, 1);
-            continue;
-        }
-        for (let j = missiles.length - 1; j >= 0; j--) {
-            const missile = missiles[j];
-            if (!missile || !missile.active) {
-                missiles.splice(j, 1);
-                continue;
-            }
-            const collisionTriggerDistance = 50;
-            if (Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < collisionTriggerDistance) {
-                anti.destroy();
-                antiMissiles.splice(i, 1);
-                this.onAntiMissileHit(anti.x, anti.y);
-                break;
-            }
-        }
-    }
-    */
-
-    // --- Rotação dos Canhões ---
-    // ESTE BLOCO FOI REMOVIDO/COMENTADO PARA QUE OS CANHÕES SÓ GIREM NO CLIQUE
-    /*
-    cannons.forEach(cannon => {
-        let closestEnemyMissile = null;
-        let minEnemyDistance = Infinity;
-        missiles.forEach(missile => {
-            if (!missile.active) return;
-            const distance = Phaser.Math.Distance.Between(cannon.sprite.x, cannon.sprite.y, missile.x, missile.y);
-            if (distance < minEnemyDistance) {
-                minEnemyDistance = distance;
-                closestEnemyMissile = missile;
-            }
-        });
-        if (closestEnemyMissile) {
-            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y);
-            cannon.sprite.rotation = angle + Math.PI / 2;
-        } else if (currentBuilding && currentBuilding.active) {
-            const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
-            cannon.sprite.rotation = angle + Math.PI / 2;
-        }
-    });
-    */
+    // --- Rotação dos Canhões (Permanece como está, girando apenas no clique) ---
+    // A rotação dos canhões agora acontece apenas no pointerdown, conforme a lógica em startGame.
+    // O bloco de rotação de canhões no update foi removido/comentado.
 
     // --- Spawn de Nova Onda ---
-    // A condição de spawn de nova onda foi ajustada para ocorrer apenas se não houver mísseis.
-    // Isso evita um spawn constante se a onda anterior for destruída rapidamente.
+    // A condição de spawn de nova onda: spawna nova onda se não há mísseis inimigos ativos na tela.
     if (missiles.length === 0 && currentState === 'game') {
         spawnWave.call(this); // Chama spawnWave no contexto da cena
     }
