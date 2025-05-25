@@ -254,31 +254,27 @@ function startGame() {
     this.input.on('pointerdown', (pointer) => {
         if (currentState !== 'game') return;
 
-        let closestCannon = null;
-        let minDistance = Infinity;
+        // Comentar ou remover esta parte para testar todos disparando
+        // let closestCannon = null;
+        // let minDistance = Infinity;
 
         const gamePointerX = pointer.x;
         const gamePointerY = pointer.y;
 
-        cannons.forEach(cannon => {
-            const distance = Phaser.Math.Distance.Between(gamePointerX, gamePointerY, cannon.sprite.x, cannon.sprite.y);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestCannon = cannon;
-            }
+        // *******************************************************************
+        // MUDANÇA AQUI: FAZER TODOS OS CANHÕES DISPARAREM PARA FINS DE TESTE
+        // *******************************************************************
+        cannons.forEach(cannon => { // Itera sobre CADA canhão
+            // Calcula o ângulo para onde ESTE canhão deve apontar (para o ponto de clique)
+            const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
+
+            // Gira o sprite deste canhão para apontar para o clique
+            cannon.sprite.rotation = cannonAngle + Math.PI / 2;
+
+            // Agora, chame fireAntiMissile com ESTE canhão e o ponto de clique
+            fireAntiMissile.call(this, cannon, gamePointerX, gamePointerY);
         });
-
-        if (closestCannon) {
-            // Calcula o ângulo para onde o canhão deve apontar (para o ponto de clique)
-            const cannonAngle = Phaser.Math.Angle.Between(closestCannon.sprite.x, closestCannon.sprite.y, gamePointerX, gamePointerY);
-
-            // Gira o sprite do canhão para apontar para o clique
-            // O + Math.PI / 2 é o ajuste para a imagem do canhão apontar corretamente (se ela aponta para cima com rotação 0)
-            closestCannon.sprite.rotation = cannonAngle + Math.PI / 2;
-
-            // Chama fireAntiMissile com o canhão e o ponto de clique
-            fireAntiMissile.call(this, closestCannon, gamePointerX, gamePointerY);
-        }
+        // *******************************************************************
     });
 
     resize.call(this, { width: this.scale.width, height: this.scale.height });
