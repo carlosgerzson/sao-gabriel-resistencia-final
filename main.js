@@ -52,8 +52,7 @@ function preload() {
     this.load.image('canhao_e', 'assets/canhao_e.png');
     this.load.image('canhao_c', 'assets/canhao_c.png');
     this.load.image('canhao_d', 'assets/canhao_d.png');
-    // Mantemos o carregamento, mas o uso será desabilitado na função fireAntiMissile por enquanto
-    this.load.image('antimissile', 'assets/antimissile.png');
+    this.load.image('antimissile', 'assets/antimissile.png'); // Mantenha o carregamento, mesmo que o sprite seja um retângulo
     this.load.image('alvo1_predio', 'nivel1/alvo1_predio.png');
     console.log("Preload complete.");
 }
@@ -76,6 +75,73 @@ function create() {
 
     this.scale.on('resize', resize, this);
 
+    // ***************************************************************
+    // DEFINIÇÃO DAS FUNÇÕES DE COLISÃO E EXPLOSÃO COMO MÉTODOS DA CENA
+    // Isso garante que 'this' dentro delas sempre se refira à cena.
+    // ***************************************************************
+    this.onAntiMissileHit = function(x, y) {
+        // Explosão do anti-míssil (amarela)
+        const explosionCircle = this.add.circle(x, y, 50, 0xffff00); // Raio inicial 50px
+        explosionCircle.setDepth(60);
+        explosionCircle.setScale(0); // Começa invisível
+        explosionCircle.setAlpha(1);
+
+        this.tweens.add({
+            targets: explosionCircle,
+            scale: 1, // Escala até 1 (para o raio de 50px)
+            alpha: 0, // Fica transparente
+            ease: 'Cubic.easeOut', // Efeito de saída suave
+            duration: 200, // Duração da animação
+            onComplete: () => {
+                explosionCircle.destroy();
+                // Lógica para detectar e destruir mísseis inimigos dentro do raio da explosão
+                this.handleExplosionCollision(x, y, 50); // Chamando o método da cena
+            }
+        });
+    }.bind(this); // Garante que 'this' dentro de onAntiMissileHit é a cena
+
+    this.onBuildingHit = function(x, y) {
+        // Explosão do míssil inimigo atingindo o prédio (laranja)
+        const buildingHitExplosion = this.add.circle(x, y, 30, 0xffa500); // Raio inicial 30px
+        buildingHitExplosion.setDepth(60);
+        buildingHitExplosion.setScale(0);
+        buildingHitExplosion.setAlpha(1);
+
+        this.tweens.add({
+            targets: buildingHitExplosion,
+            scale: 1,
+            alpha: 0,
+            ease: 'Cubic.easeOut',
+            duration: 150, // Mais rápida
+            onComplete: () => {
+                buildingHitExplosion.destroy();
+            }
+        });
+    }.bind(this); // Garante que 'this' dentro de onBuildingHit é a cena
+
+    this.handleExplosionCollision = function(explosionX, explosionY, explosionRadius) {
+        // Itera os mísseis inimigos de trás para frente para remoção segura
+        for (let i = missiles.length - 1; i >= 0; i--) {
+            const missile = missiles[i];
+            // Garante que o míssil ainda está ativo antes de verificar a colisão
+            if (!missile || !missile.active) {
+                missiles.splice(i, 1); // Remove se já estiver inativo
+                continue;
+            }
+
+            // Calcula a distância do míssil ao centro da explosão
+            const distance = Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y);
+
+            // Se o míssil está dentro do raio da explosão
+            if (distance < explosionRadius) {
+                missile.destroy();
+                missiles.splice(i, 1); // Remove o míssil do array
+            }
+        }
+    }.bind(this); // Garante que 'this' dentro de handleExplosionCollision é a cena
+    // ***************************************************************
+
+
     titleText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 - 50, 'SÃO GABRIEL\nRESISTÊNCIA FINAL', {
         fontSize: '48px',
         fill: '#fff',
@@ -92,7 +158,7 @@ function create() {
         titleText.destroy();
         startButtonText.destroy();
         currentState = 'game';
-        startGame.call(this);
+        startGame.call(this); // Inicia o jogo no contexto da cena
     });
 
     resize.call(this, { width: this.scale.width, height: this.scale.height });
@@ -171,7 +237,7 @@ function startGame() {
         allTowerSprites.push({ sprite: tower, def: def });
 
         const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
-        cannon.setOrigin(0.5, 1);
+        cannon.setOrigin(0.5, 1); // Garante que a origem do canhão é a base central
         cannon.setDepth(def.cannonDepth);
         cannon.displayWidth = def.cannonTargetWidth;
         cannon.displayHeight = def.cannonTargetHeight;
@@ -181,7 +247,7 @@ function startGame() {
         this.towers.push(tower);
     });
 
-    spawnBuilding.call(this);
+    spawnBuilding.call(this); // Chama spawnBuilding no contexto da cena
 
     this.time.addEvent({ delay: 5000, callback: spawnWave, callbackScope: this, loop: true });
 
@@ -203,6 +269,14 @@ function startGame() {
         });
 
         if (closestCannon) {
+            // Calcula o ângulo para onde o canhão deve apontar (para o ponto de clique)
+            const cannonAngle = Phaser.Math.Angle.Between(closestCannon.sprite.x, closestCannon.sprite.y, gamePointerX, gamePointerY);
+
+            // Gira o sprite do canhão para apontar para o clique
+            // O + Math.PI / 2 é o ajuste para a imagem do canhão apontar corretamente (se ela aponta para cima com rotação 0)
+            closestCannon.sprite.rotation = cannonAngle + Math.PI / 2;
+
+            // Chama fireAntiMissile com o canhão e o ponto de clique
             fireAntiMissile.call(this, closestCannon, gamePointerX, gamePointerY);
         }
     });
@@ -313,116 +387,93 @@ function spawnWave() {
     if (currentState !== 'game') return;
 
     waveCount++;
-    for (let i = 0; i < 5; i++) {
-        const x_base = Phaser.Math.Between(0, BASE_WIDTH);
-        const spawnX = x_base;
-        const spawnY = 0;
+    // Reduz a velocidade base e o incremento
+    const baseSpeed = 100; // Era 200, agora 100
+    const speedIncrementPerWave = 20; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
 
-        const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00); // Míssil verde
-        missile.speed = 200 + waveCount * 50;
+    // Atraso entre o spawn de cada míssil dentro da mesma onda
+    const delayBetweenMissiles = 300; // 300 milissegundos
 
-        if (currentBuilding) {
-            missile.targetX = currentBuilding.x;
-            missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2;
-        } else {
-            missile.targetX = BASE_WIDTH / 2;
-            missile.targetY = BASE_HEIGHT;
-        }
+    for (let i = 0; i < 5; i++) { // Ainda spawna 5 mísseis por onda
+        // Cria um atraso para cada míssil, fazendo com que apareçam em sequência
+        this.time.delayedCall(i * delayBetweenMissiles, () => {
+            const x_base = Phaser.Math.Between(0, BASE_WIDTH);
+            const spawnX = x_base;
+            const spawnY = 0; // Sempre spawna no topo da tela
 
-        const missileBaseWidth = 10;
-        const missileBaseHeight = 30;
-        missile.displayWidth = missileBaseWidth;
-        missile.displayHeight = missileBaseHeight;
+            const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00); // Míssil verde
+            missile.speed = baseSpeed + waveCount * speedIncrementPerWave;
 
-        missile.setDepth(50);
-        missiles.push(missile);
+            // Define o alvo do míssil (prédio ou centro da tela se o prédio não existir)
+            if (currentBuilding) {
+                missile.targetX = currentBuilding.x;
+                missile.targetY = currentBuilding.y - currentBuilding.displayHeight / 2;
+            } else {
+                missile.targetX = BASE_WIDTH / 2;
+                missile.targetY = BASE_HEIGHT;
+            }
+
+            const missileBaseWidth = 10;
+            const missileBaseHeight = 30;
+            missile.displayWidth = missileBaseWidth;
+            missile.displayHeight = missileBaseHeight;
+
+            missile.setDepth(50);
+            missiles.push(missile);
+        }, [], this); // O 'this' no último parâmetro é o `scope` para o callback
     }
 }
 
 function fireAntiMissile(cannon, targetGameX, targetGameY) {
-    // Não precisamos mais de 'const scene = this;' aqui se usarmos arrow function para o onComplete.
-    // Mas se mantiver, não há problema, desde que o 'this' no onComplete seja uma arrow function.
+    // Calcula o ângulo que o canhão DEVERIA ter para apontar para o clique
+    // (Este é o mesmo angle usado para a rotação do anti-míssil)
+    const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, targetGameX, targetGameY);
 
-    const antiMissile = this.add.rectangle(cannon.sprite.x, cannon.sprite.y, 20, 20, 0xff0000);
-    antiMissile.setDepth(55);
+    // ***************************************************************
+    // CÁLCULO DA POSIÇÃO DE LANÇAMENTO NA PONTA DO CANHÃO
+    // ***************************************************************
+    // O sprite do canhão tem origem (0.5, 1) - sua base está em cannon.sprite.y
+    // O comprimento total do canhão é closestCannon.sprite.displayHeight.
+    // Ajuste este multiplicador (0.9) para a ponta exata da "boca" do canhão
+    // 1.0 seria a extremidade superior do sprite, 0.9 um pouco abaixo.
+    const lengthToCannonTip = cannon.sprite.displayHeight * 0.9;
 
-    this.tweens.add({ // O 'this' aqui é a cena, como esperado
+    // Calcula a posição X e Y da ponta do canhão com base na sua rotação
+    // x_offset = Math.sin(angle_radians) * length
+    // y_offset = -Math.cos(angle_radians) * length (negativo porque Y cresce para baixo em Phaser)
+    const launchX = cannon.sprite.x + Math.sin(cannonAngle) * lengthToCannonTip;
+    const launchY = cannon.sprite.y - Math.cos(cannonAngle) * lengthToCannonTip;
+    // ***************************************************************
+
+    const antiMissile = this.add.rectangle(launchX, launchY, 15, 60, 0xff0000); // Cria na nova posição, 15x60
+    antiMissile.setOrigin(0.5, 1); // MUITO IMPORTANTE: Define a origem na parte inferior central do retângulo
+    antiMissile.setDepth(55); // Anti-míssil deve estar à frente da silhueta e canhões
+
+    // Define a rotação inicial do anti-míssil para que ele já aponte para o alvo
+    // O + Math.PI / 2 é um ajuste comum para que retângulos/imagens apontem "para cima"
+    antiMissile.rotation = cannonAngle + Math.PI / 2; // Usa o mesmo angle do canhão para sincronizar
+
+    this.tweens.add({
         targets: antiMissile,
         x: targetGameX,
         y: targetGameY,
-        duration: 500,
+        duration: 500, // Duração do tween
         ease: 'Linear',
-        // USE AQUI UMA ARROW FUNCTION PARA O CALLBACK
-        onComplete: () => { // <--- MUDE ISTO: transformei em arrow function
+        onUpdate: (tween, target) => {
+            // A cada atualização do tween, recalcula o ângulo para que o anti-míssil
+            // continue a apontar para o seu alvo, dando a sensação de um projétil guiado.
+            const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
+            target.rotation = currentAngle + Math.PI / 2;
+        },
+        onComplete: () => {
             antiMissile.destroy();
-            // Agora, 'this' dentro desta arrow function se refere à cena (que é o 'this' de fireAntiMissile)
-            this.onAntiMissileHit(targetGameX, targetGameY);
+            this.onAntiMissileHit(targetGameX, targetGameY); // Chama o método da cena
         }
     });
 
     antiMissiles.push(antiMissile);
 }
 
-function onAntiMissileHit(x, y) {
-    // Explosão do anti-míssil (amarela)
-    const explosionCircle = this.add.circle(x, y, 50, 0xffff00); // Raio inicial 50px
-    explosionCircle.setDepth(60);
-    explosionCircle.setScale(0); // Começa invisível
-    explosionCircle.setAlpha(1);
-
-    this.tweens.add({
-        targets: explosionCircle,
-        scale: 1, // Escala até 1 (para o raio de 50px)
-        alpha: 0, // Fica transparente
-        ease: 'Cubic.easeOut', // Efeito de saída suave
-        duration: 200, // Duração da animação
-        onComplete: () => {
-            explosionCircle.destroy();
-            // Lógica para detectar e destruir mísseis inimigos dentro do raio da explosão
-            handleExplosionCollision.call(this, x, y, 50); // Raio de detecção de 50px
-        }
-    });
-}
-
-function onBuildingHit(x, y) {
-    // Explosão do míssil inimigo atingindo o prédio (laranja)
-    const buildingHitExplosion = this.add.circle(x, y, 30, 0xffa500); // Raio inicial 30px
-    buildingHitExplosion.setDepth(60);
-    buildingHitExplosion.setScale(0);
-    buildingHitExplosion.setAlpha(1);
-
-    this.tweens.add({
-        targets: buildingHitExplosion,
-        scale: 1,
-        alpha: 0,
-        ease: 'Cubic.easeOut',
-        duration: 150, // Mais rápida
-        onComplete: () => {
-            buildingHitExplosion.destroy();
-        }
-    });
-}
-
-function handleExplosionCollision(explosionX, explosionY, explosionRadius) {
-    // Itera os mísseis inimigos de trás para frente para remoção segura
-    for (let i = missiles.length - 1; i >= 0; i--) {
-        const missile = missiles[i];
-        // Garante que o míssil ainda está ativo antes de verificar a colisão
-        if (!missile || !missile.active) {
-            missiles.splice(i, 1); // Remove se já estiver inativo
-            continue;
-        }
-
-        // Calcula a distância do míssil ao centro da explosão
-        const distance = Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y);
-
-        // Se o míssil está dentro do raio da explosão
-        if (distance < explosionRadius) {
-            missile.destroy();
-            missiles.splice(i, 1); // Remove o míssil do array
-        }
-    }
-}
 
 function update() {
     if (currentState !== 'game') return;
@@ -430,7 +481,7 @@ function update() {
     // --- Processamento de Mísseis Inimigos e Colisão com Prédio ---
     for (let i = missiles.length - 1; i >= 0; i--) {
         const missile = missiles[i];
-        if (!missile.active) {
+        if (!missile || !missile.active) { // Adicionado !missile para mais robustez
             missiles.splice(i, 1);
             continue;
         }
@@ -447,7 +498,7 @@ function update() {
             const buildingRightX = currentBuilding.x + currentBuilding.displayWidth / 2;
 
             if (missile.y >= buildingTopY && missile.x >= buildingLeftX && missile.x <= buildingRightX) {
-                this.onBuildingHit(missile.x, missile.y); // Explosão ao atingir o prédio
+                this.onBuildingHit(missile.x, missile.y); // Explosão ao atingir o prédio (método da cena)
                 missile.destroy();
                 missiles.splice(i, 1);
 
@@ -457,32 +508,46 @@ function update() {
                     if (currentBuilding.health === 0) {
                         currentBuilding.destroy();
                         currentBuildingIndex++;
-                        spawnBuilding.call(this);
+                        spawnBuilding.call(this); // Chama spawnBuilding no contexto da cena
                     }
                 }
             }
         }
     }
 
-    // --- Processamento de Anti-Mísseis e Colisão com Mísseis Inimigos (Pré-explosão) ---
-    // A colisão principal entre anti-mísseis e mísseis inimigos
-    // agora acontece dentro do `handleExplosionCollision` chamado no `onComplete` do tween do anti-míssil.
-    // O loop abaixo remove anti-mísseis que já terminaram seus tweens e foram destruídos.
+    // --- Processamento de Anti-Mísseis e Colisão com Mísseis Inimigos DURANTE O VOO ---
+    // (Esta seção está comentada/removida conforme sua preferência,
+    // a explosão do anti-míssil ainda ocorre apenas no ponto de clique final do tween.)
+    /*
     for (let i = antiMissiles.length - 1; i >= 0; i--) {
         const anti = antiMissiles[i];
-        if (!anti.active) { // Se o anti-míssil não está ativo (foi destruído pelo seu tween)
+        if (!anti || !anti.active) {
             antiMissiles.splice(i, 1);
+            continue;
         }
-        // Não há lógica de colisão aqui, pois ela é disparada pelo 'onComplete' do tween do anti-míssil.
+        for (let j = missiles.length - 1; j >= 0; j--) {
+            const missile = missiles[j];
+            if (!missile || !missile.active) {
+                missiles.splice(j, 1);
+                continue;
+            }
+            const collisionTriggerDistance = 50;
+            if (Phaser.Math.Distance.Between(anti.x, anti.y, missile.x, missile.y) < collisionTriggerDistance) {
+                anti.destroy();
+                antiMissiles.splice(i, 1);
+                this.onAntiMissileHit(anti.x, anti.y);
+                break;
+            }
+        }
     }
-
+    */
 
     // --- Rotação dos Canhões ---
+    // ESTE BLOCO FOI REMOVIDO/COMENTADO PARA QUE OS CANHÕES SÓ GIREM NO CLIQUE
+    /*
     cannons.forEach(cannon => {
         let closestEnemyMissile = null;
         let minEnemyDistance = Infinity;
-
-        // Procura o míssil inimigo mais próximo
         missiles.forEach(missile => {
             if (!missile.active) return;
             const distance = Phaser.Math.Distance.Between(cannon.sprite.x, cannon.sprite.y, missile.x, missile.y);
@@ -491,19 +556,20 @@ function update() {
                 closestEnemyMissile = missile;
             }
         });
-
         if (closestEnemyMissile) {
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, closestEnemyMissile.x, closestEnemyMissile.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         } else if (currentBuilding && currentBuilding.active) {
-            // Se não há mísseis inimigos, mira no prédio atual
             const angle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, currentBuilding.x, currentBuilding.y);
             cannon.sprite.rotation = angle + Math.PI / 2;
         }
     });
+    */
 
     // --- Spawn de Nova Onda ---
+    // A condição de spawn de nova onda foi ajustada para ocorrer apenas se não houver mísseis.
+    // Isso evita um spawn constante se a onda anterior for destruída rapidamente.
     if (missiles.length === 0 && currentState === 'game') {
-        spawnWave.call(this);
+        spawnWave.call(this); // Chama spawnWave no contexto da cena
     }
 }
