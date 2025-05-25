@@ -379,13 +379,13 @@ function spawnWave() {
 
     waveCount++;
     // Reduz a velocidade base e o incremento para mísseis inimigos mais lentos
-    const baseSpeed = 100; // Era 200, agora 100
-    const speedIncrementPerWave = 20; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
+    const baseSpeed = 50; // Era 200, agora 100
+    const speedIncrementPerWave = 10; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
 
     // Atraso entre o spawn de cada míssil dentro da mesma onda
-    const delayBetweenMissiles = 300; // 300 milissegundos
+    const delayBetweenMissiles = 400; // 300 milissegundos
 
-    for (let i = 0; i < 5; i++) { // Ainda spawna 5 mísseis por onda
+    for (let i = 0; i < 2; i++) { // Ainda spawna 5 mísseis por onda
         // Cria um atraso para cada míssil, fazendo com que apareçam em sequência
         this.time.delayedCall(i * delayBetweenMissiles, () => {
             const x_base = Phaser.Math.Between(0, BASE_WIDTH);
