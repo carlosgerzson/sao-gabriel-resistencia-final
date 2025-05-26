@@ -379,8 +379,8 @@ function spawnWave() {
 
     waveCount++;
     // Reduz a velocidade base e o incremento para mísseis inimigos mais lentos
-    const baseSpeed = 50; // Era 200, agora 100
-    const speedIncrementPerWave = 10; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
+    const baseSpeed = 70; // Era 200, agora 100
+    const speedIncrementPerWave = 20; // Era 50, agora 20 (cada nova onda aumenta a velocidade em 20px/s)
 
     // Atraso entre o spawn de cada míssil dentro da mesma onda
     const delayBetweenMissiles = 400; // 300 milissegundos
@@ -419,35 +419,38 @@ function fireAntiMissile(cannon, targetGameX, targetGameY) {
     // Calcula o ângulo que o canhão DEVERIA ter para apontar para o clique
     const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, targetGameX, targetGameY);
 
-    // CÁLCULO DA POSIÇÃO DE LANÇAMENTO NA PONTA DO CANHÃO
-    const lengthToCannonTip = cannon.sprite.displayHeight * 0.9; // Mantido 0.9
+    // Lança o anti-míssil exatamente da base do canhão (origem do sprite)
+    const launchX = cannon.sprite.x;
+    const launchY = cannon.sprite.y;
 
-    const launchX = cannon.sprite.x + Math.sin(cannonAngle) * lengthToCannonTip;
-    const launchY = cannon.sprite.y - Math.cos(cannonAngle) * lengthToCannonTip;
+    // const antiMissile = this.add.rectangle(launchX, launchY, 15, 60, 0xff0000);
+    // Troca o retângulo pelo sprite de imagem
+    const antiMissile = this.add.image(launchX, launchY, 'antimissile');
+    antiMissile.setOrigin(0.5, 1); // Igual ao canhão
+    antiMissile.setDepth(5);
 
-    const antiMissile = this.add.rectangle(launchX, launchY, 15, 60, 0xff0000); // Cria o retângulo
-    antiMissile.setOrigin(0.5, 1);
-    antiMissile.setDepth(55);
+    // Ajuste o tamanho conforme necessário
+    antiMissile.displayWidth = 15;
+    antiMissile.displayHeight = 60;
 
-    antiMissiles.push(antiMissile); // Adiciona ao array global de anti-mísseis
+    antiMissiles.push(antiMissile);
 
     this.tweens.add({
         targets: antiMissile,
         x: targetGameX,
         y: targetGameY,
-        duration: 500, // Duração do tween
+        duration: 500,
         ease: 'Linear',
         onUpdate: (tween, target) => {
             const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
             target.rotation = currentAngle + Math.PI / 2;
         },
         onComplete: () => {
-            antiMissile.destroy(); // Destroi o anti-míssil
-            this.onAntiMissileHit(targetGameX, targetGameY); // Chama a explosão no ponto final
+            antiMissile.destroy();
+            this.onAntiMissileHit(targetGameX, targetGameY);
         }
     });
 }
-
 
 function update() {
     if (currentState !== 'game') return;
