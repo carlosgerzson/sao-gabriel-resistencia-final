@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -6,45 +45,9 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>São Gabriel Resistência Final</title>
-
-    <!-- <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-            return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-                try {
-                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                    var firstSheetName = workbook.SheetNames[0];
-                    var worksheet = workbook.Sheets[firstSheetName];
-
-                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                    var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                    var headerRowIndex = filteredData.findIndex((row, index) =>
-                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                    );
-                    if (headerRowIndex === -1 || headerRowIndex > 25) {
-                        headerRowIndex = 0;
-                    }
-
-                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                    return csv;
-                } catch (e) {
-                    console.error(e);
-                    return "";
-                }
-            }
-            return gk_fileData[filename] || "";
-        }
-    </script> -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
     <style>
-        /* Reset básico e box-sizing para melhor controle de layout */
         * {
             box-sizing: border-box;
         }
@@ -54,44 +57,28 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            /* Importantíssimo para evitar scrollbars */
             width: 100%;
             height: 100%;
             background-color: black;
-            /* Estes 3 garantem que o body é um flex container e centraliza seu conteúdo */
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* O game-container é o elemento pai onde o canvas do Phaser será injetado */
         #game-container {
             width: 100%;
             height: 100%;
             position: relative;
-            /* ESSENCIAL: Torna o game-container um contexto de posicionamento */
-            /* REMOVA as propriedades de Flexbox daqui para evitar conflitos */
-            /* display: flex; */
-            /* justify-content: center; */
-            /* align-items: center; */
             border: 2px solid blue;
-            /* Mantenha a borda para depuração */
         }
 
-        /* Estiliza APENAS o canvas dentro do game-container */
         #game-container canvas {
             display: block;
-            /* Essencial para remover margens padrão */
             position: absolute;
-            /* Posiciona o canvas absolutamente dentro do seu pai (#game-container) */
             top: 50%;
-            /* Move o topo do elemento para 50% da altura do pai */
             left: 50%;
-            /* Move a esquerda do elemento para 50% da largura do pai */
             transform: translate(-50%, -50%);
-            /* Ajusta o elemento em -50% do seu PRÓPRIO tamanho para centralização perfeita */
             border: 2px solid red;
-            /* Mantenha a borda para depuração */
         }
     </style>
 </head>
