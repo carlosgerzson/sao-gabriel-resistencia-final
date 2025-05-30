@@ -5,6 +5,7 @@ let currentLevel = 1;
 const TOTAL_LEVELS = 10;
 let destroyedCount = 0;
 let preservedCount = 0;
+let gameEnded = false; // Novo flag para controlar o estado do jogo
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
@@ -100,10 +101,10 @@ class GameScene extends Phaser.Scene {
         this.load.image('canhao_d', 'assets/canhao_d.png');
         this.load.image('antimissile', 'assets/antimissile.png');
         const levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
-        this.load.image(`${levelPrefix}_fundo`, `${levelPrefix}_fundo.png`);
-        this.load.image(`${levelPrefix}_predio`, `${levelPrefix}_predio.png`);
-        this.load.image(`${levelPrefix}_dano1`, `${levelPrefix}_dano1.png`);
-        this.load.image(`${levelPrefix}_dano2`, `${levelPrefix}_dano2.png`);
+        this.load.image(`${levelPrefix}_fundo`, `${levelPrefix}_fundo.png');
+        this.load.image(`${levelPrefix}_predio`, `${levelPrefix}_predio.png');
+        this.load.image(`${levelPrefix}_dano1`, `${levelPrefix}_dano1.png');
+        this.load.image(`${levelPrefix}_dano2`, `${levelPrefix}_dano2.png');
         this.load.image(`${levelPrefix}_destruido`, `${levelPrefix}_destruido.png`);
     }
 
@@ -155,7 +156,11 @@ class GameScene extends Phaser.Scene {
         this.debugRect = debugRect;
 
         const levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
-        this.background = null;
+        this.background = this.add.image(0, 0, `${levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_fundo`).source[0].height / this.textures.get(`${levelPrefix}_fundo`).source[0].width));
+        this.background.setPosition(0, 550);
+        this.background.setDepth(-1); // Fundo com depth mais baixo
+        this.buildingContainer.add(this.background);
+
         this.building = this.add.image(0, 0, `${levelPrefix}_predio`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_predio`).source[0].height / this.textures.get(`${levelPrefix}_predio`).source[0].width));
         this.building.setPosition(0, 550);
         this.building.setDepth(1);
@@ -244,13 +249,15 @@ class GameScene extends Phaser.Scene {
         this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true });
 
         this.input.on('pointerdown', (pointer) => {
-            const gamePointerX = pointer.x;
-            const gamePointerY = pointer.y;
-            cannons.forEach(cannon => {
-                const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
-                cannon.sprite.rotation = cannonAngle + Math.PI / 2;
-                this.fireAntiMissile(cannon, gamePointerX, gamePointerY);
-            });
+            if (!gameEnded) {
+                const gamePointerX = pointer.x;
+                const gamePointerY = pointer.y;
+                cannons.forEach(cannon => {
+                    const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
+                    cannon.sprite.rotation = cannonAngle + Math.PI / 2;
+                    this.fireAntiMissile(cannon, gamePointerX, gamePointerY);
+                });
+            }
         });
 
         this.onAntiMissileHit = function(x, y) {
@@ -308,57 +315,61 @@ class GameScene extends Phaser.Scene {
     }
 
     spawnWave() {
-        this.waveCount++;
-        const baseSpeed = 70;
-        const speedIncrementPerWave = 20;
-        const delayBetweenMissiles = 800;
-        for (let i = 0; i < 2; i++) {
-            this.time.delayedCall(i * delayBetweenMissiles, () => {
-                const spawnX = Phaser.Math.Between(0, BASE_WIDTH);
-                const spawnY = 0;
-                const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
-                missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
-                missile.targetX = 450;
-                missile.targetY = 1552 - (this.building.displayHeight / 2);
-                missile.displayWidth = 10;
-                missile.displayHeight = 30;
-                missile.setDepth(50);
-                missiles.push(missile);
-            }, [], this);
+        if (!gameEnded) {
+            this.waveCount++;
+            const baseSpeed = 70;
+            const speedIncrementPerWave = 20;
+            const delayBetweenMissiles = 800;
+            for (let i = 0; i < 2; i++) {
+                this.time.delayedCall(i * delayBetweenMissiles, () => {
+                    const spawnX = Phaser.Math.Between(0, BASE_WIDTH);
+                    const spawnY = 0;
+                    const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
+                    missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
+                    missile.targetX = 450;
+                    missile.targetY = 1552 - (this.building.displayHeight / 2);
+                    missile.displayWidth = 10;
+                    missile.displayHeight = 30;
+                    missile.setDepth(50);
+                    missiles.push(missile);
+                }, [], this);
+            }
         }
     }
 
     fireAntiMissile(cannon, targetGameX, targetGameY) {
-        const launchX = cannon.sprite.x;
-        const launchY = cannon.sprite.y;
-        const antiMissile = this.add.image(launchX, launchY, 'antimissile');
-        antiMissile.setOrigin(0.5, 1);
-        antiMissile.setDepth(5);
-        antiMissile.displayWidth = 15;
-        antiMissile.displayHeight = 60;
-        antiMissiles.push(antiMissile);
-        this.tweens.add({
-            targets: antiMissile,
-            x: targetGameX,
-            y: targetGameY,
-            duration: 500,
-            ease: 'Linear',
-            onUpdate: (tween, target) => {
-                const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
-                target.rotation = currentAngle + Math.PI / 2;
-            },
-            onComplete: () => {
-                antiMissile.destroy();
-                this.onAntiMissileHit(targetGameX, targetGameY);
-            }
-        });
+        if (!gameEnded) {
+            const launchX = cannon.sprite.x;
+            const launchY = cannon.sprite.y;
+            const antiMissile = this.add.image(launchX, launchY, 'antimissile');
+            antiMissile.setOrigin(0.5, 1);
+            antiMissile.setDepth(5);
+            antiMissile.displayWidth = 15;
+            antiMissile.displayHeight = 60;
+            antiMissiles.push(antiMissile);
+            this.tweens.add({
+                targets: antiMissile,
+                x: targetGameX,
+                y: targetGameY,
+                duration: 500,
+                ease: 'Linear',
+                onUpdate: (tween, target) => {
+                    const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
+                    target.rotation = currentAngle + Math.PI / 2;
+                },
+                onComplete: () => {
+                    antiMissile.destroy();
+                    this.onAntiMissileHit(targetGameX, targetGameY);
+                }
+            });
+        }
     }
 
     updateBuildingState(levelPrefix) {
         if (this.buildingState >= 1 && !this.background) {
             this.background = this.add.image(0, 0, `${levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_fundo`).source[0].height / this.textures.get(`${levelPrefix}_fundo`).source[0].width));
             this.background.setPosition(0, 550);
-            this.background.setDepth(0);
+            this.background.setDepth(-1);
             this.buildingContainer.add(this.background);
         }
         const textureKey = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
@@ -369,6 +380,7 @@ class GameScene extends Phaser.Scene {
     endLevel(success) {
         this.time.removeAllEvents();
         this.input.enabled = false;
+        gameEnded = true; // Define o flag para pausar o jogo
         missiles.forEach(missile => {
             if (missile.active) missile.setActive(false).setVisible(false);
         });
@@ -431,9 +443,9 @@ class GameScene extends Phaser.Scene {
         this.continueButton.on('pointerdown', () => {
             if (currentLevel < TOTAL_LEVELS) {
                 currentLevel++;
+                gameEnded = false; // Reseta o flag para o próximo nível
                 this.scene.start('BriefingScene');
             } else {
-                // Tela final especial
                 this.gameBackgroundRect.clear();
                 this.gameBackgroundRect.fillGradientStyle(0xFFD700, 0xFFD700, 0xFF4500, 0xFF4500, 1);
                 this.gameBackgroundRect.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
@@ -526,6 +538,7 @@ class GameScene extends Phaser.Scene {
                     destroyedCount = 0;
                     preservedCount = 0;
                     currentLevel = 1;
+                    gameEnded = false;
                     this.scene.start('BriefingScene');
                 });
                 this.restartButton.on('pointerover', () => this.restartButton.fillStyle(0xFFFFFF, 1));
@@ -540,6 +553,8 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+        if (gameEnded) return; // Sai do update se o jogo terminou
+
         for (let i = missiles.length - 1; i >= 0; i--) {
             const missile = missiles[i];
             if (!missile || !missile.active) {
@@ -585,7 +600,7 @@ const config = {
     scene: [BriefingScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.NONE,
+        autoCenter: Phaser.Scale.CENTER_BOTH, // Alterado para centralizar vertical e horizontalmente
         parent: 'game-container'
     }
 };
@@ -594,14 +609,15 @@ const game = new Phaser.Game(config);
 console.log("Jogo Phaser inicializado");
 
 function resize(gameSize) {
-    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height); // Ajusta a câmera para o tamanho da tela
+    this.cameras.main.setZoom(Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT)); // Ajusta o zoom proporcionalmente
     const currentPhaserZoom = this.scale.zoom;
 
     if (this.gameBackgroundRect && this.gameBackgroundRect.active) {
         this.gameBackgroundRect.x = 0;
         this.gameBackgroundRect.y = 0;
-        this.gameBackgroundRect.displayWidth = BASE_WIDTH;
-        this.gameBackgroundRect.displayHeight = BASE_HEIGHT;
+        this.gameBackgroundRect.displayWidth = BASE_WIDTH * currentPhaserZoom;
+        this.gameBackgroundRect.displayHeight = BASE_HEIGHT * currentPhaserZoom;
     }
 
     if (this.stars) {
@@ -613,69 +629,69 @@ function resize(gameSize) {
     }
 
     if (this.briefingText && this.briefingText.active) {
-        this.briefingText.x = BASE_WIDTH / 2;
-        this.briefingText.y = BASE_HEIGHT / 2;
+        this.briefingText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.briefingText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
         this.briefingText.setFontSize(40 * currentPhaserZoom);
     }
 
     if (this.startButton && this.startButton.active) {
         this.startButton.clear();
         this.startButton.fillStyle(0xFFFF00, 1);
-        this.startButton.fillRect(350, 1400, 200, 80);
-        this.startButton.lineStyle(2, 0xFFFFFF);
-        this.startButton.strokeRect(350, 1400, 200, 80);
-        this.startButton.setScale(currentPhaserZoom);
+        this.startButton.fillRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.startButton.lineStyle(2 * currentPhaserZoom, 0xFFFFFF);
+        this.startButton.strokeRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.startButton.setScale(1);
     }
 
     if (this.startText && this.startText.active) {
-        this.startText.x = BASE_WIDTH / 2;
-        this.startText.y = 1440;
+        this.startText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.startText.y = 1440 * currentPhaserZoom;
         this.startText.setFontSize(30 * currentPhaserZoom);
     }
 
     if (this.silhuetaSprite && this.silhuetaSprite.active) {
-        this.silhuetaSprite.x = 450;
-        this.silhuetaSprite.y = 1600;
-        this.silhuetaSprite.displayWidth = 900;
-        this.silhuetaSprite.displayHeight = 384;
-        this.silhuetaSprite.setScale(currentPhaserZoom);
+        this.silhuetaSprite.x = 450 * currentPhaserZoom;
+        this.silhuetaSprite.y = 1600 * currentPhaserZoom;
+        this.silhuetaSprite.displayWidth = 900 * currentPhaserZoom;
+        this.silhuetaSprite.displayHeight = 384 * currentPhaserZoom;
+        this.silhuetaSprite.setScale(1);
     }
 
     if (this.buildingContainer && this.buildingContainer.active) {
-        this.buildingContainer.x = 450;
-        this.buildingContainer.y = 1002;
-        this.buildingContainer.setScale(currentPhaserZoom);
+        this.buildingContainer.x = 450 * currentPhaserZoom;
+        this.buildingContainer.y = 1002 * currentPhaserZoom;
+        this.buildingContainer.setScale(1);
         if (this.building) {
-            this.building.setDisplaySize(510, 510 * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
+            this.building.setDisplaySize(510 * currentPhaserZoom, 510 * currentPhaserZoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
         }
         if (this.background) {
-            this.background.setDisplaySize(510, 510 * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].width));
+            this.background.setDisplaySize(510 * currentPhaserZoom, 510 * currentPhaserZoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].width));
         }
     }
 
     if (this.debugRect && this.debugRect.active) {
         this.debugRect.clear();
-        this.debugRect.lineStyle(2, 0x00FF00);
-        this.debugRect.strokeRect(450 - 255, 1002, 510, 550);
-        this.debugRect.setScale(currentPhaserZoom);
+        this.debugRect.lineStyle(2 * currentPhaserZoom, 0x00FF00);
+        this.debugRect.strokeRect((450 - 255) * currentPhaserZoom, 1002 * currentPhaserZoom, 510 * currentPhaserZoom, 550 * currentPhaserZoom);
+        this.debugRect.setScale(1);
     }
 
     if (this.timerText && this.timerText.active) {
-        this.timerText.x = 20;
-        this.timerText.y = 20;
+        this.timerText.x = 20 * currentPhaserZoom;
+        this.timerText.y = 20 * currentPhaserZoom;
         this.timerText.setFontSize(40 * currentPhaserZoom);
     }
 
     if (missiles) {
         missiles.forEach(missile => {
             if (missile && missile.active) {
-                const missileBaseWidth = 10;
-                const missileBaseHeight = 30;
+                const missileBaseWidth = 10 * currentPhaserZoom;
+                const missileBaseHeight = 30 * currentPhaserZoom;
                 missile.displayWidth = missileBaseWidth;
                 missile.displayHeight = missileBaseHeight;
-                missile.targetX = 450;
-                missile.targetY = this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552;
-                missile.setScale(currentPhaserZoom);
+                missile.targetX = 450 * currentPhaserZoom;
+                missile.targetY = (this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552) * currentPhaserZoom;
+                missile.setScale(1);
             }
         });
     }
@@ -683,9 +699,9 @@ function resize(gameSize) {
     if (antiMissiles) {
         antiMissiles.forEach(anti => {
             if (anti && anti.active) {
-                anti.displayWidth = 15;
-                anti.displayHeight = 60;
-                anti.setScale(currentPhaserZoom);
+                anti.displayWidth = 15 * currentPhaserZoom;
+                anti.displayHeight = 60 * currentPhaserZoom;
+                anti.setScale(1);
             }
         });
     }
@@ -693,11 +709,11 @@ function resize(gameSize) {
     if (this.allTowerSprites) {
         this.allTowerSprites.forEach(tower => {
             if (tower.sprite.active) {
-                tower.sprite.x = tower.def.towerBaseX;
-                tower.sprite.y = tower.def.towerBaseY;
-                tower.sprite.displayWidth = tower.def.towerTargetWidth;
-                tower.sprite.displayHeight = tower.def.towerTargetHeight;
-                tower.sprite.setScale(currentPhaserZoom);
+                tower.sprite.x = tower.def.towerBaseX * currentPhaserZoom;
+                tower.sprite.y = tower.def.towerBaseY * currentPhaserZoom;
+                tower.sprite.displayWidth = tower.def.towerTargetWidth * currentPhaserZoom;
+                tower.sprite.displayHeight = tower.def.towerTargetHeight * currentPhaserZoom;
+                tower.sprite.setScale(1);
             }
         });
     }
@@ -705,66 +721,66 @@ function resize(gameSize) {
     if (this.allCannonsSprites) {
         this.allCannonsSprites.forEach(cannon => {
             if (cannon.sprite.active) {
-                cannon.sprite.x = cannon.def.cannonX;
-                cannon.sprite.y = cannon.def.cannonY;
-                cannon.sprite.displayWidth = cannon.def.cannonTargetWidth;
-                cannon.sprite.displayHeight = cannon.def.cannonTargetHeight;
-                cannon.sprite.setScale(currentPhaserZoom);
+                cannon.sprite.x = cannon.def.cannonX * currentPhaserZoom;
+                cannon.sprite.y = cannon.def.cannonY * currentPhaserZoom;
+                cannon.sprite.displayWidth = cannon.def.cannonTargetWidth * currentPhaserZoom;
+                cannon.sprite.displayHeight = cannon.def.cannonTargetHeight * currentPhaserZoom;
+                cannon.sprite.setScale(1);
             }
         });
     }
 
     if (this.resultText && this.resultText.active) {
-        this.resultText.x = BASE_WIDTH / 2;
-        this.resultText.y = BASE_HEIGHT / 2;
+        this.resultText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.resultText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
         this.resultText.setFontSize(60 * currentPhaserZoom);
     }
 
     if (this.statsText && this.statsText.active) {
-        this.statsText.x = BASE_WIDTH / 2;
-        this.statsText.y = BASE_HEIGHT / 2 + 100;
+        this.statsText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.statsText.y = (BASE_HEIGHT / 2 + 100) * currentPhaserZoom;
         this.statsText.setFontSize(40 * currentPhaserZoom);
     }
 
     if (this.performanceText && this.performanceText.active) {
-        this.performanceText.x = BASE_WIDTH / 2;
-        this.performanceText.y = BASE_HEIGHT / 2;
+        this.performanceText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.performanceText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
         this.performanceText.setFontSize(40 * currentPhaserZoom);
     }
 
     if (this.continueButton && this.continueButton.active) {
         this.continueButton.clear();
         this.continueButton.fillStyle(0xFFFF00, 1);
-        this.continueButton.fillRect(350, 1400, 200, 80);
-        this.continueButton.lineStyle(2, 0xFFFFFF);
-        this.continueButton.strokeRect(350, 1400, 200, 80);
-        this.continueButton.setScale(currentPhaserZoom);
+        this.continueButton.fillRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.continueButton.lineStyle(2 * currentPhaserZoom, 0xFFFFFF);
+        this.continueButton.strokeRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.continueButton.setScale(1);
     }
 
     if (this.continueText && this.continueText.active) {
-        this.continueText.x = BASE_WIDTH / 2;
-        this.continueText.y = 1440;
+        this.continueText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.continueText.y = 1440 * currentPhaserZoom;
         this.continueText.setFontSize(30 * currentPhaserZoom);
     }
 
     if (this.endText && this.endText.active) {
-        this.endText.x = BASE_WIDTH / 2;
-        this.endText.y = BASE_HEIGHT / 2 - 200;
+        this.endText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.endText.y = (BASE_HEIGHT / 2 - 200) * currentPhaserZoom;
         this.endText.setFontSize(80 * currentPhaserZoom);
     }
 
     if (this.restartButton && this.restartButton.active) {
         this.restartButton.clear();
         this.restartButton.fillStyle(0x00FF00, 1);
-        this.restartButton.fillRect(300, 1300, 300, 100);
-        this.restartButton.lineStyle(4, 0xFFFFFF);
-        this.restartButton.strokeRect(300, 1300, 300, 100);
-        this.restartButton.setScale(currentPhaserZoom);
+        this.restartButton.fillRect(300 * currentPhaserZoom, 1300 * currentPhaserZoom, 300 * currentPhaserZoom, 100 * currentPhaserZoom);
+        this.restartButton.lineStyle(4 * currentPhaserZoom, 0xFFFFFF);
+        this.restartButton.strokeRect(300 * currentPhaserZoom, 1300 * currentPhaserZoom, 300 * currentPhaserZoom, 100 * currentPhaserZoom);
+        this.restartButton.setScale(1);
     }
 
     if (this.restartText && this.restartText.active) {
-        this.restartText.x = BASE_WIDTH / 2;
-        this.restartText.y = 1350;
+        this.restartText.x = BASE_WIDTH / 2 * currentPhaserZoom;
+        this.restartText.y = 1350 * currentPhaserZoom;
         this.restartText.setFontSize(40 * currentPhaserZoom);
     }
 
