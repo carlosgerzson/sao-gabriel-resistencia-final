@@ -436,11 +436,13 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(100);
         this.continueButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
         this.continueButton.on('pointerdown', () => {
+            console.log("Botão CONTINUAR clicado");
             if (currentLevel < TOTAL_LEVELS) {
                 currentLevel++;
                 gameEnded = false;
-                this.scene.start('BriefingScene');
+                this.scene.restart(); // Reinicia a cena atual para o próximo nível
             } else {
+                // Tela final
                 this.gameBackgroundRect.clear();
                 this.gameBackgroundRect.fillGradientStyle(0xFFD700, 0xFFD700, 0xFF4500, 0xFF4500, 1);
                 this.gameBackgroundRect.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
@@ -604,88 +606,89 @@ const game = new Phaser.Game(config);
 console.log("Jogo Phaser inicializado");
 
 function resize(gameSize) {
+    const zoom = Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT);
     this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-    this.cameras.main.setZoom(Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT));
-    const currentPhaserZoom = this.scale.zoom;
+    this.cameras.main.setZoom(zoom);
+    this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2); // Centraliza a câmera
 
     if (this.gameBackgroundRect && this.gameBackgroundRect.active) {
         this.gameBackgroundRect.x = 0;
         this.gameBackgroundRect.y = 0;
-        this.gameBackgroundRect.displayWidth = BASE_WIDTH * currentPhaserZoom;
-        this.gameBackgroundRect.displayHeight = BASE_HEIGHT * currentPhaserZoom;
+        this.gameBackgroundRect.displayWidth = BASE_WIDTH * zoom;
+        this.gameBackgroundRect.displayHeight = BASE_HEIGHT * zoom;
     }
 
     if (this.stars) {
         this.stars.forEach(star => {
             if (star.active) {
-                star.setScale(currentPhaserZoom);
+                star.setScale(zoom);
             }
         });
     }
 
     if (this.briefingText && this.briefingText.active) {
-        this.briefingText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.briefingText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
-        this.briefingText.setFontSize(40 * currentPhaserZoom);
+        this.briefingText.x = BASE_WIDTH / 2 * zoom;
+        this.briefingText.y = BASE_HEIGHT / 2 * zoom;
+        this.briefingText.setFontSize(40 * zoom);
     }
 
     if (this.startButton && this.startButton.active) {
         this.startButton.clear();
         this.startButton.fillStyle(0xFFFF00, 1);
-        this.startButton.fillRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
-        this.startButton.lineStyle(2 * currentPhaserZoom, 0xFFFFFF);
-        this.startButton.strokeRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.startButton.fillRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
+        this.startButton.lineStyle(2 * zoom, 0xFFFFFF);
+        this.startButton.strokeRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
         this.startButton.setScale(1);
     }
 
     if (this.startText && this.startText.active) {
-        this.startText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.startText.y = 1440 * currentPhaserZoom;
-        this.startText.setFontSize(30 * currentPhaserZoom);
+        this.startText.x = BASE_WIDTH / 2 * zoom;
+        this.startText.y = 1440 * zoom;
+        this.startText.setFontSize(30 * zoom);
     }
 
     if (this.silhuetaSprite && this.silhuetaSprite.active) {
-        this.silhuetaSprite.x = 450 * currentPhaserZoom;
-        this.silhuetaSprite.y = 1600 * currentPhaserZoom;
-        this.silhuetaSprite.displayWidth = 900 * currentPhaserZoom;
-        this.silhuetaSprite.displayHeight = 384 * currentPhaserZoom;
+        this.silhuetaSprite.x = 450 * zoom;
+        this.silhuetaSprite.y = 1600 * zoom;
+        this.silhuetaSprite.displayWidth = 900 * zoom;
+        this.silhuetaSprite.displayHeight = 384 * zoom;
         this.silhuetaSprite.setScale(1);
     }
 
     if (this.buildingContainer && this.buildingContainer.active) {
-        this.buildingContainer.x = 450 * currentPhaserZoom;
-        this.buildingContainer.y = 1002 * currentPhaserZoom;
+        this.buildingContainer.x = 450 * zoom;
+        this.buildingContainer.y = 1002 * zoom;
         this.buildingContainer.setScale(1);
         if (this.building) {
-            this.building.setDisplaySize(510 * currentPhaserZoom, 510 * currentPhaserZoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
+            this.building.setDisplaySize(510 * zoom, 510 * zoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
         }
         if (this.background) {
-            this.background.setDisplaySize(510 * currentPhaserZoom, 510 * currentPhaserZoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].width));
+            this.background.setDisplaySize(510 * zoom, 510 * zoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].width));
         }
     }
 
     if (this.debugRect && this.debugRect.active) {
         this.debugRect.clear();
-        this.debugRect.lineStyle(2 * currentPhaserZoom, 0x00FF00);
-        this.debugRect.strokeRect((450 - 255) * currentPhaserZoom, 1002 * currentPhaserZoom, 510 * currentPhaserZoom, 550 * currentPhaserZoom);
+        this.debugRect.lineStyle(2 * zoom, 0x00FF00);
+        this.debugRect.strokeRect((450 - 255) * zoom, 1002 * zoom, 510 * zoom, 550 * zoom);
         this.debugRect.setScale(1);
     }
 
     if (this.timerText && this.timerText.active) {
-        this.timerText.x = 20 * currentPhaserZoom;
-        this.timerText.y = 20 * currentPhaserZoom;
-        this.timerText.setFontSize(40 * currentPhaserZoom);
+        this.timerText.x = 20 * zoom;
+        this.timerText.y = 20 * zoom;
+        this.timerText.setFontSize(40 * zoom);
     }
 
     if (missiles) {
         missiles.forEach(missile => {
             if (missile && missile.active) {
-                const missileBaseWidth = 10 * currentPhaserZoom;
-                const missileBaseHeight = 30 * currentPhaserZoom;
+                const missileBaseWidth = 10 * zoom;
+                const missileBaseHeight = 30 * zoom;
                 missile.displayWidth = missileBaseWidth;
                 missile.displayHeight = missileBaseHeight;
-                missile.targetX = 450 * currentPhaserZoom;
-                missile.targetY = (this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552) * currentPhaserZoom;
+                missile.targetX = 450 * zoom;
+                missile.targetY = (this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552) * zoom;
                 missile.setScale(1);
             }
         });
@@ -694,8 +697,8 @@ function resize(gameSize) {
     if (antiMissiles) {
         antiMissiles.forEach(anti => {
             if (anti && anti.active) {
-                anti.displayWidth = 15 * currentPhaserZoom;
-                anti.displayHeight = 60 * currentPhaserZoom;
+                anti.displayWidth = 15 * zoom;
+                anti.displayHeight = 60 * zoom;
                 anti.setScale(1);
             }
         });
@@ -704,10 +707,10 @@ function resize(gameSize) {
     if (this.allTowerSprites) {
         this.allTowerSprites.forEach(tower => {
             if (tower.sprite.active) {
-                tower.sprite.x = tower.def.towerBaseX * currentPhaserZoom;
-                tower.sprite.y = tower.def.towerBaseY * currentPhaserZoom;
-                tower.sprite.displayWidth = tower.def.towerTargetWidth * currentPhaserZoom;
-                tower.sprite.displayHeight = tower.def.towerTargetHeight * currentPhaserZoom;
+                tower.sprite.x = tower.def.towerBaseX * zoom;
+                tower.sprite.y = tower.def.towerBaseY * zoom;
+                tower.sprite.displayWidth = tower.def.towerTargetWidth * zoom;
+                tower.sprite.displayHeight = tower.def.towerTargetHeight * zoom;
                 tower.sprite.setScale(1);
             }
         });
@@ -716,68 +719,68 @@ function resize(gameSize) {
     if (this.allCannonsSprites) {
         this.allCannonsSprites.forEach(cannon => {
             if (cannon.sprite.active) {
-                cannon.sprite.x = cannon.def.cannonX * currentPhaserZoom;
-                cannon.sprite.y = cannon.def.cannonY * currentPhaserZoom;
-                cannon.sprite.displayWidth = cannon.def.cannonTargetWidth * currentPhaserZoom;
-                cannon.sprite.displayHeight = cannon.def.cannonTargetHeight * currentPhaserZoom;
+                cannon.sprite.x = cannon.def.cannonX * zoom;
+                cannon.sprite.y = cannon.def.cannonY * zoom;
+                cannon.sprite.displayWidth = cannon.def.cannonTargetWidth * zoom;
+                cannon.sprite.displayHeight = cannon.def.cannonTargetHeight * zoom;
                 cannon.sprite.setScale(1);
             }
         });
     }
 
     if (this.resultText && this.resultText.active) {
-        this.resultText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.resultText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
-        this.resultText.setFontSize(60 * currentPhaserZoom);
+        this.resultText.x = BASE_WIDTH / 2 * zoom;
+        this.resultText.y = BASE_HEIGHT / 2 * zoom;
+        this.resultText.setFontSize(60 * zoom);
     }
 
     if (this.statsText && this.statsText.active) {
-        this.statsText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.statsText.y = (BASE_HEIGHT / 2 + 100) * currentPhaserZoom;
-        this.statsText.setFontSize(40 * currentPhaserZoom);
+        this.statsText.x = BASE_WIDTH / 2 * zoom;
+        this.statsText.y = (BASE_HEIGHT / 2 + 100) * zoom;
+        this.statsText.setFontSize(40 * zoom);
     }
 
     if (this.performanceText && this.performanceText.active) {
-        this.performanceText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.performanceText.y = BASE_HEIGHT / 2 * currentPhaserZoom;
-        this.performanceText.setFontSize(40 * currentPhaserZoom);
+        this.performanceText.x = BASE_WIDTH / 2 * zoom;
+        this.performanceText.y = BASE_HEIGHT / 2 * zoom;
+        this.performanceText.setFontSize(40 * zoom);
     }
 
     if (this.continueButton && this.continueButton.active) {
         this.continueButton.clear();
         this.continueButton.fillStyle(0xFFFF00, 1);
-        this.continueButton.fillRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
-        this.continueButton.lineStyle(2 * currentPhaserZoom, 0xFFFFFF);
-        this.continueButton.strokeRect(350 * currentPhaserZoom, 1400 * currentPhaserZoom, 200 * currentPhaserZoom, 80 * currentPhaserZoom);
+        this.continueButton.fillRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
+        this.continueButton.lineStyle(2 * zoom, 0xFFFFFF);
+        this.continueButton.strokeRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
         this.continueButton.setScale(1);
     }
 
     if (this.continueText && this.continueText.active) {
-        this.continueText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.continueText.y = 1440 * currentPhaserZoom;
-        this.continueText.setFontSize(30 * currentPhaserZoom);
+        this.continueText.x = BASE_WIDTH / 2 * zoom;
+        this.continueText.y = 1440 * zoom;
+        this.continueText.setFontSize(30 * zoom);
     }
 
     if (this.endText && this.endText.active) {
-        this.endText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.endText.y = (BASE_HEIGHT / 2 - 200) * currentPhaserZoom;
-        this.endText.setFontSize(80 * currentPhaserZoom);
+        this.endText.x = BASE_WIDTH / 2 * zoom;
+        this.endText.y = (BASE_HEIGHT / 2 - 200) * zoom;
+        this.endText.setFontSize(80 * zoom);
     }
 
     if (this.restartButton && this.restartButton.active) {
         this.restartButton.clear();
         this.restartButton.fillStyle(0x00FF00, 1);
-        this.restartButton.fillRect(300 * currentPhaserZoom, 1300 * currentPhaserZoom, 300 * currentPhaserZoom, 100 * currentPhaserZoom);
-        this.restartButton.lineStyle(4 * currentPhaserZoom, 0xFFFFFF);
-        this.restartButton.strokeRect(300 * currentPhaserZoom, 1300 * currentPhaserZoom, 300 * currentPhaserZoom, 100 * currentPhaserZoom);
+        this.restartButton.fillRect(300 * zoom, 1300 * zoom, 300 * zoom, 100 * zoom);
+        this.restartButton.lineStyle(4 * zoom, 0xFFFFFF);
+        this.restartButton.strokeRect(300 * zoom, 1300 * zoom, 300 * zoom, 100 * zoom);
         this.restartButton.setScale(1);
     }
 
     if (this.restartText && this.restartText.active) {
-        this.restartText.x = BASE_WIDTH / 2 * currentPhaserZoom;
-        this.restartText.y = 1350 * currentPhaserZoom;
-        this.restartText.setFontSize(40 * currentPhaserZoom);
+        this.restartText.x = BASE_WIDTH / 2 * zoom;
+        this.restartText.y = 1350 * zoom;
+        this.restartText.setFontSize(40 * zoom);
     }
 
-    console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${currentPhaserZoom.toFixed(2)}`);
+    console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${zoom.toFixed(2)}`);
 }
