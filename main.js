@@ -64,20 +64,25 @@ class BriefingScene extends Phaser.Scene {
         this.startButton.fillRect(350, 1400, 200, 80);
         this.startButton.lineStyle(2, 0xFFFFFF);
         this.startButton.strokeRect(350, 1400, 200, 80);
-        this.startButton.setDepth(100);
+        this.startButton.setDepth(101); // Aumenta o depth para garantir que fique acima de outros elementos
         this.startText = this.add.text(BASE_WIDTH / 2, 1440, 'INICIAR', {
             fontFamily: 'VT323',
             fontSize: '30px',
             color: '#000000'
-        }).setOrigin(0.5).setDepth(100);
+        }).setOrigin(0.5).setDepth(101);
         // Configura interatividade inicial
         this.startButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
         this.startButton.on('pointerdown', () => {
             console.log("Botão INICIAR clicado, iniciando GameScene");
             this.scene.start('GameScene');
         });
-        this.startButton.on('pointerover', () => this.startButton.fillStyle(0xFFFFFF, 1));
-        this.startButton.on('pointerout', () => this.startButton.fillStyle(0xFFFF00, 1));
+        this.startButton.on('pointerover', () => {
+            console.log("Mouse sobre o botão INICIAR");
+            this.startButton.fillStyle(0xFFFFFF, 1);
+        });
+        this.startButton.on('pointerout', () => {
+            this.startButton.fillStyle(0xFFFF00, 1);
+        });
         console.log("Botão INICIAR renderizado");
 
         this.scale.on('resize', resize, this);
@@ -651,7 +656,7 @@ function resize(gameSize) {
         this.startButton.x = offsetX / zoom;
         this.startButton.y = offsetY / zoom;
         // Atualiza o retângulo interativo no resize
-        this.startButton.setInteractive(new Phaser.Geom.Rectangle(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom), Phaser.Geom.Rectangle.Contains);
+        this.startButton.setInteractive(new Phaser.Geom.Rectangle(350 * zoom + offsetX / zoom, 1400 * zoom + offsetY / zoom, 200 * zoom, 80 * zoom), Phaser.Geom.Rectangle.Contains);
     }
 
     if (this.startText && this.startText.active) {
