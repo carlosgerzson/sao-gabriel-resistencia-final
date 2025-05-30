@@ -59,31 +59,33 @@ class BriefingScene extends Phaser.Scene {
             }
         });
 
-        this.startButton = this.add.graphics();
-        this.startButton.fillStyle(0xFFFF00, 1);
-        this.startButton.fillRect(350, 1400, 200, 80);
-        this.startButton.lineStyle(2, 0xFFFFFF);
-        this.startButton.strokeRect(350, 1400, 200, 80);
-        this.startButton.setDepth(101); // Aumenta o depth para garantir que fique acima de outros elementos
+        // Usar um retângulo interativo
+        this.startButton = this.add.rectangle(450, 1440, 200, 80, 0xFFFF00); // Centro ajustado para (450, 1440)
+        this.startButton.setStrokeStyle(2, 0xFFFFFF);
+        this.startButton.setDepth(101);
         this.startText = this.add.text(BASE_WIDTH / 2, 1440, 'INICIAR', {
             fontFamily: 'VT323',
             fontSize: '30px',
             color: '#000000'
         }).setOrigin(0.5).setDepth(101);
-        // Configura interatividade inicial
-        this.startButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
+        this.startButton.setInteractive();
         this.startButton.on('pointerdown', () => {
             console.log("Botão INICIAR clicado, iniciando GameScene");
             this.scene.start('GameScene');
         });
         this.startButton.on('pointerover', () => {
             console.log("Mouse sobre o botão INICIAR");
-            this.startButton.fillStyle(0xFFFFFF, 1);
+            this.startButton.setFillStyle(0xFFFFFF, 1);
         });
         this.startButton.on('pointerout', () => {
-            this.startButton.fillStyle(0xFFFF00, 1);
+            this.startButton.setFillStyle(0xFFFF00, 1);
         });
         console.log("Botão INICIAR renderizado");
+
+        // Adicionar um listener global para depurar cliques
+        this.input.on('pointerdown', (pointer) => {
+            console.log(`Clique detectado em: x=${pointer.x}, y=${pointer.y} (world: x=${pointer.worldX}, y=${pointer.worldY})`);
+        });
 
         this.scale.on('resize', resize, this);
         resize.call(this, { width: this.scale.width, height: this.scale.height });
@@ -387,7 +389,7 @@ class GameScene extends Phaser.Scene {
         this.time.removeAllEvents();
         gameEnded = true;
         missiles.forEach(missile => {
-            if (missile.active) missile.setActive(false).setVisible(false);
+            if (miscile.active) missile.setActive(false).setVisible(false);
         });
         antiMissiles.forEach(anti => {
             if (anti.active) anti.setActive(false).setVisible(false);
@@ -606,7 +608,7 @@ const config = {
     scene: [BriefingScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.NO_CENTER,
+        autoCenter: Phaser.Scale.CENTER_BOTH, // Alterado para centralizar automaticamente
         parent: 'game-container'
     }
 };
@@ -647,19 +649,10 @@ function resize(gameSize) {
     }
 
     if (this.startButton && this.startButton.active) {
-        this.startButton.clear();
-        this.startButton.fillStyle(0xFFFF00, 1);
-        this.startButton.fillRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
-        this.startButton.lineStyle(2 * zoom, 0xFFFFFF);
-        this.startButton.strokeRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
-        this.startButton.setScale(1);
-        this.startButton.x = offsetX / zoom;
-        this.startButton.y = offsetY / zoom;
-        // Atualiza o retângulo interativo no resize
-        this.startButton.setInteractive(new Phaser.Geom.Rectangle(350 * zoom + offsetX / zoom, 1400 * zoom + offsetY / zoom, 200 * zoom, 80 * zoom), Phaser.Geom.Rectangle.Contains);
-    }
-
-    if (this.startText && this.startText.active) {
+        this.startButton.setScale(zoom);
+        this.startButton.x = 450 * zoom + offsetX / zoom;
+        this.startButton.y = 1440 * zoom + offsetY / zoom;
+        this.startButton.setSize(200 * zoom, 80 * zoom);
         this.startText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
         this.startText.y = (1440 * zoom) + offsetY / zoom;
         this.startText.setFontSize(30 * zoom);
