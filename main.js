@@ -301,6 +301,14 @@ class GameScene extends Phaser.Scene {
                     buildingHitExplosion.destroy();
                 }
             });
+            // Incrementar o estado do prédio
+            if (this.buildingState < 3) {
+                this.buildingState++;
+                this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
+                if (this.buildingState === 3) {
+                    this.endLevel(false);
+                }
+            }
         }.bind(this);
 
         this.handleExplosionCollision = function(explosionX, explosionY, explosionRadius) {
@@ -389,7 +397,7 @@ class GameScene extends Phaser.Scene {
         this.time.removeAllEvents();
         gameEnded = true;
         missiles.forEach(missile => {
-            if (miscile.active) missile.setActive(false).setVisible(false);
+            if (missile.active) missile.setActive(false).setVisible(false);
         });
         antiMissiles.forEach(anti => {
             if (anti.active) anti.setActive(false).setVisible(false);
@@ -583,14 +591,6 @@ class GameScene extends Phaser.Scene {
                 this.onBuildingHit(missile.x, missile.y);
                 missile.destroy();
                 missiles.splice(i, 1);
-
-                if (this.buildingState < 3) {
-                    this.buildingState++;
-                    this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
-                    if (this.buildingState === 3) {
-                        this.endLevel(false);
-                    }
-                }
             }
         }
 
@@ -608,7 +608,7 @@ const config = {
     scene: [BriefingScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH, // Alterado para centralizar automaticamente
+        autoCenter: Phaser.Scale.NO_CENTER, // Restaurado para NO_CENTER
         parent: 'game-container'
     }
 };
@@ -619,9 +619,11 @@ console.log("Jogo Phaser inicializado");
 function resize(gameSize) {
     let zoom = Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT);
     zoom = Math.min(zoom, MAX_ZOOM); // Limita o zoom máximo
-    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-    this.cameras.main.setZoom(zoom);
-    this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2);
+    if (this.cameras && this.cameras.main) { // Verificação para evitar erro
+        this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+        this.cameras.main.setZoom(zoom);
+        this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2);
+    }
 
     const offsetX = (gameSize.width - BASE_WIDTH * zoom) / 2;
     const offsetY = (gameSize.height - BASE_HEIGHT * zoom) / 2;
