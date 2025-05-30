@@ -96,10 +96,10 @@ class GameScene extends Phaser.Scene {
         this.load.image('canhao_d', 'assets/canhao_d.png');
         this.load.image('antimissile', 'assets/antimissile.png');
         const levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
-        this.load.image(`${levelPrefix}_fundo`, `${levelPrefix}_fundo.png');
-        this.load.image(`${levelPrefix}_predio`, `${levelPrefix}_predio.png');
-        this.load.image(`${levelPrefix}_dano1`, `${levelPrefix}_dano1.png');
-        this.load.image(`${levelPrefix}_dano2`, `${levelPrefix}_dano2.png');
+        this.load.image(`${levelPrefix}_fundo`, `${levelPrefix}_fundo.png`);
+        this.load.image(`${levelPrefix}_predio`, `${levelPrefix}_predio.png`);
+        this.load.image(`${levelPrefix}_dano1`, `${levelPrefix}_dano1.png`);
+        this.load.image(`${levelPrefix}_dano2`, `${levelPrefix}_dano2.png`);
         this.load.image(`${levelPrefix}_destruido`, `${levelPrefix}_destruido.png`);
     }
 
