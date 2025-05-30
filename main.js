@@ -70,6 +70,7 @@ class BriefingScene extends Phaser.Scene {
             fontSize: '30px',
             color: '#000000'
         }).setOrigin(0.5).setDepth(100);
+        // Configura interatividade inicial
         this.startButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
         this.startButton.on('pointerdown', () => {
             console.log("Botão INICIAR clicado, iniciando GameScene");
@@ -649,6 +650,8 @@ function resize(gameSize) {
         this.startButton.setScale(1);
         this.startButton.x = offsetX / zoom;
         this.startButton.y = offsetY / zoom;
+        // Atualiza o retângulo interativo no resize
+        this.startButton.setInteractive(new Phaser.Geom.Rectangle(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom), Phaser.Geom.Rectangle.Contains);
     }
 
     if (this.startText && this.startText.active) {
