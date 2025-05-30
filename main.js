@@ -9,6 +9,7 @@ let gameEnded = false;
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
+const MAX_ZOOM = 0.8; // Limite máximo para o zoom
 
 class BriefingScene extends Phaser.Scene {
     constructor() {
@@ -32,6 +33,8 @@ class BriefingScene extends Phaser.Scene {
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
+            star.originalX = star.x; // Armazena posição original para resize
+            star.originalY = star.y;
             this.stars.push(star);
         }
         console.log("Estrelas renderizadas");
@@ -117,6 +120,8 @@ class GameScene extends Phaser.Scene {
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
+            star.originalX = star.x;
+            star.originalY = star.y;
             this.stars.push(star);
         }
 
@@ -434,7 +439,6 @@ class GameScene extends Phaser.Scene {
             color: '#000000'
         }).setOrigin(0.5).setDepth(100);
         this.continueButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
-        this.input.setInteractive(this.continueButton);
         this.continueButton.on('pointerdown', () => {
             console.log("Botão CONTINUAR clicado");
             if (currentLevel < TOTAL_LEVELS) {
@@ -530,7 +534,6 @@ class GameScene extends Phaser.Scene {
                     color: '#000000'
                 }).setOrigin(0.5).setDepth(100);
                 this.restartButton.setInteractive(new Phaser.Geom.Rectangle(300, 1300, 300, 100), Phaser.Geom.Rectangle.Contains);
-                this.input.setInteractive(this.restartButton);
                 this.restartButton.on('pointerdown', () => {
                     destroyedCount = 0;
                     preservedCount = 0;
@@ -606,7 +609,8 @@ const game = new Phaser.Game(config);
 console.log("Jogo Phaser inicializado");
 
 function resize(gameSize) {
-    const zoom = Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT);
+    let zoom = Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT);
+    zoom = Math.min(zoom, MAX_ZOOM); // Limita o zoom máximo
     this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
     this.cameras.main.setZoom(zoom);
     this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2);
