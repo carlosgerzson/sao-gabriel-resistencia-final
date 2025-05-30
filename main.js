@@ -33,6 +33,8 @@ class BriefingScene extends Phaser.Scene {
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
+            star.originalX = star.x;
+            star.originalY = star.y;
             this.stars.push(star);
         }
         console.log("Estrelas renderizadas");
@@ -124,6 +126,8 @@ class GameScene extends Phaser.Scene {
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
+            star.originalX = star.x;
+            star.originalY = star.y;
             this.stars.push(star);
         }
 
@@ -230,6 +234,8 @@ class GameScene extends Phaser.Scene {
             tower.setDepth(def.towerDepth);
             tower.displayWidth = def.towerTargetWidth;
             tower.displayHeight = def.towerTargetHeight;
+            tower.originalX = def.towerBaseX;
+            tower.originalY = def.towerBaseY;
             this.allTowerSprites.push({ sprite: tower, def: def });
 
             const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
@@ -237,6 +243,8 @@ class GameScene extends Phaser.Scene {
             cannon.setDepth(def.cannonDepth);
             cannon.displayWidth = def.cannonTargetWidth;
             cannon.displayHeight = def.cannonTargetHeight;
+            cannon.originalX = def.cannonX;
+            cannon.originalY = def.cannonY;
             this.allCannonsSprites.push({ sprite: cannon, def: def });
 
             cannons.push({ sprite: cannon, tower: tower });
@@ -626,6 +634,9 @@ function resize(gameSize) {
         this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2);
     }
 
+    const offsetX = (gameSize.width - BASE_WIDTH * zoom) / 2 / zoom;
+    const offsetY = (gameSize.height - BASE_HEIGHT * zoom) / 2 / zoom;
+
     if (this.gameBackgroundRect && this.gameBackgroundRect.active) {
         this.gameBackgroundRect.clear();
         this.gameBackgroundRect.fillGradientStyle(0x8B0000, 0x8B0000, 0x000000, 0x000000, 1);
@@ -635,41 +646,59 @@ function resize(gameSize) {
     if (this.stars) {
         this.stars.forEach(star => {
             if (star.active) {
+                star.x = star.originalX + offsetX;
+                star.y = star.originalY + offsetY;
                 star.setScale(zoom);
             }
         });
     }
 
     if (this.briefingText && this.briefingText.active) {
+        this.briefingText.x = BASE_WIDTH / 2 + offsetX;
+        this.briefingText.y = BASE_HEIGHT / 2 + offsetY;
         this.briefingText.setFontSize(40 * zoom);
     }
 
     if (this.startButton && this.startButton.active) {
-        this.startButton.setScale(zoom);
+        this.startButton.x = BASE_WIDTH / 2 + offsetX;
+        this.startButton.y = (BASE_HEIGHT - 160) + offsetY;
+        this.startButton.setSize(200 * zoom, 80 * zoom);
+        this.startText.x = BASE_WIDTH / 2 + offsetX;
+        this.startText.y = (BASE_HEIGHT - 160) + offsetY;
         this.startText.setFontSize(30 * zoom);
     }
 
     if (this.silhuetaSprite && this.silhuetaSprite.active) {
+        this.silhuetaSprite.x = BASE_WIDTH / 2 + offsetX;
+        this.silhuetaSprite.y = BASE_HEIGHT + offsetY;
         this.silhuetaSprite.displayWidth = BASE_WIDTH * zoom;
         this.silhuetaSprite.displayHeight = 384 * zoom;
     }
 
     if (this.buildingContainer && this.buildingContainer.active) {
+        this.buildingContainer.x = BASE_WIDTH / 2 + offsetX;
+        this.buildingContainer.y = BASE_HEIGHT * 0.625 + offsetY;
         if (this.building) {
             this.building.setDisplaySize(510 * zoom, 510 * zoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
+            this.building.x = 0;
+            this.building.y = 550;
         }
         if (this.background) {
             this.background.setDisplaySize(510 * zoom, 510 * zoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_fundo`).source[0].width));
+            this.background.x = 0;
+            this.background.y = 550;
         }
     }
 
     if (this.debugRect && this.debugRect.active) {
         this.debugRect.clear();
         this.debugRect.lineStyle(2 * zoom, 0x00FF00);
-        this.debugRect.strokeRect(BASE_WIDTH / 2 - 255, BASE_HEIGHT * 0.625, 510 * zoom, 550 * zoom);
+        this.debugRect.strokeRect((BASE_WIDTH / 2 - 255) + offsetX, (BASE_HEIGHT * 0.625) + offsetY, 510 * zoom, 550 * zoom);
     }
 
     if (this.timerText && this.timerText.active) {
+        this.timerText.x = 20 + offsetX;
+        this.timerText.y = 20 + offsetY;
         this.timerText.setFontSize(40 * zoom);
     }
 
@@ -678,8 +707,8 @@ function resize(gameSize) {
             if (missile && missile.active) {
                 missile.displayWidth = 10 * zoom;
                 missile.displayHeight = 30 * zoom;
-                missile.targetX = BASE_WIDTH / 2;
-                missile.targetY = BASE_HEIGHT * 0.97 - (missile.displayHeight / 2);
+                missile.targetX = BASE_WIDTH / 2 + offsetX;
+                missile.targetY = (BASE_HEIGHT * 0.97 - (missile.displayHeight / 2)) + offsetY;
             }
         });
     }
@@ -696,6 +725,8 @@ function resize(gameSize) {
     if (this.allTowerSprites) {
         this.allTowerSprites.forEach(tower => {
             if (tower.sprite.active) {
+                tower.sprite.x = tower.originalX + offsetX;
+                tower.sprite.y = tower.originalY + offsetY;
                 tower.sprite.displayWidth = tower.def.towerTargetWidth * zoom;
                 tower.sprite.displayHeight = tower.def.towerTargetHeight * zoom;
             }
@@ -705,6 +736,8 @@ function resize(gameSize) {
     if (this.allCannonsSprites) {
         this.allCannonsSprites.forEach(cannon => {
             if (cannon.sprite.active) {
+                cannon.sprite.x = cannon.originalX + offsetX;
+                cannon.sprite.y = cannon.originalY + offsetY;
                 cannon.sprite.displayWidth = cannon.def.cannonTargetWidth * zoom;
                 cannon.sprite.displayHeight = cannon.def.cannonTargetHeight * zoom;
             }
@@ -712,28 +745,44 @@ function resize(gameSize) {
     }
 
     if (this.resultText && this.resultText.active) {
+        this.resultText.x = BASE_WIDTH / 2 + offsetX;
+        this.resultText.y = BASE_HEIGHT / 2 + offsetY;
         this.resultText.setFontSize(60 * zoom);
     }
 
     if (this.statsText && this.statsText.active) {
+        this.statsText.x = BASE_WIDTH / 2 + offsetX;
+        this.statsText.y = (BASE_HEIGHT / 2 + 100) + offsetY;
         this.statsText.setFontSize(40 * zoom);
     }
 
     if (this.performanceText && this.performanceText.active) {
+        this.performanceText.x = BASE_WIDTH / 2 + offsetX;
+        this.performanceText.y = BASE_HEIGHT / 2 + offsetY;
         this.performanceText.setFontSize(40 * zoom);
     }
 
     if (this.continueButton && this.continueButton.active) {
-        this.continueButton.setScale(zoom);
+        this.continueButton.x = BASE_WIDTH / 2 + offsetX;
+        this.continueButton.y = (BASE_HEIGHT - 160) + offsetY;
+        this.continueButton.setSize(200 * zoom, 80 * zoom);
+        this.continueText.x = BASE_WIDTH / 2 + offsetX;
+        this.continueText.y = (BASE_HEIGHT - 160) + offsetY;
         this.continueText.setFontSize(30 * zoom);
     }
 
     if (this.endText && this.endText.active) {
+        this.endText.x = BASE_WIDTH / 2 + offsetX;
+        this.endText.y = (BASE_HEIGHT / 2 - 200) + offsetY;
         this.endText.setFontSize(80 * zoom);
     }
 
     if (this.restartButton && this.restartButton.active) {
-        this.restartButton.setScale(zoom);
+        this.restartButton.x = BASE_WIDTH / 2 + offsetX;
+        this.restartButton.y = (BASE_HEIGHT - 250) + offsetY;
+        this.restartButton.setSize(300 * zoom, 100 * zoom);
+        this.restartText.x = BASE_WIDTH / 2 + offsetX;
+        this.restartText.y = (BASE_HEIGHT - 250) + offsetY;
         this.restartText.setFontSize(40 * zoom);
     }
 
