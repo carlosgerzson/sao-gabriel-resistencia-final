@@ -141,13 +141,13 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        this.buildingContainer = this.add.container(450, 1002);
+        this.buildingContainer = this.add.container(BASE_WIDTH / 2, 1002);
         this.buildingContainer.setSize(510, 550);
         this.buildingContainer.setDepth(30);
 
         const debugRect = this.add.graphics();
         debugRect.lineStyle(2, 0x00FF00);
-        debugRect.strokeRect(450 - 255, 1002, 510, 550);
+        debugRect.strokeRect(BASE_WIDTH / 2 - 255, 1002, 510, 550);
         this.debugRect = debugRect;
 
         const levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
@@ -161,8 +161,8 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(1);
         this.buildingContainer.add(this.building);
 
-        this.silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1).setDepth(20);
-        this.silhuetaSprite.displayWidth = 900;
+        this.silhuetaSprite = this.add.image(BASE_WIDTH / 2, 1600, 'silhueta_urbana').setOrigin(0.5, 1).setDepth(20);
+        this.silhuetaSprite.displayWidth = BASE_WIDTH;
         this.silhuetaSprite.displayHeight = 384;
 
         const towerAndCannonDefinitions = [
@@ -184,13 +184,13 @@ class GameScene extends Phaser.Scene {
             {
                 name: 'Torre Central',
                 towerAsset: 'torre_c',
-                towerBaseX: 610,
+                towerBaseX: BASE_WIDTH / 2,
                 towerBaseY: 1600,
                 towerTargetWidth: 148,
                 towerTargetHeight: 637,
                 towerDepth: 18,
                 cannonAsset: 'canhao_c',
-                cannonX: 610,
+                cannonX: BASE_WIDTH / 2,
                 cannonY: 1035,
                 cannonTargetWidth: 33,
                 cannonTargetHeight: 103,
@@ -199,13 +199,13 @@ class GameScene extends Phaser.Scene {
             {
                 name: 'Torre Direita',
                 towerAsset: 'torre_d',
-                towerBaseX: 793,
+                towerBaseX: BASE_WIDTH - 107,
                 towerBaseY: 1600,
                 towerTargetWidth: 190,
                 towerTargetHeight: 782,
                 towerDepth: 18,
                 cannonAsset: 'canhao_d',
-                cannonX: 793,
+                cannonX: BASE_WIDTH - 107,
                 cannonY: 901,
                 cannonTargetWidth: 39,
                 cannonTargetHeight: 125,
@@ -245,8 +245,8 @@ class GameScene extends Phaser.Scene {
 
         this.input.on('pointerdown', (pointer) => {
             if (!gameEnded) {
-                const gamePointerX = pointer.x;
-                const gamePointerY = pointer.y;
+                const gamePointerX = pointer.x / this.cameras.main.zoom;
+                const gamePointerY = pointer.y / this.cameras.main.zoom;
                 cannons.forEach(cannon => {
                     const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
                     cannon.sprite.rotation = cannonAngle + Math.PI / 2;
@@ -321,7 +321,7 @@ class GameScene extends Phaser.Scene {
                     const spawnY = 0;
                     const missile = this.add.rectangle(spawnX, spawnY, 10, 30, 0x00ff00);
                     missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
-                    missile.targetX = 450;
+                    missile.targetX = BASE_WIDTH / 2;
                     missile.targetY = 1552 - (this.building.displayHeight / 2);
                     missile.displayWidth = 10;
                     missile.displayHeight = 30;
@@ -374,7 +374,6 @@ class GameScene extends Phaser.Scene {
 
     endLevel(success) {
         this.time.removeAllEvents();
-        this.input.enabled = false;
         gameEnded = true;
         missiles.forEach(missile => {
             if (missile.active) missile.setActive(false).setVisible(false);
@@ -435,14 +434,14 @@ class GameScene extends Phaser.Scene {
             color: '#000000'
         }).setOrigin(0.5).setDepth(100);
         this.continueButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
+        this.input.setInteractive(this.continueButton);
         this.continueButton.on('pointerdown', () => {
             console.log("Botão CONTINUAR clicado");
             if (currentLevel < TOTAL_LEVELS) {
                 currentLevel++;
                 gameEnded = false;
-                this.scene.restart(); // Reinicia a cena atual para o próximo nível
+                this.scene.restart();
             } else {
-                // Tela final
                 this.gameBackgroundRect.clear();
                 this.gameBackgroundRect.fillGradientStyle(0xFFD700, 0xFFD700, 0xFF4500, 0xFF4500, 1);
                 this.gameBackgroundRect.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
@@ -531,6 +530,7 @@ class GameScene extends Phaser.Scene {
                     color: '#000000'
                 }).setOrigin(0.5).setDepth(100);
                 this.restartButton.setInteractive(new Phaser.Geom.Rectangle(300, 1300, 300, 100), Phaser.Geom.Rectangle.Contains);
+                this.input.setInteractive(this.restartButton);
                 this.restartButton.on('pointerdown', () => {
                     destroyedCount = 0;
                     preservedCount = 0;
@@ -565,8 +565,8 @@ class GameScene extends Phaser.Scene {
             missile.rotation = angle + Math.PI / 2;
 
             const buildingTopY = 1552 - (this.building.displayHeight / 2);
-            const buildingLeftX = 450 - (this.building.displayWidth / 2);
-            const buildingRightX = 450 + (this.building.displayWidth / 2);
+            const buildingLeftX = BASE_WIDTH / 2 - (this.building.displayWidth / 2);
+            const buildingRightX = BASE_WIDTH / 2 + (this.building.displayWidth / 2);
 
             if (missile.y >= buildingTopY && missile.x >= buildingLeftX && missile.x <= buildingRightX) {
                 this.onBuildingHit(missile.x, missile.y);
@@ -597,7 +597,7 @@ const config = {
     scene: [BriefingScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        autoCenter: Phaser.Scale.NO_CENTER,
         parent: 'game-container'
     }
 };
@@ -609,26 +609,30 @@ function resize(gameSize) {
     const zoom = Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT);
     this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
     this.cameras.main.setZoom(zoom);
-    this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2); // Centraliza a câmera
+    this.cameras.main.centerOn(BASE_WIDTH / 2, BASE_HEIGHT / 2);
+
+    const offsetX = (gameSize.width - BASE_WIDTH * zoom) / 2;
+    const offsetY = (gameSize.height - BASE_HEIGHT * zoom) / 2;
 
     if (this.gameBackgroundRect && this.gameBackgroundRect.active) {
-        this.gameBackgroundRect.x = 0;
-        this.gameBackgroundRect.y = 0;
-        this.gameBackgroundRect.displayWidth = BASE_WIDTH * zoom;
-        this.gameBackgroundRect.displayHeight = BASE_HEIGHT * zoom;
+        this.gameBackgroundRect.clear();
+        this.gameBackgroundRect.fillGradientStyle(0x8B0000, 0x8B0000, 0x000000, 0x000000, 1);
+        this.gameBackgroundRect.fillRect(-offsetX / zoom, -offsetY / zoom, gameSize.width / zoom, gameSize.height / zoom);
     }
 
     if (this.stars) {
         this.stars.forEach(star => {
             if (star.active) {
                 star.setScale(zoom);
+                star.x = star.originalX * zoom + offsetX / zoom;
+                star.y = star.originalY * zoom + offsetY / zoom;
             }
         });
     }
 
     if (this.briefingText && this.briefingText.active) {
-        this.briefingText.x = BASE_WIDTH / 2 * zoom;
-        this.briefingText.y = BASE_HEIGHT / 2 * zoom;
+        this.briefingText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.briefingText.y = (BASE_HEIGHT / 2 * zoom) + offsetY / zoom;
         this.briefingText.setFontSize(40 * zoom);
     }
 
@@ -639,25 +643,27 @@ function resize(gameSize) {
         this.startButton.lineStyle(2 * zoom, 0xFFFFFF);
         this.startButton.strokeRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
         this.startButton.setScale(1);
+        this.startButton.x = offsetX / zoom;
+        this.startButton.y = offsetY / zoom;
     }
 
     if (this.startText && this.startText.active) {
-        this.startText.x = BASE_WIDTH / 2 * zoom;
-        this.startText.y = 1440 * zoom;
+        this.startText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.startText.y = (1440 * zoom) + offsetY / zoom;
         this.startText.setFontSize(30 * zoom);
     }
 
     if (this.silhuetaSprite && this.silhuetaSprite.active) {
-        this.silhuetaSprite.x = 450 * zoom;
-        this.silhuetaSprite.y = 1600 * zoom;
-        this.silhuetaSprite.displayWidth = 900 * zoom;
+        this.silhuetaSprite.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.silhuetaSprite.y = (1600 * zoom) + offsetY / zoom;
+        this.silhuetaSprite.displayWidth = BASE_WIDTH * zoom;
         this.silhuetaSprite.displayHeight = 384 * zoom;
         this.silhuetaSprite.setScale(1);
     }
 
     if (this.buildingContainer && this.buildingContainer.active) {
-        this.buildingContainer.x = 450 * zoom;
-        this.buildingContainer.y = 1002 * zoom;
+        this.buildingContainer.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.buildingContainer.y = (1002 * zoom) + offsetY / zoom;
         this.buildingContainer.setScale(1);
         if (this.building) {
             this.building.setDisplaySize(510 * zoom, 510 * zoom * (this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].height / this.textures.get(`nivel${currentLevel}/alvo${currentLevel}_predio`).source[0].width));
@@ -670,13 +676,15 @@ function resize(gameSize) {
     if (this.debugRect && this.debugRect.active) {
         this.debugRect.clear();
         this.debugRect.lineStyle(2 * zoom, 0x00FF00);
-        this.debugRect.strokeRect((450 - 255) * zoom, 1002 * zoom, 510 * zoom, 550 * zoom);
+        this.debugRect.strokeRect((BASE_WIDTH / 2 - 255) * zoom, 1002 * zoom, 510 * zoom, 550 * zoom);
         this.debugRect.setScale(1);
+        this.debugRect.x = offsetX / zoom;
+        this.debugRect.y = offsetY / zoom;
     }
 
     if (this.timerText && this.timerText.active) {
-        this.timerText.x = 20 * zoom;
-        this.timerText.y = 20 * zoom;
+        this.timerText.x = (20 * zoom) + offsetX / zoom;
+        this.timerText.y = (20 * zoom) + offsetY / zoom;
         this.timerText.setFontSize(40 * zoom);
     }
 
@@ -687,8 +695,8 @@ function resize(gameSize) {
                 const missileBaseHeight = 30 * zoom;
                 missile.displayWidth = missileBaseWidth;
                 missile.displayHeight = missileBaseHeight;
-                missile.targetX = 450 * zoom;
-                missile.targetY = (this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552) * zoom;
+                missile.targetX = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+                missile.targetY = (this.building && this.building.active ? 1552 - (this.building.displayHeight / 2) : 1552) * zoom + offsetY / zoom;
                 missile.setScale(1);
             }
         });
@@ -707,8 +715,8 @@ function resize(gameSize) {
     if (this.allTowerSprites) {
         this.allTowerSprites.forEach(tower => {
             if (tower.sprite.active) {
-                tower.sprite.x = tower.def.towerBaseX * zoom;
-                tower.sprite.y = tower.def.towerBaseY * zoom;
+                tower.sprite.x = (tower.def.towerBaseX * zoom) + offsetX / zoom;
+                tower.sprite.y = (tower.def.towerBaseY * zoom) + offsetY / zoom;
                 tower.sprite.displayWidth = tower.def.towerTargetWidth * zoom;
                 tower.sprite.displayHeight = tower.def.towerTargetHeight * zoom;
                 tower.sprite.setScale(1);
@@ -719,8 +727,8 @@ function resize(gameSize) {
     if (this.allCannonsSprites) {
         this.allCannonsSprites.forEach(cannon => {
             if (cannon.sprite.active) {
-                cannon.sprite.x = cannon.def.cannonX * zoom;
-                cannon.sprite.y = cannon.def.cannonY * zoom;
+                cannon.sprite.x = (cannon.def.cannonX * zoom) + offsetX / zoom;
+                cannon.sprite.y = (cannon.def.cannonY * zoom) + offsetY / zoom;
                 cannon.sprite.displayWidth = cannon.def.cannonTargetWidth * zoom;
                 cannon.sprite.displayHeight = cannon.def.cannonTargetHeight * zoom;
                 cannon.sprite.setScale(1);
@@ -729,20 +737,20 @@ function resize(gameSize) {
     }
 
     if (this.resultText && this.resultText.active) {
-        this.resultText.x = BASE_WIDTH / 2 * zoom;
-        this.resultText.y = BASE_HEIGHT / 2 * zoom;
+        this.resultText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.resultText.y = (BASE_HEIGHT / 2 * zoom) + offsetY / zoom;
         this.resultText.setFontSize(60 * zoom);
     }
 
     if (this.statsText && this.statsText.active) {
-        this.statsText.x = BASE_WIDTH / 2 * zoom;
-        this.statsText.y = (BASE_HEIGHT / 2 + 100) * zoom;
+        this.statsText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.statsText.y = (BASE_HEIGHT / 2 + 100) * zoom + offsetY / zoom;
         this.statsText.setFontSize(40 * zoom);
     }
 
     if (this.performanceText && this.performanceText.active) {
-        this.performanceText.x = BASE_WIDTH / 2 * zoom;
-        this.performanceText.y = BASE_HEIGHT / 2 * zoom;
+        this.performanceText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.performanceText.y = (BASE_HEIGHT / 2 * zoom) + offsetY / zoom;
         this.performanceText.setFontSize(40 * zoom);
     }
 
@@ -753,17 +761,19 @@ function resize(gameSize) {
         this.continueButton.lineStyle(2 * zoom, 0xFFFFFF);
         this.continueButton.strokeRect(350 * zoom, 1400 * zoom, 200 * zoom, 80 * zoom);
         this.continueButton.setScale(1);
+        this.continueButton.x = offsetX / zoom;
+        this.continueButton.y = offsetY / zoom;
     }
 
     if (this.continueText && this.continueText.active) {
-        this.continueText.x = BASE_WIDTH / 2 * zoom;
-        this.continueText.y = 1440 * zoom;
+        this.continueText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.continueText.y = (1440 * zoom) + offsetY / zoom;
         this.continueText.setFontSize(30 * zoom);
     }
 
     if (this.endText && this.endText.active) {
-        this.endText.x = BASE_WIDTH / 2 * zoom;
-        this.endText.y = (BASE_HEIGHT / 2 - 200) * zoom;
+        this.endText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.endText.y = (BASE_HEIGHT / 2 - 200) * zoom + offsetY / zoom;
         this.endText.setFontSize(80 * zoom);
     }
 
@@ -774,11 +784,13 @@ function resize(gameSize) {
         this.restartButton.lineStyle(4 * zoom, 0xFFFFFF);
         this.restartButton.strokeRect(300 * zoom, 1300 * zoom, 300 * zoom, 100 * zoom);
         this.restartButton.setScale(1);
+        this.restartButton.x = offsetX / zoom;
+        this.restartButton.y = offsetY / zoom;
     }
 
     if (this.restartText && this.restartText.active) {
-        this.restartText.x = BASE_WIDTH / 2 * zoom;
-        this.restartText.y = 1350 * zoom;
+        this.restartText.x = (BASE_WIDTH / 2 * zoom) + offsetX / zoom;
+        this.restartText.y = (1350 * zoom) + offsetY / zoom;
         this.restartText.setFontSize(40 * zoom);
     }
 
