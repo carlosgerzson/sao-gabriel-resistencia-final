@@ -22,7 +22,7 @@ class BriefingScene extends Phaser.Scene {
         const graphics = this.add.graphics();
         graphics.fillGradientStyle(0x8B0000, 0x8B0000, 0x000000, 0x000000, 1);
         graphics.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-        this.gameBackgroundRect = graphics; // Para resize
+        this.gameBackgroundRect = graphics;
         console.log("Fundo com gradiente renderizado");
 
         // Estrelas piscando
@@ -124,7 +124,7 @@ class GameScene extends Phaser.Scene {
             this.stars.push(star);
         }
 
-        this.timerText = this.add.text(20, 20, '01:30', {
+        this.timerText = this.add.text(20, 20, '00:20', {
             fontFamily: 'VT323',
             fontSize: '40px',
             color: '#FFFFFF'
@@ -139,7 +139,7 @@ class GameScene extends Phaser.Scene {
                 let seconds = this.timeLeft % 60;
                 this.timerText.setText(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
                 if (this.timeLeft <= 0 && this.buildingState < 3) {
-                    this.endLevel(true);
+                    this.endLevel(false);
                 }
             },
             loop: true
@@ -147,6 +147,7 @@ class GameScene extends Phaser.Scene {
 
         this.buildingContainer = this.add.container(450, 1002);
         this.buildingContainer.setSize(510, 550);
+        this.buildingContainer.setDepth(30);
 
         const debugRect = this.add.graphics();
         debugRect.lineStyle(2, 0x00FF00);
@@ -157,7 +158,7 @@ class GameScene extends Phaser.Scene {
         this.background = null;
         this.building = this.add.image(0, 0, `${levelPrefix}_predio`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_predio`).source[0].height / this.textures.get(`${levelPrefix}_predio`).source[0].width));
         this.building.setPosition(0, 550);
-        this.building.setDepth(25);
+        this.building.setDepth(1);
         this.buildingContainer.add(this.building);
 
         this.silhuetaSprite = this.add.image(450, 1600, 'silhueta_urbana').setOrigin(0.5, 1).setDepth(20);
@@ -367,6 +368,15 @@ class GameScene extends Phaser.Scene {
 
     endLevel(success) {
         this.time.removeAllEvents();
+        this.input.enabled = false;
+        missiles.forEach(missile => {
+            if (missile.active) missile.setActive(false).setVisible(false);
+        });
+        antiMissiles.forEach(anti => {
+            if (anti.active) anti.setActive(false).setVisible(false);
+        });
+        this.tweens.pauseAll();
+
         if (success) {
             preservedCount++;
         } else {
@@ -419,43 +429,107 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(100);
         this.continueButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
         this.continueButton.on('pointerdown', () => {
-            if (success && currentLevel < TOTAL_LEVELS) {
+            if (currentLevel < TOTAL_LEVELS) {
                 currentLevel++;
                 this.scene.start('BriefingScene');
-            } else if (destroyedCount + preservedCount === TOTAL_LEVELS) {
-                this.endText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 'FIM DE JOGO!', {
+            } else {
+                // Tela final especial
+                this.gameBackgroundRect.clear();
+                this.gameBackgroundRect.fillGradientStyle(0xFFD700, 0xFFD700, 0xFF4500, 0xFF4500, 1);
+                this.gameBackgroundRect.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
+
+                this.stars.forEach(star => {
+                    if (star.active) {
+                        this.tweens.add({
+                            targets: star,
+                            alpha: { from: 1, to: 0.2 },
+                            duration: 500,
+                            yoyo: true,
+                            repeat: -1
+                        });
+                    }
+                });
+
+                this.resultText.destroy();
+                this.statsText.destroy();
+                this.continueButton.destroy();
+                this.continueText.destroy();
+
+                this.endText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 - 200, 'FIM DE JOGO!', {
                     fontFamily: 'VT323',
-                    fontSize: '60px',
+                    fontSize: '80px',
                     color: '#FFFFFF',
                     align: 'center'
                 }).setOrigin(0.5).setDepth(100);
-                this.endText.setAlpha(0);
                 this.tweens.add({
                     targets: this.endText,
+                    scale: { from: 1, to: 1.2 },
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1
+                });
+
+                let performanceMessage = '';
+                if (preservedCount >= 8) {
+                    performanceMessage = 'Excelente! Você é um verdadeiro defensor do patrimônio!';
+                } else if (preservedCount >= 5) {
+                    performanceMessage = 'Bom trabalho! Você preservou mais da metade!';
+                } else {
+                    performanceMessage = 'Foi difícil, mas você fez o seu melhor!';
+                }
+
+                this.performanceText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, performanceMessage, {
+                    fontFamily: 'VT323',
+                    fontSize: '40px',
+                    color: '#FFFFFF',
+                    align: 'center',
+                    lineSpacing: 20,
+                    wordWrap: { width: 800 }
+                }).setOrigin(0.5).setDepth(100);
+                this.performanceText.setAlpha(0);
+                this.tweens.add({
+                    targets: this.performanceText,
+                    alpha: { from: 0, to: 1 },
+                    duration: 2000
+                });
+
+                this.statsText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2 + 150, 
+                    `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
+                    {
+                        fontFamily: 'VT323',
+                        fontSize: '40px',
+                        color: '#FFFFFF',
+                        align: 'center',
+                        lineSpacing: 20
+                    }
+                ).setOrigin(0.5).setDepth(100);
+                this.statsText.setAlpha(0);
+                this.tweens.add({
+                    targets: this.statsText,
                     alpha: { from: 0, to: 1 },
                     duration: 2000
                 });
 
                 this.restartButton = this.add.graphics();
-                this.restartButton.fillStyle(0xFFFF00, 1);
-                this.restartButton.fillRect(350, 1400, 200, 80);
-                this.restartButton.lineStyle(2, 0xFFFFFF);
-                this.restartButton.strokeRect(350, 1400, 200, 80);
+                this.restartButton.fillStyle(0x00FF00, 1);
+                this.restartButton.fillRect(300, 1300, 300, 100);
+                this.restartButton.lineStyle(4, 0xFFFFFF);
+                this.restartButton.strokeRect(300, 1300, 300, 100);
                 this.restartButton.setDepth(100);
-                this.restartText = this.add.text(BASE_WIDTH / 2, 1440, 'REINICIAR', {
+                this.restartText = this.add.text(BASE_WIDTH / 2, 1350, 'REINICIAR', {
                     fontFamily: 'VT323',
-                    fontSize: '30px',
+                    fontSize: '40px',
                     color: '#000000'
                 }).setOrigin(0.5).setDepth(100);
-                this.restartButton.setInteractive(new Phaser.Geom.Rectangle(350, 1400, 200, 80), Phaser.Geom.Rectangle.Contains);
+                this.restartButton.setInteractive(new Phaser.Geom.Rectangle(300, 1300, 300, 100), Phaser.Geom.Rectangle.Contains);
                 this.restartButton.on('pointerdown', () => {
                     destroyedCount = 0;
                     preservedCount = 0;
                     currentLevel = 1;
                     this.scene.start('BriefingScene');
                 });
-            } else {
-                this.scene.start('BriefingScene');
+                this.restartButton.on('pointerover', () => this.restartButton.fillStyle(0xFFFFFF, 1));
+                this.restartButton.on('pointerout', () => this.restartButton.fillStyle(0x00FF00, 1));
             }
         });
         this.continueButton.on('pointerover', () => this.continueButton.fillStyle(0xFFFFFF, 1));
@@ -510,7 +584,7 @@ const config = {
     parent: 'game-container',
     scene: [BriefingScene, GameScene],
     scale: {
-        mode: Phaser.Scale.FIT, // Restaurado para FIT
+        mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.NONE,
         parent: 'game-container'
     }
@@ -652,6 +726,12 @@ function resize(gameSize) {
         this.statsText.setFontSize(40 * currentPhaserZoom);
     }
 
+    if (this.performanceText && this.performanceText.active) {
+        this.performanceText.x = BASE_WIDTH / 2;
+        this.performanceText.y = BASE_HEIGHT / 2;
+        this.performanceText.setFontSize(40 * currentPhaserZoom);
+    }
+
     if (this.continueButton && this.continueButton.active) {
         this.continueButton.clear();
         this.continueButton.fillStyle(0xFFFF00, 1);
@@ -669,23 +749,23 @@ function resize(gameSize) {
 
     if (this.endText && this.endText.active) {
         this.endText.x = BASE_WIDTH / 2;
-        this.endText.y = BASE_HEIGHT / 2;
-        this.endText.setFontSize(60 * currentPhaserZoom);
+        this.endText.y = BASE_HEIGHT / 2 - 200;
+        this.endText.setFontSize(80 * currentPhaserZoom);
     }
 
     if (this.restartButton && this.restartButton.active) {
         this.restartButton.clear();
-        this.restartButton.fillStyle(0xFFFF00, 1);
-        this.restartButton.fillRect(350, 1400, 200, 80);
-        this.restartButton.lineStyle(2, 0xFFFFFF);
-        this.restartButton.strokeRect(350, 1400, 200, 80);
+        this.restartButton.fillStyle(0x00FF00, 1);
+        this.restartButton.fillRect(300, 1300, 300, 100);
+        this.restartButton.lineStyle(4, 0xFFFFFF);
+        this.restartButton.strokeRect(300, 1300, 300, 100);
         this.restartButton.setScale(currentPhaserZoom);
     }
 
     if (this.restartText && this.restartText.active) {
         this.restartText.x = BASE_WIDTH / 2;
-        this.restartText.y = 1440;
-        this.restartText.setFontSize(30 * currentPhaserZoom);
+        this.restartText.y = 1350;
+        this.restartText.setFontSize(40 * currentPhaserZoom);
     }
 
     console.log(`Resized to: ${gameSize.width}x${gameSize.height}. Phaser Zoom: ${currentPhaserZoom.toFixed(2)}`);
