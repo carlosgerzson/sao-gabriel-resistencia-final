@@ -5,12 +5,11 @@ let currentLevel = 1;
 const TOTAL_LEVELS = 10;
 let destroyedCount = 0;
 let preservedCount = 0;
-let gameEnded = false; // Novo flag para controlar o estado do jogo
+let gameEnded = false;
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
 
-// Definir as cenas antes de usá-las no config
 class BriefingScene extends Phaser.Scene {
     constructor() {
         super('BriefingScene');
@@ -19,14 +18,12 @@ class BriefingScene extends Phaser.Scene {
     create() {
         console.log(`BriefingScene iniciada para o nível ${currentLevel}`);
 
-        // Fundo com gradiente
         const graphics = this.add.graphics();
         graphics.fillGradientStyle(0x8B0000, 0x8B0000, 0x000000, 0x000000, 1);
         graphics.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
         this.gameBackgroundRect = graphics;
         console.log("Fundo com gradiente renderizado");
 
-        // Estrelas piscando
         this.stars = [];
         for (let i = 0; i < 50; i++) {
             const star = this.add.circle(
@@ -39,7 +36,6 @@ class BriefingScene extends Phaser.Scene {
         }
         console.log("Estrelas renderizadas");
 
-        // Texto do briefing
         this.briefingText = this.add.text(BASE_WIDTH / 2, BASE_HEIGHT / 2, 
             `Nível ${currentLevel}: Teatro Municipal de São Gabriel,\nconstruído em 1920. Defenda-o dos ataques!`, 
             {
@@ -60,7 +56,6 @@ class BriefingScene extends Phaser.Scene {
             }
         });
 
-        // Botão "INICIAR"
         this.startButton = this.add.graphics();
         this.startButton.fillStyle(0xFFFF00, 1);
         this.startButton.fillRect(350, 1400, 200, 80);
@@ -158,7 +153,7 @@ class GameScene extends Phaser.Scene {
         const levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
         this.background = this.add.image(0, 0, `${levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_fundo`).source[0].height / this.textures.get(`${levelPrefix}_fundo`).source[0].width));
         this.background.setPosition(0, 550);
-        this.background.setDepth(-1); // Fundo com depth mais baixo
+        this.background.setDepth(-1);
         this.buildingContainer.add(this.background);
 
         this.building = this.add.image(0, 0, `${levelPrefix}_predio`).setOrigin(0.5, 1).setDisplaySize(510, 510 * (this.textures.get(`${levelPrefix}_predio`).source[0].height / this.textures.get(`${levelPrefix}_predio`).source[0].width));
@@ -380,7 +375,7 @@ class GameScene extends Phaser.Scene {
     endLevel(success) {
         this.time.removeAllEvents();
         this.input.enabled = false;
-        gameEnded = true; // Define o flag para pausar o jogo
+        gameEnded = true;
         missiles.forEach(missile => {
             if (missile.active) missile.setActive(false).setVisible(false);
         });
@@ -443,7 +438,7 @@ class GameScene extends Phaser.Scene {
         this.continueButton.on('pointerdown', () => {
             if (currentLevel < TOTAL_LEVELS) {
                 currentLevel++;
-                gameEnded = false; // Reseta o flag para o próximo nível
+                gameEnded = false;
                 this.scene.start('BriefingScene');
             } else {
                 this.gameBackgroundRect.clear();
@@ -553,7 +548,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
-        if (gameEnded) return; // Sai do update se o jogo terminou
+        if (gameEnded) return;
 
         for (let i = missiles.length - 1; i >= 0; i--) {
             const missile = missiles[i];
@@ -600,7 +595,7 @@ const config = {
     scene: [BriefingScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH, // Alterado para centralizar vertical e horizontalmente
+        autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container'
     }
 };
@@ -609,8 +604,8 @@ const game = new Phaser.Game(config);
 console.log("Jogo Phaser inicializado");
 
 function resize(gameSize) {
-    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height); // Ajusta a câmera para o tamanho da tela
-    this.cameras.main.setZoom(Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT)); // Ajusta o zoom proporcionalmente
+    this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+    this.cameras.main.setZoom(Math.min(gameSize.width / BASE_WIDTH, gameSize.height / BASE_HEIGHT));
     const currentPhaserZoom = this.scale.zoom;
 
     if (this.gameBackgroundRect && this.gameBackgroundRect.active) {
