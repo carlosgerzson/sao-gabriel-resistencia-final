@@ -160,7 +160,7 @@ class GameScene extends Phaser.Scene {
             this.stars.push(star);
         }
 
-        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:20', {
+        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:30', {
             fontFamily: 'VT323',
             fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
             color: '#FFFFFF'
