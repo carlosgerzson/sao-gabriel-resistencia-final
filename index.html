@@ -1,11 +1,11 @@
 <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+        return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
         if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
             try {
                 var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
@@ -19,11 +19,11 @@
 
                 // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
                 var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
                 // Fallback
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
+                    headerRowIndex = 0;
                 }
 
                 // Convert filtered JSON back to CSV
@@ -36,58 +36,58 @@
             }
         }
         return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
-<html lang="pt-BR">
+    }
+</script>
+<!DOCTYPE html>
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>São Gabriel Resistência Final</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-
-   <style>
-    * {
-        box-sizing: border-box;
-    }
-
-    html,
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-        background-color: black;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #game-container {
-        width: 900px;
-        height: 1600px;
-        position: relative;
-        border: 2px solid blue; /* Para depuração */
-        overflow: hidden;
-    }
-
-    #game-container canvas {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        border: 2px solid red; /* Para depuração */
-    }
-</style>
+    <title>São Gabriel: Resistência Final</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Fundo preto da página */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #phaser-game {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            background-color: #000000; /* Fundo preto do canvas */
+        }
+    </style>
 </head>
 
 <body>
-    <div id="game-container"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <script src="main.js"></script>
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: 900,
+            height: 1600,
+            scale: {
+                mode: Phaser.Scale.FIT, // Mantém a proporção e centraliza
+                autoCenter: Phaser.Scale.NO_CENTER, // Centraliza horizontal e verticalmente
+                parent: 'phaser-game',
+                width: 900,
+                height: 1600
+            },
+            scene: [BriefingScene, GameScene],
+            backgroundColor: '#000000' // Fundo preto global
+        };
+        const game = new Phaser.Game(config);
+        console.log("Jogo Phaser inicializado a partir do index.html");
+    </script>
 </body>
 
 </html>
