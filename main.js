@@ -595,7 +595,7 @@ class GameScene extends Phaser.Scene {
 
                     let performanceMessage = '';
                     if (preservedCount >= 8) {
-                        performanceMessage = 'Excelente! Você é um verdadeiro defensor do patrimônio!';
+                        performanceMessage = 'DANIEL! Você é um verdadeiro defensor do patrimônio!';
                     } else if (preservedCount >= 5) {
                         performanceMessage = 'Bom trabalho! Você preservou mais da metade!';
                     } else {
