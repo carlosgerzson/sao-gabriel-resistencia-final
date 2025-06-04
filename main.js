@@ -10,6 +10,159 @@ let gameEnded = false;
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
 
+class IntroScene extends Phaser.Scene {
+    constructor() {
+        super('IntroScene');
+    }
+
+    preload() {
+        this.load.image('intro_background', 'assets/intro_background.png'); // Substitua pelo caminho correto do seu PNG
+    }
+
+    create() {
+        console.log("IntroScene iniciada");
+
+        const introImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'intro_background')
+            .setOrigin(0.5)
+            .setDisplaySize(this.scale.width, this.scale.height);
+        console.log("Imagem de apresentação renderizada");
+
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.continueButton.setStrokeStyle(2, 0xFFFFFF);
+        this.continueButton.setDepth(1001);
+        this.continueButton.setInteractive({ useHandCursor: true });
+
+        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
+            fontFamily: 'VT323',
+            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            color: '#000000'
+        }).setOrigin(0.5).setDepth(1002);
+
+        const updateButtonState = (button, text, hover) => {
+            console.log(`Estado do botão ${text.text}: ${hover ? 'hover' : 'out'}`);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
+            text.setColor(hover ? '#000000' : '#000000');
+        };
+
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
+        this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
+        this.continueButton.on('pointerdown', () => {
+            console.log("Botão CONTINUAR clicado (pointerdown)");
+            this.continueButton.setFillStyle(0xFFFF00, 1);
+            this.continueText.setColor('#000000');
+            this.continueButton.once('pointerup', () => {
+                console.log("Botão CONTINUAR liberado (pointerup)");
+                this.scene.start('InstructionsScene');
+            }, this);
+        }, this);
+
+        console.log("Botão CONTINUAR renderizado");
+
+        this.input.on('pointerdown', (pointer) => {
+            console.log(`Clique detectado em: x=${pointer.x}, y=${pointer.y}`);
+            this.game.canvas.focus();
+        });
+
+        this.scale.on('resize', resize, this);
+        resize.call(this);
+    }
+}
+
+class InstructionsScene extends Phaser.Scene {
+    constructor() {
+        super('InstructionsScene');
+    }
+
+    create() {
+        console.log("InstructionsScene iniciada");
+
+        const graphics = this.add.graphics();
+        graphics.fillGradientStyle(0x8B0000, 0x8B0000, 0x000000, 0x000000, 1);
+        graphics.fillRect(0, 0, this.scale.width, this.scale.height);
+        this.gameBackgroundRect = graphics;
+        console.log("Fundo com gradiente renderizado");
+
+        this.stars = [];
+        for (let i = 0; i < 50; i++) {
+            const star = this.add.circle(
+                Phaser.Math.Between(0, this.scale.width),
+                Phaser.Math.Between(0, this.scale.height),
+                Phaser.Math.Between(1, 3),
+                0xFFFFFF
+            ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
+            this.stars.push(star);
+        }
+        console.log("Estrelas renderizadas");
+
+        const instructionsText = "Bem-vindo ao jogo!\n\n" +
+            "Seu objetivo é proteger os prédios históricos de mísseis inimigos.\n" +
+            "Clique ou toque na tela para disparar antimísseis das torres.\n" +
+            "Cada nível tem um prédio único que você deve defender.\n" +
+            "Se o prédio for destruído, você perde o nível.\n" +
+            "Complete todos os níveis para vencer o jogo!\n\n" +
+            "Boa sorte, defensor do patrimônio!";
+
+        this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
+            fontFamily: 'VT323',
+            fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+            color: '#FFFFFF',
+            align: 'center',
+            lineSpacing: 20,
+            wordWrap: { width: this.scale.width * 0.8 }
+        }).setOrigin(0.5).setDepth(100);
+        this.instructionsText.setAlpha(0);
+        this.tweens.add({
+            targets: this.instructionsText,
+            alpha: { from: 0, to: 1 },
+            duration: 2000,
+            onComplete: () => {
+                console.log("Texto de instruções exibido");
+            }
+        });
+
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.continueButton.setStrokeStyle(2, 0xFFFFFF);
+        this.continueButton.setDepth(1001);
+        this.continueButton.setInteractive({ useHandCursor: true });
+
+        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
+            fontFamily: 'VT323',
+            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            color: '#000000'
+        }).setOrigin(0.5).setDepth(1002);
+
+        const updateButtonState = (button, text, hover) => {
+            console.log(`Estado do botão ${text.text}: ${hover ? 'hover' : 'out'}`);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
+            text.setColor(hover ? '#000000' : '#000000');
+        };
+
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
+        this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
+        this.continueButton.on('pointerdown', () => {
+            console.log("Botão CONTINUAR clicado (pointerdown)");
+            this.continueButton.setFillStyle(0xFFFF00, 1);
+            this.continueText.setColor('#000000');
+            this.continueButton.once('pointerup', () => {
+                console.log("Botão CONTINUAR liberado (pointerup)");
+                this.scene.start('BriefingScene');
+            }, this);
+        }, this);
+
+        console.log("Botão CONTINUAR renderizado");
+
+        this.input.on('pointerdown', (pointer) => {
+            console.log(`Clique detectado em: x=${pointer.x}, y=${pointer.y}`);
+            this.game.canvas.focus();
+        });
+
+        this.scale.on('resize', resize, this);
+        resize.call(this);
+    }
+}
+
 class BriefingScene extends Phaser.Scene {
     constructor() {
         super('BriefingScene');
@@ -80,14 +233,13 @@ class BriefingScene extends Phaser.Scene {
             color: '#000000'
         }).setOrigin(0.5).setDepth(102);
 
-        // Eventos para hover e toque
         const updateButtonState = (button, text, hover) => {
             console.log(`Estado do botão ${text.text}: ${hover ? 'hover' : 'out'}`);
             button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
             text.setColor(hover ? '#000000' : '#000000');
         };
 
-        this.startButton.defaultFillColor = 0xFFFF00; // Salvar a cor padrão
+        this.startButton.defaultFillColor = 0xFFFF00;
         this.startButton.on('pointerover', () => updateButtonState(this.startButton, this.startText, true), this);
         this.startButton.on('pointerout', () => updateButtonState(this.startButton, this.startText, false), this);
         this.startButton.on('pointerdown', () => {
@@ -102,7 +254,6 @@ class BriefingScene extends Phaser.Scene {
 
         console.log("Botão INICIAR renderizado");
 
-        // Garantir foco no canvas ao interagir
         this.input.on('pointerdown', (pointer) => {
             console.log(`Clique detectado em: x=${pointer.x}, y=${pointer.y} (world: x=${pointer.worldX}, y=${pointer.worldY})`);
             this.game.canvas.focus();
@@ -160,13 +311,13 @@ class GameScene extends Phaser.Scene {
             this.stars.push(star);
         }
 
-        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:30', {
+        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:20', {
             fontFamily: 'VT323',
             fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft = 30;
+        this.timeLeft = 20;
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -324,7 +475,7 @@ class GameScene extends Phaser.Scene {
         this.onAntiMissileHit = function(x, y) {
             console.log(`Explosão criada em x=${x}, y=${y}`);
             const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8);
-            explosionCircle.setDepth(920); // Aumentado para ficar acima das chamas (910)
+            explosionCircle.setDepth(920);
             const explosionVisualRadius = 100 * (this.scale.width / BASE_WIDTH);
             const explosionAnimationDuration = 500;
             this.tweens.add({
@@ -595,7 +746,7 @@ class GameScene extends Phaser.Scene {
 
                     let performanceMessage = '';
                     if (preservedCount >= 8) {
-                        performanceMessage = 'DANIEL! Você é um verdadeiro defensor do patrimônio!';
+                        performanceMessage = 'Excelente! Você é um verdadeiro defensor do patrimônio!';
                     } else if (preservedCount >= 5) {
                         performanceMessage = 'Bom trabalho! Você preservou mais da metade!';
                     } else {
@@ -658,7 +809,7 @@ class GameScene extends Phaser.Scene {
                             preservedCount = 0;
                             currentLevel = 1;
                             gameEnded = false;
-                            this.scene.start('BriefingScene');
+                            this.scene.start('IntroScene');
                         }, this);
                     }, this);
                 }
@@ -732,12 +883,26 @@ function resize() {
         this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
     }
 
+    if (this.instructionsText && this.instructionsText.active) {
+        this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
+        this.instructionsText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
+        this.instructionsText.setWordWrapWidth(this.scale.width * 0.8);
+    }
+
     if (this.startButton && this.startButton.active) {
         this.startButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
         this.startButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
-        this.startButton.setInteractive(); // Reaplicar interatividade
+        this.startButton.setInteractive();
         this.startText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
         this.startText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
+    }
+
+    if (this.continueButton && this.continueButton.active) {
+        this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+        this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
+        this.continueButton.setInteractive();
+        this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+        this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
     }
 
     if (this.silhuetaSprite && this.silhuetaSprite.active) {
@@ -830,14 +995,6 @@ function resize() {
         this.performanceText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
     }
 
-    if (this.continueButton && this.continueButton.active) {
-        this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
-        this.continueButton.setInteractive(); // Reaplicar interatividade
-        this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
-    }
-
     if (this.endText && this.endText.active) {
         this.endText.setPosition(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / BASE_HEIGHT)));
         this.endText.setFontSize(80 * (this.scale.width / BASE_WIDTH));
@@ -846,7 +1003,7 @@ function resize() {
     if (this.restartButton && this.restartButton.active) {
         this.restartButton.setPosition(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)));
         this.restartButton.setSize(300 * (this.scale.width / BASE_WIDTH), 100 * (this.scale.height / BASE_HEIGHT));
-        this.restartButton.setInteractive(); // Reaplicar interatividade
+        this.restartButton.setInteractive();
         this.restartText.setPosition(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)));
         this.restartText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
     }
