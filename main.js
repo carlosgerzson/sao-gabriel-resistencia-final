@@ -18,6 +18,7 @@ class IntroScene extends Phaser.Scene {
 
     preload() {
         this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
+        this.load.font('VT323', 'assets/fonts/VT323-Regular.ttf');
     }
 
     create() {
