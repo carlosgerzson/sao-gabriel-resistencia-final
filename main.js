@@ -17,7 +17,7 @@ class IntroScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fundointro1', 'assets/fundoIntro.jpeg');        
+        this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
     }
 
     create() {
@@ -37,7 +37,7 @@ class IntroScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(1002);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00e9bb00, 1);
             text.setColor(hover ? '#000000' : '#000000');
         };
 
@@ -94,80 +94,129 @@ class InstructionsScene2 extends Phaser.Scene {
             .setOrigin(0.5)
             .setDisplaySize(this.scale.width, this.scale.height);
 
-            const instructionsText = "BEM-VINDO AO JOGO!\n\n" +
-                "Em um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\n" +
-                "Eles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\n" +
-                "E para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\n" +
-                "Boa sorte, DEFENSOR!";
+        const instructionsText = "BEM-VINDO AO JOGO!\n\n" +
+            "Em um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\n" +
+            "Eles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\n" +
+            "E para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\n" +
+            "Boa sorte, DEFENSOR!";
 
-            this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
-                fontFamily: 'VT323',
-                fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
-                color: '#FFFFFF',
-                align: 'center',
-                lineSpacing: 20,
-                wordWrap: { width: this.scale.width * 0.8 }
-            }).setOrigin(0.5).setDepth(1000);
-            this.instructionsText.setAlpha(0);
-            this.tweens.add({
-                targets: this.instructionsText,
-                alpha: { from: 0, to: 1 },
-                duration: 1500
-            });
+        this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
+            fontFamily: 'VT323',
+            fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
+            color: '#e9bb00',
+            align: 'center',
+            lineSpacing: 20,
+            wordWrap: { width: this.scale.width * 0.8 }
+        }).setOrigin(0.5).setDepth(1000);
 
-            this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
-            this.continueButton.setStrokeStyle(2, 0xFFFFFF);
-            this.continueButton.setDepth(1001);
-            this.continueButton.setInteractive({ useHandCursor: true });
+        // Obter dimensões do texto
+        const textBounds = this.instructionsText.getBounds();
+        const padding = 20 * (this.scale.width / BASE_WIDTH); // Espaçamento ao redor do texto
+        const offsetX = this.scale.width / 2 - textBounds.width / 2 - padding;
+        const offsetY = this.scale.height / 2 - textBounds.height / 2 - padding;
+        const widthWithPadding = textBounds.width + padding * 2;
+        const heightWithPadding = textBounds.height + padding * 2;
 
-            this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
-                fontFamily: 'VT323',
-                fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
-                color: '#000000'
-            }).setOrigin(0.5).setDepth(1002);
+        // Criar gráfico para os cantos
+        const corners = this.add.graphics();
+        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xFFFFFF, 1); // Stroke base branco
 
-            const updateButtonState = (button, text, hover) => {
-                button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
-                text.setColor(hover ? '#000000' : '#000000');
-            };
+        // Canto superior esquerdo - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX, offsetY); // Ponto inicial
+        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a direita
+        corners.moveTo(offsetX, offsetY); // Volta ao ponto inicial
+        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.strokePath();
 
-            this.continueButton.defaultFillColor = 0xFFFF00;
-            this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
-            this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
-            this.continueButton.on('pointerdown', () => {
-                this.continueButton.setFillStyle(0xFFFF00, 1);
-                this.continueText.setColor('#FFFFFF');
-                this.continueButton.once('pointerup', () => {
-                    this.scene.start('InstructionsScene');
-                }, this);
+        // Canto superior direito - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX + widthWithPadding, offsetY); // Ponto inicial
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a esquerda
+        corners.moveTo(offsetX + widthWithPadding, offsetY); // Volta ao ponto inicial
+        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.strokePath();
+
+        // Canto inferior esquerdo - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX, offsetY + heightWithPadding); // Ponto inicial
+        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a direita
+        corners.moveTo(offsetX, offsetY + heightWithPadding); // Volta ao ponto inicial
+        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.strokePath();
+
+        // Canto inferior direito - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Ponto inicial
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a esquerda
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Volta ao ponto inicial
+        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.strokePath();
+
+        corners.setDepth(999); // Abaixo do texto
+
+        this.instructionsText.setAlpha(0);
+        this.tweens.add({
+            targets: this.instructionsText,
+            alpha: { from: 0, to: 1 },
+            duration: 1500
+        });
+
+
+
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.continueButton.setStrokeStyle(2, 0xFFFFFF);
+        this.continueButton.setDepth(1001);
+        this.continueButton.setInteractive({ useHandCursor: true });
+
+        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
+            fontFamily: 'VT323',
+            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            color: '#e9bb00'
+        }).setOrigin(0.5).setDepth(1002);
+
+        const updateButtonState = (button, text, hover) => {
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00, 1);
+            text.setColor(hover ? '#000000' : '#000000');
+        };
+
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
+        this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
+        this.continueButton.on('pointerdown', () => {
+            this.continueButton.setFillStyle(0xFFFF00, 1);
+            this.continueText.setColor('#FFFFFF');
+            this.continueButton.once('pointerup', () => {
+                this.scene.start('InstructionsScene');
             }, this);
+        }, this);
 
-            this.input.on('pointerdown', () => {
-                this.game.canvas.focus();
-            });
+        this.input.on('pointerdown', () => {
+            this.game.canvas.focus();
+        });
 
-            const resize = () => {
-                if (this.cameras && this.cameras.main) {
-                    this.cameras.main.setSize(this.scale.width, this.scale.height);
-                }
-                if (this.instructionsText && this.instructionsText.active) {
-                    this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
-                    this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
-                    this.instructionsText.setWordWrapWidth(this.scale.width * 0.8);
-                }
-                if (this.continueButton && this.continueButton.active) {
-                    this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                    this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
-                    this.continueButton.setInteractive();
-                    this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                    this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
-                }
-            };
+        const resize = () => {
+            if (this.cameras && this.cameras.main) {
+                this.cameras.main.setSize(this.scale.width, this.scale.height);
+            }
+            if (this.instructionsText && this.instructionsText.active) {
+                this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
+                this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
+                this.instructionsText.setWordWrapWidth(this.scale.width * 0.8);
+            }
+            if (this.continueButton && this.continueButton.active) {
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
+                this.continueButton.setInteractive();
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
+            }
+        };
 
-            this.scale.on('resize', resize, this);
-            resize.call(this);
-        }
+        this.scale.on('resize', resize, this);
+        resize.call(this);
     }
+}
 
 // -------- InstructionsScene --------
 class InstructionsScene extends Phaser.Scene {
@@ -185,20 +234,20 @@ class InstructionsScene extends Phaser.Scene {
             .setDisplaySize(this.scale.width, this.scale.height);
 
         const instructionsText = "Mas uma cidade resiste.!\n\n" +
-            
+
             "SÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\n" +
-           
+
             "Um grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\n" +
-           
+
             "A cada fase, um prédio histórico corre risco de ser apagado da existência.\n\n" +
-            
+
             "Você é o último guardião.\n" +
             "E a cultura… não vai cair sem lutar!";
 
         this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
             fontFamily: 'VT323',
             fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
-            color: '#FFFFFF',
+            color: '#e9bb00',
             align: 'center',
             lineSpacing: 20,
             wordWrap: { width: this.scale.width * 0.8 }
@@ -245,7 +294,7 @@ class InstructionsScene extends Phaser.Scene {
             if (this.cameras && this.cameras.main) {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
-            
+
             if (this.instructionsText && this.instructionsText.active) {
                 this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
                 this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
@@ -322,7 +371,7 @@ class BriefingScene extends Phaser.Scene {
             {
                 fontFamily: 'VT323',
                 fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
-                color: '#FFFFFF',
+                color: '#e9bb00',
                 align: 'center',
                 lineSpacing: 20,
                 wordWrap: { width: this.scale.width * 0.8 }
