@@ -7,19 +7,20 @@ class GameScene extends Phaser.Scene {
     preload() {
         // Carrega os assets com base no nível
         let colorPrefix;
-        if ([1, 2, 3].includes(currentLevel)) {
+        if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
-        } else if ([4, 5, 6].includes(currentLevel)) {
+        } else if ([3, 6, 9].includes(currentLevel)) {
             colorPrefix = 'yellow';
         } else {
-            colorPrefix = 'blue';
+            colorPrefix = 'blue'; // Níveis 2, 5, 8
         }
+        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`); // Depuração
 
-        this.load.image('fundo', `assets/fundo_${colorPrefix}.png`);
-        this.load.image('silhueta_urbana', `assets/silhueta_urbana_${colorPrefix}.png`);
-        this.load.image('torre_e', `assets/torre_e_${colorPrefix}.png`);
-        this.load.image('torre_c', `assets/torre_c_${colorPrefix}.png`);
-        this.load.image('torre_d', `assets/torre_d_${colorPrefix}.png`);
+        this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
+        this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
+        this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
+        this.load.image(`torre_c_${colorPrefix}`, `assets/torre_c_${colorPrefix}.png`);
+        this.load.image(`torre_d_${colorPrefix}`, `assets/torre_d_${colorPrefix}.png`);
         this.load.image('canhao_e', 'assets/canhao_e.png'); // Canhões não mudam de cor
         this.load.image('canhao_c', 'assets/canhao_c.png');
         this.load.image('canhao_d', 'assets/canhao_d.png');
@@ -41,12 +42,17 @@ class GameScene extends Phaser.Scene {
     create() {
         // Configurar a câmera principal (única)
         this.cameras.main.setSize(this.scale.width, this.scale.height);
-
-        // Fundo
-        this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo')
+        let colorPrefix;
+        if ([1, 4, 7, 10].includes(currentLevel)) {
+            colorPrefix = 'red';
+        } else if ([3, 6, 9].includes(currentLevel)) {
+            colorPrefix = 'yellow';
+        } else {
+            colorPrefix = 'blue';
+        }
+        this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, `fundo_${colorPrefix}`)
             .setOrigin(0.5)
             .setDisplaySize(this.scale.width, this.scale.height);
-
 
         // Timer
         this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:10', {
@@ -81,10 +87,10 @@ class GameScene extends Phaser.Scene {
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
-        const debugRect = this.add.graphics();
-        debugRect.lineStyle(2, 0x00FF00);
-        debugRect.strokeRect(this.scale.width / 2 - (buildingWidth / 2), this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)), buildingWidth, buildingHeight);
-        this.debugRect = debugRect;
+        //const debugRect = this.add.graphics();
+        //debugRect.lineStyle(2, 0x00FF00);
+        // debugRect.strokeRect(this.scale.width / 2 - (buildingWidth / 2), this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)), buildingWidth, buildingHeight);
+        // this.debugRect = debugRect;
 
         // Adicionar fundo e prédio usando a propriedade levelPrefix
         const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_fundo`).source[0].height / this.textures.get(`${this.levelPrefix}_fundo`).source[0].width));
@@ -106,7 +112,7 @@ class GameScene extends Phaser.Scene {
 
 
         // Silhueta urbana
-        this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, 'silhueta_urbana').setOrigin(0.5, 1).setDepth(20);
+        this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`).setOrigin(0.5, 1).setDepth(20);
         this.silhuetaSprite.displayWidth = this.scale.width;
         this.silhuetaSprite.displayHeight = 384 * (this.scale.height / BASE_HEIGHT);
 
@@ -114,7 +120,7 @@ class GameScene extends Phaser.Scene {
         const towerAndCannonDefinitions = [
             {
                 name: 'Torre Esquerda',
-                towerAsset: 'torre_e',
+                towerAsset: `torre_e_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.144,
                 towerBaseY: this.scale.height,
                 towerTargetWidth: 218 * (this.scale.width / BASE_WIDTH),
@@ -129,7 +135,7 @@ class GameScene extends Phaser.Scene {
             },
             {
                 name: 'Torre Central',
-                towerAsset: 'torre_c',
+                towerAsset: `torre_c_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.65,
                 towerBaseY: this.scale.height,
                 towerTargetWidth: 148 * (this.scale.width / BASE_WIDTH),
@@ -144,7 +150,7 @@ class GameScene extends Phaser.Scene {
             },
             {
                 name: 'Torre Direita',
-                towerAsset: 'torre_d',
+                towerAsset: `torre_d_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.881,
                 towerBaseY: this.scale.height,
                 towerTargetWidth: 190 * (this.scale.width / BASE_WIDTH),
@@ -250,29 +256,29 @@ class GameScene extends Phaser.Scene {
         }.bind(this);
 
         this.onBuildingHit = function (x, y) {
-        console.log(`Colisão detectada em x: ${x}, y: ${y}`); // Depuração
-        this.onMissileHit(x, y); // Cria a explosão primeiro
-        // Adiciona delay antes de exibir as chamas
-        this.time.delayedCall(500, () => {
-            if (this.currentChamasSprite && this.currentChamasSprite.active) {
-                if (this.currentChamasSprite.visible) {
-                    this.currentChamasSprite.stop();
+            console.log(`Colisão detectada em x: ${x}, y: ${y}`); // Depuração
+            this.onMissileHit(x, y); // Cria a explosão primeiro
+            // Adiciona delay antes de exibir as chamas
+            this.time.delayedCall(500, () => {
+                if (this.currentChamasSprite && this.currentChamasSprite.active) {
+                    if (this.currentChamasSprite.visible) {
+                        this.currentChamasSprite.stop();
+                    }
+                    this.currentChamasSprite.setVisible(true);
+                    if (this.anims.get('chamasAnim')) {
+                        this.currentChamasSprite.play('chamasAnim');
+                    }
                 }
-                this.currentChamasSprite.setVisible(true);
-                if (this.anims.get('chamasAnim')) {
-                    this.currentChamasSprite.play('chamasAnim');
-                }
-            }
 
-            if (this.buildingState < 3) {
-                this.buildingState++;
-                this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
-                if (this.buildingState === 3) {
-                    this.endLevel(false);
+                if (this.buildingState < 3) {
+                    this.buildingState++;
+                    this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
+                    if (this.buildingState === 3) {
+                        this.endLevel(false);
+                    }
                 }
-            }
-        }, [], this);
-    }.bind(this);
+            }, [], this);
+        }.bind(this);
 
         this.handleExplosionCollision = function (explosionX, explosionY, explosionRadius) {
             for (let i = missiles.length - 1; i >= 0; i--) {
@@ -539,28 +545,27 @@ class GameScene extends Phaser.Scene {
             this.continueText.setColor('#000000');
             this.continueButton.once('pointerup', () => {
                 console.log('Botão clicado - pointerup'); // Depuração
+                console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`); // Depuração
                 updateButtonState(this.continueButton, this.continueText, false);
-                if (currentLevel < TOTAL_LEVELS) {
+                const totalLevels = typeof TOTAL_LEVELS !== 'undefined' ? TOTAL_LEVELS : 10;
+                if (currentLevel < totalLevels) {
                     currentLevel++;
                     gameEnded = false;
                     this.scene.start('BriefingScene');
                 } else {
-                    this.stars.forEach(star => {
-                        if (star.active) {
-                            this.tweens.add({
-                                targets: star,
-                                alpha: { from: 1, to: 0.2 },
-                                duration: 500,
-                                yoyo: true,
-                                repeat: -1
-                            });
-                        }
-                    });
-
-                    this.resultText.destroy();
-                    this.statsText.destroy();
+                    console.log('Entrando no modo FIM DE JOGO'); // Depuração
+                    // Destruir elementos da tela anterior
+                    if (this.gameBackground) this.gameBackground.destroy();
+                    if (this.resultText) this.resultText.destroy();
+                    if (this.statsText) this.statsText.destroy();
                     this.continueButton.destroy();
                     this.continueText.destroy();
+
+                    // Adicionar fundo1.png
+                    this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
+                        .setOrigin(0.5)
+                        .setDisplaySize(this.scale.width, this.scale.height)
+                        .setDepth(1000);
 
                     this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / BASE_HEIGHT)), 'FIM DE JOGO!', {
                         fontFamily: 'VT323',
@@ -624,7 +629,7 @@ class GameScene extends Phaser.Scene {
                     this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)), 'REINICIAR', {
                         fontFamily: 'VT323',
                         fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
-                        color: '#000000' // Ajustado para preto
+                        color: '#000000'
                     }).setOrigin(0.5).setDepth(2001);
 
                     this.restartButton.defaultFillColor = 0x00FF00;

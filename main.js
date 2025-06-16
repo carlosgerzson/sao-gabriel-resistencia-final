@@ -86,11 +86,11 @@ class InstructionsScene2 extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fundo', 'assets/fundo_red.png');
+        this.load.image('fundo1', 'assets/fundo1.png');
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo')
+        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
             .setOrigin(0.5)
             .setDisplaySize(this.scale.width, this.scale.height);
 
@@ -119,7 +119,7 @@ class InstructionsScene2 extends Phaser.Scene {
 
         // Criar gráfico para os cantos
         const corners = this.add.graphics();
-        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xFFFFFF, 1); // Stroke base branco
+        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xe9bb00, 1); // Stroke base branco
 
         // Canto superior esquerdo - Ângulo 90 graus com taper
         corners.beginPath();
@@ -162,18 +162,16 @@ class InstructionsScene2 extends Phaser.Scene {
             duration: 1500
         });
 
-
-
         this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
         this.continueButton.setStrokeStyle(2, 0xFFFFFF);
-        this.continueButton.setDepth(1001);
+        this.continueButton.setDepth(1002);
         this.continueButton.setInteractive({ useHandCursor: true });
 
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
             color: '#e9bb00'
-        }).setOrigin(0.5).setDepth(1002);
+        }).setOrigin(0.5).setDepth(1003);
 
         const updateButtonState = (button, text, hover) => {
             button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00, 1);
@@ -225,22 +223,18 @@ class InstructionsScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fundo', 'assets/fundo_red.png');
+        this.load.image('fundo1', 'assets/fundo1.png');
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo')
+        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
             .setOrigin(0.5)
             .setDisplaySize(this.scale.width, this.scale.height);
 
         const instructionsText = "Mas uma cidade resiste.!\n\n" +
-
             "SÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\n" +
-
             "Um grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\n" +
-
             "A cada fase, um prédio histórico corre risco de ser apagado da existência.\n\n" +
-
             "Você é o último guardião.\n" +
             "E a cultura… não vai cair sem lutar!";
 
@@ -252,6 +246,54 @@ class InstructionsScene extends Phaser.Scene {
             lineSpacing: 20,
             wordWrap: { width: this.scale.width * 0.8 }
         }).setOrigin(0.5).setDepth(1000);
+
+
+        // Obter dimensões do texto
+        const textBounds = this.instructionsText.getBounds();
+        const padding = 20 * (this.scale.width / BASE_WIDTH); // Espaçamento ao redor do texto
+        const offsetX = this.scale.width / 2 - textBounds.width / 2 - padding;
+        const offsetY = this.scale.height / 2 - textBounds.height / 2 - padding;
+        const widthWithPadding = textBounds.width + padding * 2;
+        const heightWithPadding = textBounds.height + padding * 2;
+
+        // Criar gráfico para os cantos
+        const corners = this.add.graphics();
+        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xe9bb00, 1); // Stroke base branco
+
+        // Canto superior esquerdo - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX, offsetY); // Ponto inicial
+        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a direita
+        corners.moveTo(offsetX, offsetY); // Volta ao ponto inicial
+        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.strokePath();
+
+        // Canto superior direito - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX + widthWithPadding, offsetY); // Ponto inicial
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a esquerda
+        corners.moveTo(offsetX + widthWithPadding, offsetY); // Volta ao ponto inicial
+        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.strokePath();
+
+        // Canto inferior esquerdo - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX, offsetY + heightWithPadding); // Ponto inicial
+        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a direita
+        corners.moveTo(offsetX, offsetY + heightWithPadding); // Volta ao ponto inicial
+        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.strokePath();
+
+        // Canto inferior direito - Ângulo 90 graus com taper
+        corners.beginPath();
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Ponto inicial
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a esquerda
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Volta ao ponto inicial
+        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.strokePath();
+
+        corners.setDepth(999); // Abaixo do texto
+
         this.instructionsText.setAlpha(0);
         this.tweens.add({
             targets: this.instructionsText,
@@ -261,17 +303,17 @@ class InstructionsScene extends Phaser.Scene {
 
         this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
         this.continueButton.setStrokeStyle(2, 0xFFFFFF);
-        this.continueButton.setDepth(1001);
+        this.continueButton.setDepth(1002);
         this.continueButton.setInteractive({ useHandCursor: true });
 
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
-            color: '#000000'
-        }).setOrigin(0.5).setDepth(1002);
+            color: '#e9bb00'
+        }).setOrigin(0.5).setDepth(1003);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00, 1);
             text.setColor(hover ? '#000000' : '#000000');
         };
 
@@ -294,7 +336,6 @@ class InstructionsScene extends Phaser.Scene {
             if (this.cameras && this.cameras.main) {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
-
             if (this.instructionsText && this.instructionsText.active) {
                 this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
                 this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
@@ -313,32 +354,18 @@ class InstructionsScene extends Phaser.Scene {
         resize.call(this);
     }
 }
-
-// -------- BriefingScene --------
+// -------- BRIEFING SCENE --------
 class BriefingScene extends Phaser.Scene {
     constructor() {
         super('BriefingScene');
     }
 
     preload() {
-        let colorPrefix;
-        if ([1, 2, 3].includes(currentLevel)) {
-            colorPrefix = 'red';
-        } else if ([4, 5, 6].includes(currentLevel)) {
-            colorPrefix = 'yellow';
-        } else {
-            colorPrefix = 'blue';
-        }
-
-        this.load.image('fundo', `assets/fundo_${colorPrefix}.png`);
-        this.load.image('silhueta_urbana', `assets/silhueta_urbana_${colorPrefix}.png`);
-        this.load.image('torre_e', `assets/torre_e_${colorPrefix}.png`);
-        this.load.image('torre_c', `assets/torre_c_${colorPrefix}.png`);
-        this.load.image('torre_d', `assets/torre_d_${colorPrefix}.png`);
+        this.load.image('fundo1', 'assets/fundo1.png');
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo')
+        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
             .setOrigin(0.5)
             .setDisplaySize(this.scale.width, this.scale.height);
 
@@ -354,7 +381,8 @@ class BriefingScene extends Phaser.Scene {
         }
 
         const levelDescriptions = [
-            "Nível 1: Sinta o calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.",
+            "ALVO 1: CLUBE COMERCIAL! \n\n" +
+            "O calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.",
             "Nível 2: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
             "Nível 3: Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
             "Nível 4: Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
@@ -370,7 +398,7 @@ class BriefingScene extends Phaser.Scene {
             levelDescriptions[currentLevel - 1],
             {
                 fontFamily: 'VT323',
-                fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+                fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
                 color: '#e9bb00',
                 align: 'center',
                 lineSpacing: 20,
