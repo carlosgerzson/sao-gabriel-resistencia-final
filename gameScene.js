@@ -1,4 +1,3 @@
-
 class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
@@ -25,6 +24,8 @@ class GameScene extends Phaser.Scene {
         this.load.image('canhao_c', 'assets/canhao_c.png');
         this.load.image('canhao_d', 'assets/canhao_d.png');
         this.load.image('antimissile', 'assets/antimissile.png');
+        this.load.audio('explosion_air', 'assets/explosion_air.mp3');
+        this.load.audio('explosion_target', 'assets/explosion_target.mp3');
 
         const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
         spriteNames.forEach(name => {
@@ -39,6 +40,7 @@ class GameScene extends Phaser.Scene {
         this.load.image(`${this.levelPrefix}_destruido`, `${this.levelPrefix}_destruido.png`);
         this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`); // Adicionado
     }
+
     create() {
         // Configurar a câmera principal (única)
         this.cameras.main.setSize(this.scale.width, this.scale.height);
@@ -55,13 +57,13 @@ class GameScene extends Phaser.Scene {
             .setDisplaySize(this.scale.width, this.scale.height);
 
         // Timer
-        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:10', {
+        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:20', {
             fontFamily: 'VT323',
             fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft = 10;
+        this.timeLeft = 20;
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -87,11 +89,6 @@ class GameScene extends Phaser.Scene {
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
-        //const debugRect = this.add.graphics();
-        //debugRect.lineStyle(2, 0x00FF00);
-        // debugRect.strokeRect(this.scale.width / 2 - (buildingWidth / 2), this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)), buildingWidth, buildingHeight);
-        // this.debugRect = debugRect;
-
         // Adicionar fundo e prédio usando a propriedade levelPrefix
         const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_fundo`).source[0].height / this.textures.get(`${this.levelPrefix}_fundo`).source[0].width));
         background.setPosition(0, buildingHeight);
@@ -109,7 +106,6 @@ class GameScene extends Phaser.Scene {
         this.building.setPosition(0, buildingHeight);
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
-
 
         // Silhueta urbana
         this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`).setOrigin(0.5, 1).setDepth(20);
@@ -258,6 +254,12 @@ class GameScene extends Phaser.Scene {
         this.onBuildingHit = function (x, y) {
             console.log(`Colisão detectada em x: ${x}, y: ${y}`); // Depuração
             this.onMissileHit(x, y); // Cria a explosão primeiro
+            try {
+                this.sound.play('explosion_target'); // Tenta tocar o som
+                console.log('Som explosion_target tocado');
+            } catch (e) {
+                console.error('Erro ao tocar explosion_target:', e); // Log de erro
+            }
             // Adiciona delay antes de exibir as chamas
             this.time.delayedCall(500, () => {
                 if (this.currentChamasSprite && this.currentChamasSprite.active) {
@@ -291,6 +293,7 @@ class GameScene extends Phaser.Scene {
                 if (distance < explosionRadius) {
                     missile.destroy();
                     missiles.splice(i, 1);
+                    this.sound.play('explosion_air'); // Toca som de explosão no ar
                 }
             }
         }.bind(this);
@@ -304,15 +307,7 @@ class GameScene extends Phaser.Scene {
                 this.gameBackground.setPosition(this.scale.width / 2, this.scale.height / 2);
                 this.gameBackground.setDisplaySize(this.scale.width, this.scale.height);
             }
-            if (this.stars) {
-                this.stars.forEach(star => {
-                    if (star.active) {
-                        star.x = Phaser.Math.Between(0, this.scale.width);
-                        star.y = Phaser.Math.Between(0, this.scale.height);
-                        star.setScale(1);
-                    }
-                });
-            }
+           
             if (this.silhuetaSprite && this.silhuetaSprite.active) {
                 this.silhuetaSprite.setPosition(this.scale.width / 2, this.scale.height);
                 this.silhuetaSprite.displayWidth = this.scale.width;
