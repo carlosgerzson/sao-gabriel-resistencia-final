@@ -4,16 +4,15 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // Carrega os assets com base no nível
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
         } else if ([3, 6, 9].includes(currentLevel)) {
             colorPrefix = 'yellow';
         } else {
-            colorPrefix = 'blue'; // Níveis 2, 5, 8
+            colorPrefix = 'blue';
         }
-        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`); // Depuração
+        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
 
         this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
@@ -41,10 +40,10 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        // Configurar a câmera principal para ocupar toda a tela
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
-        this.game.canvas.style.height = `${this.scale.height}px`;
-        this.game.canvas.style.width = `${this.scale.width}px`;
+        // Configurar a câmera para ocupar toda a tela com proporção correta
+        this.cameras.main.setViewport(0, 0, this.scale.width, this.scale.height);
+        this.cameras.main.setZoom(1); // Define zoom base como 1
+        this.game.scale.resize(this.scale.width, this.scale.height); // Ajusta o game ao tamanho da janela
 
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
@@ -54,9 +53,21 @@ class GameScene extends Phaser.Scene {
         } else {
             colorPrefix = 'blue';
         }
+        // Ajuste do background mantendo a proporção original
+        const bg = this.textures.get(`fundo_${colorPrefix}`);
+        const bgRatio = bg.source[0].width / bg.source[0].height;
+        const gameRatio = this.scale.width / this.scale.height;
+        let bgWidth, bgHeight;
+        if (gameRatio > bgRatio) {
+            bgHeight = this.scale.height;
+            bgWidth = bgHeight * bgRatio;
+        } else {
+            bgWidth = this.scale.width;
+            bgHeight = bgWidth / bgRatio;
+        }
         this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, `fundo_${colorPrefix}`)
             .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+            .setDisplaySize(bgWidth, bgHeight);
 
         // Timer
         this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:10', {
@@ -299,17 +310,30 @@ class GameScene extends Phaser.Scene {
         const resize = () => {
             const width = this.scale.width;
             const height = this.scale.height;
-            if (this.cameras && this.cameras.main) {
-                this.cameras.main.setSize(width, height);
-                this.game.canvas.style.height = `${height}px`;
-                this.game.canvas.style.width = `${width}px`;
-                this.game.canvas.style.margin = '0';
-                this.game.canvas.style.padding = '0';
+            console.log(`Resize: width=${width}, height=${height}`); // Depuração
+            this.cameras.main.setViewport(0, 0, width, height);
+            this.game.scale.resize(width, height);
+            this.game.canvas.style.width = `${width}px`;
+            this.game.canvas.style.height = `${height}px`;
+            this.game.canvas.style.margin = '0';
+            this.game.canvas.style.padding = '0';
+
+            // Ajuste do background mantendo proporção
+            const bg = this.textures.get(`fundo_${colorPrefix}`);
+            const bgRatio = bg.source[0].width / bg.source[0].height;
+            let bgWidth, bgHeight;
+            if (width / height > bgRatio) {
+                bgHeight = height;
+                bgWidth = bgHeight * bgRatio;
+            } else {
+                bgWidth = width;
+                bgHeight = bgWidth / bgRatio;
             }
             if (this.gameBackground && this.gameBackground.active) {
                 this.gameBackground.setPosition(width / 2, height / 2);
-                this.gameBackground.setDisplaySize(width, height);
+                this.gameBackground.setDisplaySize(bgWidth, bgHeight);
             }
+
             if (this.silhuetaSprite && this.silhuetaSprite.active) {
                 this.silhuetaSprite.setPosition(width / 2, height);
                 this.silhuetaSprite.displayWidth = width;
@@ -400,7 +424,8 @@ class GameScene extends Phaser.Scene {
         };
 
         this.scale.on('resize', resize, this);
-        resize.call(this);        
+        resize.call(this);
+   
 }
 
     spawnWave() {
