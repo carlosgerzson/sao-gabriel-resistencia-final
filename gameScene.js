@@ -302,12 +302,15 @@ class GameScene extends Phaser.Scene {
         const resize = () => {
             if (this.cameras && this.cameras.main) {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
+                // Ajusta o canvas para ocupar toda a altura da janela
+                this.game.canvas.style.height = `${this.scale.height}px`;
+                this.game.canvas.style.width = `${this.scale.width}px`;
             }
             if (this.gameBackground && this.gameBackground.active) {
                 this.gameBackground.setPosition(this.scale.width / 2, this.scale.height / 2);
                 this.gameBackground.setDisplaySize(this.scale.width, this.scale.height);
             }
-           
+
             if (this.silhuetaSprite && this.silhuetaSprite.active) {
                 this.silhuetaSprite.setPosition(this.scale.width / 2, this.scale.height);
                 this.silhuetaSprite.displayWidth = this.scale.width;
