@@ -17,7 +17,7 @@ class IntroScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
+       this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
     }
 
     create() {
