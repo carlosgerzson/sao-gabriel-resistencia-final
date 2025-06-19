@@ -4,23 +4,22 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // Carrega os assets com base no nível
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
         } else if ([3, 6, 9].includes(currentLevel)) {
             colorPrefix = 'yellow';
         } else {
-            colorPrefix = 'blue'; // Níveis 2, 5, 8
+            colorPrefix = 'blue';
         }
-        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`); // Depuração
+        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
 
         this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
         this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
         this.load.image(`torre_c_${colorPrefix}`, `assets/torre_c_${colorPrefix}.png`);
         this.load.image(`torre_d_${colorPrefix}`, `assets/torre_d_${colorPrefix}.png`);
-        this.load.image('canhao_e', 'assets/canhao_e.png'); // Canhões não mudam de cor
+        this.load.image('canhao_e', 'assets/canhao_e.png');
         this.load.image('canhao_c', 'assets/canhao_c.png');
         this.load.image('canhao_d', 'assets/canhao_d.png');
         this.load.image('antimissile', 'assets/antimissile.png');
@@ -32,17 +31,15 @@ class GameScene extends Phaser.Scene {
             this.load.image(`chamas${name}`, `assets/chamas1/chamas${name}.png`);
         });
 
-        // Declarar levelPrefix como propriedade da classe
         this.levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
         this.load.image(`${this.levelPrefix}_predio`, `${this.levelPrefix}_predio.png`);
         this.load.image(`${this.levelPrefix}_dano1`, `${this.levelPrefix}_dano1.png`);
         this.load.image(`${this.levelPrefix}_dano2`, `${this.levelPrefix}_dano2.png`);
         this.load.image(`${this.levelPrefix}_destruido`, `${this.levelPrefix}_destruido.png`);
-        this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`); // Adicionado
+        this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`);
     }
 
     create() {
-        // Configurar a câmera principal (única)
         this.cameras.main.setSize(this.scale.width, this.scale.height);
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
@@ -52,14 +49,13 @@ class GameScene extends Phaser.Scene {
         } else {
             colorPrefix = 'blue';
         }
-        this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, `fundo_${colorPrefix}`)
-            .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+        this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
+            .setOrigin(0.5, 0)
+            .setDisplaySize(900, 1600);
 
-        // Timer
-        this.timerText = this.add.text(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT), '00:20', {
+        this.timerText = this.add.text(20 * (this.scale.width / 900), 20 * (this.scale.height / 1600), '00:20', {
             fontFamily: 'VT323',
-            fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${40 * (this.scale.width / 900)}px`,
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
@@ -82,17 +78,15 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        // Configurar o buildingContainer (sem cameraFilter)
         const buildingWidth = 510;
         const buildingHeight = 550;
-        this.buildingContainer = this.add.container(this.scale.width / 2, this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)));
+        this.buildingContainer = this.add.container(this.scale.width / 2, this.scale.height - buildingHeight - (48 * (this.scale.height / 1600)));
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
-        // Adicionar fundo e prédio usando a propriedade levelPrefix
         const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_fundo`).source[0].height / this.textures.get(`${this.levelPrefix}_fundo`).source[0].width));
         background.setPosition(0, buildingHeight);
-        background.setDepth(900); // Mesmo depth do contêiner
+        background.setDepth(900);
         this.buildingContainer.add(background);
 
         const chamasSpriteHeight = 375 * 1.0;
@@ -107,26 +101,24 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
 
-        // Silhueta urbana
         this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`).setOrigin(0.5, 1).setDepth(20);
         this.silhuetaSprite.displayWidth = this.scale.width;
-        this.silhuetaSprite.displayHeight = 384 * (this.scale.height / BASE_HEIGHT);
+        this.silhuetaSprite.displayHeight = 384 * (this.scale.height / 1600);
 
-        // Torres e canhões
         const towerAndCannonDefinitions = [
             {
                 name: 'Torre Esquerda',
                 towerAsset: `torre_e_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.144,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 218 * (this.scale.width / BASE_WIDTH),
-                towerTargetHeight: 709 * (this.scale.height / BASE_HEIGHT),
+                towerTargetWidth: 218 * (this.scale.width / 900),
+                towerTargetHeight: 709 * (this.scale.height / 1600),
                 towerDepth: 30,
                 cannonAsset: 'canhao_e',
                 cannonX: this.scale.width * 0.144,
                 cannonY: this.scale.height * 0.613,
-                cannonTargetWidth: 39 * (this.scale.width / BASE_WIDTH),
-                cannonTargetHeight: 141 * (this.scale.height / BASE_HEIGHT),
+                cannonTargetWidth: 39 * (this.scale.width / 900),
+                cannonTargetHeight: 141 * (this.scale.height / 1600),
                 cannonDepth: 10
             },
             {
@@ -134,14 +126,14 @@ class GameScene extends Phaser.Scene {
                 towerAsset: `torre_c_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.65,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 148 * (this.scale.width / BASE_WIDTH),
-                towerTargetHeight: 637 * (this.scale.height / BASE_HEIGHT),
+                towerTargetWidth: 148 * (this.scale.width / 900),
+                towerTargetHeight: 637 * (this.scale.height / 1600),
                 towerDepth: 18,
                 cannonAsset: 'canhao_c',
                 cannonX: this.scale.width * 0.65,
                 cannonY: this.scale.height * 0.647,
-                cannonTargetWidth: 33 * (this.scale.width / BASE_WIDTH),
-                cannonTargetHeight: 103 * (this.scale.height / BASE_HEIGHT),
+                cannonTargetWidth: 33 * (this.scale.width / 900),
+                cannonTargetHeight: 103 * (this.scale.height / 1600),
                 cannonDepth: 10
             },
             {
@@ -149,19 +141,18 @@ class GameScene extends Phaser.Scene {
                 towerAsset: `torre_d_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.881,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 190 * (this.scale.width / BASE_WIDTH),
-                towerTargetHeight: 782 * (this.scale.height / BASE_HEIGHT),
+                towerTargetWidth: 190 * (this.scale.width / 900),
+                towerTargetHeight: 782 * (this.scale.height / 1600),
                 towerDepth: 18,
                 cannonAsset: 'canhao_d',
                 cannonX: this.scale.width * 0.881,
                 cannonY: this.scale.height * 0.563,
-                cannonTargetWidth: 39 * (this.scale.width / BASE_WIDTH),
-                cannonTargetHeight: 125 * (this.scale.height / BASE_HEIGHT),
+                cannonTargetWidth: 39 * (this.scale.width / 900),
+                cannonTargetHeight: 125 * (this.scale.height / 1600),
                 cannonDepth: 10
             }
         ];
 
-        cannons = [];
         this.allCannonsSprites = [];
         this.towers = [];
         this.allTowerSprites = [];
@@ -185,8 +176,6 @@ class GameScene extends Phaser.Scene {
         });
 
         this.buildingState = 0;
-        missiles = [];
-        antiMissiles = [];
         this.waveCount = 0;
 
         const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
@@ -201,7 +190,7 @@ class GameScene extends Phaser.Scene {
         this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true });
 
         this.input.on('pointerdown', (pointer) => {
-            console.log('Clique detectado'); // Depuração
+            console.log('Clique detectado');
             if (!gameEnded) {
                 const gamePointerX = pointer.x;
                 const gamePointerY = pointer.y;
@@ -214,11 +203,10 @@ class GameScene extends Phaser.Scene {
             this.game.canvas.focus();
         });
 
-        // Funções de explosão
         this.onAntiMissileHit = function (x, y) {
             const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8);
             explosionCircle.setDepth(920);
-            const explosionVisualRadius = 100 * (this.scale.width / BASE_WIDTH);
+            const explosionVisualRadius = 100 * (this.scale.width / 900);
             const explosionAnimationDuration = 500;
             this.tweens.add({
                 targets: explosionCircle,
@@ -228,17 +216,17 @@ class GameScene extends Phaser.Scene {
                 duration: explosionAnimationDuration,
                 onComplete: () => {
                     explosionCircle.destroy();
-                    this.handleExplosionCollision(x, y, explosionVisualRadius + (50 * (this.scale.width / BASE_WIDTH)));
+                    this.handleExplosionCollision(x, y, explosionVisualRadius + (50 * (this.scale.width / 900)));
                 }
             });
         }.bind(this);
 
         this.onMissileHit = function (x, y) {
-            console.log(`Explosão em x: ${x}, y: ${y}`); // Depuração
-            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 1.0); // Mesma cor da explosão no ar
-            explosionCircle.setDepth(930); // Mesmo depth do prédio para sobrepor
-            const explosionVisualRadius = 250 * (this.scale.width / BASE_WIDTH); // raio aumentado
-            const explosionAnimationDuration = 550; // Mesmo tempo
+            console.log(`Explosão em x: ${x}, y: ${y}`);
+            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 1.0);
+            explosionCircle.setDepth(930);
+            const explosionVisualRadius = 250 * (this.scale.width / 900);
+            const explosionAnimationDuration = 550;
             this.tweens.add({
                 targets: explosionCircle,
                 radius: explosionVisualRadius,
@@ -252,15 +240,14 @@ class GameScene extends Phaser.Scene {
         }.bind(this);
 
         this.onBuildingHit = function (x, y) {
-            console.log(`Colisão detectada em x: ${x}, y: ${y}`); // Depuração
-            this.onMissileHit(x, y); // Cria a explosão primeiro
+            console.log(`Colisão detectada em x: ${x}, y: ${y}`);
+            this.onMissileHit(x, y);
             try {
-                this.sound.play('explosion_target'); // Tenta tocar o som
+                this.sound.play('explosion_target');
                 console.log('Som explosion_target tocado');
             } catch (e) {
-                console.error('Erro ao tocar explosion_target:', e); // Log de erro
+                console.error('Erro ao tocar explosion_target:', e);
             }
-            // Adiciona delay antes de exibir as chamas
             this.time.delayedCall(500, () => {
                 if (this.currentChamasSprite && this.currentChamasSprite.active) {
                     if (this.currentChamasSprite.visible) {
@@ -293,71 +280,45 @@ class GameScene extends Phaser.Scene {
                 if (distance < explosionRadius) {
                     missile.destroy();
                     missiles.splice(i, 1);
-                    this.sound.play('explosion_air'); // Toca som de explosão no ar
+                    this.sound.play('explosion_air');
                 }
             }
         }.bind(this);
 
-        // Função resize específica para GameScene
-        const resize = () => {
-            if (this.cameras && this.cameras.main) {
-                this.cameras.main.setSize(this.scale.width, this.scale.height);
-            }
+        this.resize = () => {
+            const width = this.scale.width;
+            const height = this.scale.height;
+            console.log(`Resize: width=${width}, height=${height}`);
+
             if (this.gameBackground && this.gameBackground.active) {
-                this.gameBackground.setPosition(this.scale.width / 2, this.scale.height / 2);
-                this.gameBackground.setDisplaySize(this.scale.width, this.scale.height);
+                this.gameBackground.setPosition(width / 2, 0);
+                this.gameBackground.setDisplaySize(900, 1600);
             }
-           
+
             if (this.silhuetaSprite && this.silhuetaSprite.active) {
-                this.silhuetaSprite.setPosition(this.scale.width / 2, this.scale.height);
-                this.silhuetaSprite.displayWidth = this.scale.width;
-                this.silhuetaSprite.displayHeight = 384 * (this.scale.height / BASE_HEIGHT);
+                this.silhuetaSprite.setPosition(width / 2, height);
+                this.silhuetaSprite.displayWidth = width;
+                this.silhuetaSprite.displayHeight = 384 * (height / 1600);
             }
+
             if (this.buildingContainer && this.buildingContainer.active) {
                 const buildingWidth = 510;
                 const buildingHeight = 550;
-                this.buildingContainer.setPosition(this.scale.width / 2, this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)));
+                this.buildingContainer.setPosition(width / 2, height - buildingHeight - (48 * (height / 1600)));
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(this.building.texture.key).source[0].height / this.textures.get(this.building.texture.key).source[0].width));
                 this.building.setPosition(0, buildingHeight);
             }
+
             if (this.currentChamasSprite && this.currentChamasSprite.active) {
                 const chamasSpriteHeight = 375 * 1.0;
                 this.currentChamasSprite.setPosition(0, 550 - (chamasSpriteHeight / 2));
             }
-            if (this.debugRect && this.debugRect.active) {
-                const buildingWidth = 510;
-                const buildingHeight = 550;
-                this.debugRect.clear();
-                this.debugRect.lineStyle(2, 0x00FF00);
-                this.debugRect.strokeRect(this.scale.width / 2 - (buildingWidth / 2), this.scale.height - buildingHeight - (48 * (this.scale.height / BASE_HEIGHT)), buildingWidth, buildingHeight);
-            }
-            if (this.timerText && this.timerText.active) {
-                this.timerText.setPosition(20 * (this.scale.width / BASE_WIDTH), 20 * (this.scale.height / BASE_HEIGHT));
-                this.timerText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
-            }
-            if (missiles) {
-                missiles.forEach(missile => {
-                    if (missile && missile.active) {
-                        missile.displayWidth = 10 * (this.scale.width / BASE_WIDTH);
-                        missile.displayHeight = 30 * (this.scale.height / BASE_HEIGHT);
-                        missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255, this.scale.width / 2 + 255);
-                        missile.targetY = this.scale.height - 315;
-                    }
-                });
-            }
-            if (antiMissiles) {
-                antiMissiles.forEach(anti => {
-                    if (anti && anti.active) {
-                        anti.displayWidth = 15 * (this.scale.width / BASE_WIDTH);
-                        anti.displayHeight = 60 * (this.scale.height / BASE_HEIGHT);
-                    }
-                });
-            }
+
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
                     if (tower.sprite.active) {
-                        tower.sprite.setPosition(tower.def.towerBaseX, tower.def.towerBaseY);
+                        tower.sprite.setPosition(tower.def.towerBaseX, height);
                         tower.sprite.displayWidth = tower.def.towerTargetWidth;
                         tower.sprite.displayHeight = tower.def.towerTargetHeight;
                     }
@@ -367,38 +328,39 @@ class GameScene extends Phaser.Scene {
                 this.allCannonsSprites.forEach(cannon => {
                     if (cannon.sprite.active) {
                         cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
-                        cannon.sprite.displayWidth = cannon.def.cannonTargetWidth; // Corrigido: cannon.def
-                        cannon.sprite.displayHeight = cannon.def.cannonTargetHeight; // Corrigido: cannon.def
+                        cannon.sprite.displayWidth = cannon.def.cannonTargetWidth;
+                        cannon.sprite.displayHeight = cannon.def.cannonTargetHeight;
                     }
                 });
             }
-            if (this.resultText && this.resultText.active) {
-                this.resultText.setPosition(this.scale.width / 2, this.scale.height * 0.25);
-                this.resultText.setFontSize(60 * (this.scale.width / BASE_WIDTH));
+
+            if (this.timerText && this.timerText.active) {
+                this.timerText.setPosition(20 * (width / 900), 20 * (height / 1600));
+                this.timerText.setFontSize(40 * (width / 900));
             }
-            if (this.statsText && this.statsText.active) {
-                this.statsText.setPosition(this.scale.width / 2, this.scale.height * 0.30);
-                this.statsText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
+
+            if (missiles) {
+                missiles.forEach(missile => {
+                    if (missile && missile.active) {
+                        missile.displayWidth = 10 * (width / 900);
+                        missile.displayHeight = 30 * (height / 1600);
+                        missile.targetX = Phaser.Math.Between(width / 2 - 255, width / 2 + 255);
+                        missile.targetY = height - 315;
+                    }
+                });
             }
-            if (this.performanceText && this.performanceText.active) {
-                this.performanceText.setPosition(this.scale.width / 2, this.scale.height / 2);
-                this.performanceText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
-            }
-            if (this.endText && this.endText.active) {
-                this.endText.setPosition(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / BASE_HEIGHT)));
-                this.endText.setFontSize(80 * (this.scale.width / BASE_WIDTH));
-            }
-            if (this.restartButton && this.restartButton.active) {
-                this.restartButton.setPosition(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)));
-                this.restartButton.setSize(300 * (this.scale.width / BASE_WIDTH), 100 * (this.scale.height / BASE_HEIGHT));
-                this.restartButton.setInteractive();
-                this.restartText.setPosition(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)));
-                this.restartText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
+            if (antiMissiles) {
+                antiMissiles.forEach(anti => {
+                    if (anti && anti.active) {
+                        anti.displayWidth = 15 * (width / 900);
+                        anti.displayHeight = 60 * (height / 1600);
+                    }
+                });
             }
         };
 
-        this.scale.on('resize', resize, this);
-        resize.call(this);
+        this.scale.on('resize', this.resize, this);
+        this.resize();
     }
 
     spawnWave() {
@@ -411,15 +373,15 @@ class GameScene extends Phaser.Scene {
                 this.time.delayedCall(i * delayBetweenMissiles, () => {
                     const spawnX = Phaser.Math.Between(0, this.scale.width);
                     const spawnY = 0;
-                    const missile = this.add.rectangle(spawnX, spawnY, 10 * (this.scale.width / BASE_WIDTH), 30 * (this.scale.height / BASE_HEIGHT), 0x00ff00);
+                    const missile = this.add.rectangle(spawnX, spawnY, 10 * (this.scale.width / 900), 30 * (this.scale.height / 1600), 0x00ff00);
                     missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
                     missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255, this.scale.width / 2 + 255);
                     missile.targetY = this.scale.height - 315;
-                    missile.displayWidth = 10 * (this.scale.width / BASE_WIDTH);
-                    missile.displayHeight = 30 * (this.scale.height / BASE_HEIGHT);
+                    missile.displayWidth = 10 * (this.scale.width / 900);
+                    missile.displayHeight = 30 * (this.scale.height / 1600);
                     missile.setDepth(1000);
-                    missile.setActive(true); // Adicionado
-                    missile.setVisible(true); // Adicionado
+                    missile.setActive(true);
+                    missile.setVisible(true);
                     missiles.push(missile);
                 }, [], this);
             }
@@ -433,8 +395,8 @@ class GameScene extends Phaser.Scene {
             const antiMissile = this.add.image(launchX, launchY, 'antimissile');
             antiMissile.setOrigin(0.5, 1);
             antiMissile.setDepth(5);
-            antiMissile.displayWidth = 12 * (this.scale.width / BASE_WIDTH);
-            antiMissile.displayHeight = 76 * (this.scale.height / BASE_HEIGHT);
+            antiMissile.displayWidth = 12 * (this.scale.width / 900);
+            antiMissile.displayHeight = 76 * (this.scale.height / 1600);
             antiMissiles.push(antiMissile);
             this.tweens.add({
                 targets: antiMissile,
@@ -483,7 +445,7 @@ class GameScene extends Phaser.Scene {
             success ? 'SUCESSO!' : 'FALHA!',
             {
                 fontFamily: 'VT323',
-                fontSize: `${60 * (this.scale.width / BASE_WIDTH)}px`,
+                fontSize: `${60 * (this.scale.width / 900)}px`,
                 color: success ? '#00FF00' : '#FF0000',
                 align: 'center'
             }
@@ -499,7 +461,7 @@ class GameScene extends Phaser.Scene {
             `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
             {
                 fontFamily: 'VT323',
-                fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+                fontSize: `${40 * (this.scale.width / 900)}px`,
                 color: '#FFFFFF',
                 align: 'center',
                 lineSpacing: 20
@@ -521,26 +483,26 @@ class GameScene extends Phaser.Scene {
 
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
             fontFamily: 'VT323',
-            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${30 * (this.scale.width / 900)}px`,
             color: '#000000'
         }).setOrigin(0.5).setDepth(2001);
         this.continueText.setVisible(true);
 
         const updateButtonState = (button, text, hover) => {
             button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
-            text.setColor('#000000'); // Sempre preto
+            text.setColor('#000000');
         };
 
         this.continueButton.defaultFillColor = 0xFFFF00;
         this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
         this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
         this.continueButton.on('pointerdown', () => {
-            console.log('Botão clicado - pointerdown'); // Depuração
+            console.log('Botão clicado - pointerdown');
             this.continueButton.setFillStyle(0xFFFF00, 1);
             this.continueText.setColor('#000000');
             this.continueButton.once('pointerup', () => {
-                console.log('Botão clicado - pointerup'); // Depuração
-                console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`); // Depuração
+                console.log('Botão clicado - pointerup');
+                console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`);
                 updateButtonState(this.continueButton, this.continueText, false);
                 const totalLevels = typeof TOTAL_LEVELS !== 'undefined' ? TOTAL_LEVELS : 10;
                 if (currentLevel < totalLevels) {
@@ -548,23 +510,21 @@ class GameScene extends Phaser.Scene {
                     gameEnded = false;
                     this.scene.start('BriefingScene');
                 } else {
-                    console.log('Entrando no modo FIM DE JOGO'); // Depuração
-                    // Destruir elementos da tela anterior
+                    console.log('Entrando no modo FIM DE JOGO');
                     if (this.gameBackground) this.gameBackground.destroy();
                     if (this.resultText) this.resultText.destroy();
                     if (this.statsText) this.statsText.destroy();
                     this.continueButton.destroy();
                     this.continueText.destroy();
 
-                    // Adicionar fundo1.png
-                    this.gameBackground = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
-                        .setOrigin(0.5)
-                        .setDisplaySize(this.scale.width, this.scale.height)
+                    this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1')
+                        .setOrigin(0.5, 0)
+                        .setDisplaySize(900, 1600)
                         .setDepth(1000);
 
-                    this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / BASE_HEIGHT)), 'FIM DE JOGO!', {
+                    this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / 1600)), 'FIM DE JOGO!', {
                         fontFamily: 'VT323',
-                        fontSize: `${80 * (this.scale.width / BASE_WIDTH)}px`,
+                        fontSize: `${80 * (this.scale.width / 900)}px`,
                         color: '#FFFFFF',
                         align: 'center'
                     }).setOrigin(0.5).setDepth(1200);
@@ -587,11 +547,11 @@ class GameScene extends Phaser.Scene {
 
                     this.performanceText = this.add.text(this.scale.width / 2, this.scale.height / 2, performanceMessage, {
                         fontFamily: 'VT323',
-                        fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+                        fontSize: `${40 * (this.scale.width / 900)}px`,
                         color: '#FFFFFF',
                         align: 'center',
                         lineSpacing: 20,
-                        wordWrap: { width: 800 * (this.scale.width / BASE_WIDTH) }
+                        wordWrap: { width: 800 * (this.scale.width / 900) }
                     }).setOrigin(0.5).setDepth(1201);
                     this.performanceText.setAlpha(0);
                     this.tweens.add({
@@ -600,11 +560,11 @@ class GameScene extends Phaser.Scene {
                         duration: 2000
                     });
 
-                    this.statsText = this.add.text(this.scale.width / 2, this.scale.height / 2 + (150 * (this.scale.height / BASE_HEIGHT)),
+                    this.statsText = this.add.text(this.scale.width / 2, this.scale.height / 2 + (150 * (this.scale.height / 1600)),
                         `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
                         {
                             fontFamily: 'VT323',
-                            fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+                            fontSize: `${40 * (this.scale.width / 900)}px`,
                             color: '#FFFFFF',
                             align: 'center',
                             lineSpacing: 20
@@ -617,13 +577,13 @@ class GameScene extends Phaser.Scene {
                         duration: 2000
                     });
 
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)), 300, 100, 0x00FF00);
+                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 300, 100, 0x00FF00);
                     this.restartButton.setStrokeStyle(4, 0xFFFFFF);
                     this.restartButton.setDepth(2000);
                     this.restartButton.setInteractive({ useHandCursor: true });
-                    this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / BASE_HEIGHT)), 'REINICIAR', {
+                    this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 'REINICIAR', {
                         fontFamily: 'VT323',
-                        fontSize: `${40 * (this.scale.width / BASE_WIDTH)}px`,
+                        fontSize: `${40 * (this.scale.width / 900)}px`,
                         color: '#000000'
                     }).setOrigin(0.5).setDepth(2001);
 
@@ -631,11 +591,11 @@ class GameScene extends Phaser.Scene {
                     this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
                     this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
                     this.restartButton.on('pointerdown', () => {
-                        console.log('Botão reiniciar clicado - pointerdown'); // Depuração
+                        console.log('Botão reiniciar clicado - pointerdown');
                         this.restartButton.setFillStyle(0x00FF00, 1);
                         this.restartText.setColor('#000000');
                         this.restartButton.once('pointerup', () => {
-                            console.log('Botão reiniciar clicado - pointerup'); // Depuração
+                            console.log('Botão reiniciar clicado - pointerup');
                             updateButtonState(this.restartButton, this.restartText, false);
                             destroyedCount = 0;
                             preservedCount = 0;

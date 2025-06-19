@@ -17,13 +17,13 @@ class IntroScene extends Phaser.Scene {
     }
 
     preload() {
-       this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
+        this.load.image('fundointro1', 'assets/fundoIntro.jpeg');
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundointro1')
-            .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+        const fundo = this.add.image(this.scale.width / 2, 0, 'fundointro1')
+            .setOrigin(0.5, 0)
+            .setDisplaySize(900, 1600);
 
         this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200, 80, 0xFFFF00);
         this.continueButton.setStrokeStyle(2, 0xFFFFFF);
@@ -33,12 +33,12 @@ class IntroScene extends Phaser.Scene {
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: `${30 * (this.scale.width / 900)}px`,
-            color: '#000000' // Ajustado para black
+            color: '#000000'
         }).setOrigin(0.5).setDepth(1002);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00e9bb00, 1);
-            text.setColor(hover ? '#000000' : '#000000');
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
+            text.setColor('#000000');
         };
 
         this.continueButton.defaultFillColor = 0xFFFF00;
@@ -61,8 +61,8 @@ class IntroScene extends Phaser.Scene {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
             if (fundo && fundo.active) {
-                fundo.setPosition(this.scale.width / 2, this.scale.height / 2);
-                fundo.setDisplaySize(this.scale.width, this.scale.height);
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setDisplaySize(900, 1600);
             }
             if (this.continueButton && this.continueButton.active) {
                 this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
@@ -79,7 +79,6 @@ class IntroScene extends Phaser.Scene {
 }
 
 // -------- InstructionsScene2 --------
-
 class InstructionsScene2 extends Phaser.Scene {
     constructor() {
         super('InstructionsScene2');
@@ -90,9 +89,9 @@ class InstructionsScene2 extends Phaser.Scene {
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
-            .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+        const fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
+            .setOrigin(0.5, 0)
+            .setDisplaySize(900, 1600);
 
         const instructionsText = "BEM-VINDO AO JOGO!\n\n" +
             "Em um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\n" +
@@ -102,58 +101,52 @@ class InstructionsScene2 extends Phaser.Scene {
 
         this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
             fontFamily: 'VT323',
-            fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${48 * (this.scale.width / 900)}px`,
             color: '#e9bb00',
             align: 'center',
             lineSpacing: 20,
             wordWrap: { width: this.scale.width * 0.8 }
         }).setOrigin(0.5).setDepth(1000);
 
-        // Obter dimensões do texto
         const textBounds = this.instructionsText.getBounds();
-        const padding = 20 * (this.scale.width / BASE_WIDTH); // Espaçamento ao redor do texto
+        const padding = 20 * (this.scale.width / 900);
         const offsetX = this.scale.width / 2 - textBounds.width / 2 - padding;
         const offsetY = this.scale.height / 2 - textBounds.height / 2 - padding;
         const widthWithPadding = textBounds.width + padding * 2;
         const heightWithPadding = textBounds.height + padding * 2;
 
-        // Criar gráfico para os cantos
         const corners = this.add.graphics();
-        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xe9bb00, 1); // Stroke base branco
+        corners.lineStyle(4 * (this.scale.width / 900), 0xe9bb00, 1);
 
-        // Canto superior esquerdo - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX, offsetY); // Ponto inicial
-        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a direita
-        corners.moveTo(offsetX, offsetY); // Volta ao ponto inicial
-        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.moveTo(offsetX, offsetY);
+        corners.lineTo(offsetX + 45 * (this.scale.width / 900), offsetY);
+        corners.moveTo(offsetX, offsetY);
+        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto superior direito - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX + widthWithPadding, offsetY); // Ponto inicial
-        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a esquerda
-        corners.moveTo(offsetX + widthWithPadding, offsetY); // Volta ao ponto inicial
-        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.moveTo(offsetX + widthWithPadding, offsetY);
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / 900), offsetY);
+        corners.moveTo(offsetX + widthWithPadding, offsetY);
+        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto inferior esquerdo - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX, offsetY + heightWithPadding); // Ponto inicial
-        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a direita
-        corners.moveTo(offsetX, offsetY + heightWithPadding); // Volta ao ponto inicial
-        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.moveTo(offsetX, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + 45 * (this.scale.width / 900), offsetY + heightWithPadding);
+        corners.moveTo(offsetX, offsetY + heightWithPadding);
+        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto inferior direito - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Ponto inicial
-        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a esquerda
-        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Volta ao ponto inicial
-        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / 900), offsetY + heightWithPadding);
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        corners.setDepth(999); // Abaixo do texto
+        corners.setDepth(999);
 
         this.instructionsText.setAlpha(0);
         this.tweens.add({
@@ -162,19 +155,19 @@ class InstructionsScene2 extends Phaser.Scene {
             duration: 1500
         });
 
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200, 80, 0xFFFF00);
         this.continueButton.setStrokeStyle(2, 0xFFFFFF);
         this.continueButton.setDepth(1002);
         this.continueButton.setInteractive({ useHandCursor: true });
 
-        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
+        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
             fontFamily: 'VT323',
-            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${30 * (this.scale.width / 900)}px`,
             color: '#e9bb00'
         }).setOrigin(0.5).setDepth(1003);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00, 1);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
             text.setColor(hover ? '#000000' : '#000000');
         };
 
@@ -197,17 +190,21 @@ class InstructionsScene2 extends Phaser.Scene {
             if (this.cameras && this.cameras.main) {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
+            if (fundo && fundo.active) {
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setDisplaySize(900, 1600);
+            }
             if (this.instructionsText && this.instructionsText.active) {
                 this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
-                this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
+                this.instructionsText.setFontSize(48 * (this.scale.width / 900));
                 this.instructionsText.setWordWrapWidth(this.scale.width * 0.8);
             }
             if (this.continueButton && this.continueButton.active) {
-                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.continueButton.setSize(200 * (this.scale.width / 900), 80 * (this.scale.height / 1600));
                 this.continueButton.setInteractive();
-                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.continueText.setFontSize(30 * (this.scale.width / 900));
             }
         };
 
@@ -227,9 +224,9 @@ class InstructionsScene extends Phaser.Scene {
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
-            .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+        const fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
+            .setOrigin(0.5, 0)
+            .setDisplaySize(900, 1600);
 
         const instructionsText = "Mas uma cidade resiste.!\n\n" +
             "SÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\n" +
@@ -240,59 +237,52 @@ class InstructionsScene extends Phaser.Scene {
 
         this.instructionsText = this.add.text(this.scale.width / 2, this.scale.height / 2, instructionsText, {
             fontFamily: 'VT323',
-            fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${48 * (this.scale.width / 900)}px`,
             color: '#e9bb00',
             align: 'center',
             lineSpacing: 20,
             wordWrap: { width: this.scale.width * 0.8 }
         }).setOrigin(0.5).setDepth(1000);
 
-
-        // Obter dimensões do texto
         const textBounds = this.instructionsText.getBounds();
-        const padding = 20 * (this.scale.width / BASE_WIDTH); // Espaçamento ao redor do texto
+        const padding = 20 * (this.scale.width / 900);
         const offsetX = this.scale.width / 2 - textBounds.width / 2 - padding;
         const offsetY = this.scale.height / 2 - textBounds.height / 2 - padding;
         const widthWithPadding = textBounds.width + padding * 2;
         const heightWithPadding = textBounds.height + padding * 2;
 
-        // Criar gráfico para os cantos
         const corners = this.add.graphics();
-        corners.lineStyle(4 * (this.scale.width / BASE_WIDTH), 0xe9bb00, 1); // Stroke base branco
+        corners.lineStyle(4 * (this.scale.width / 900), 0xe9bb00, 1);
 
-        // Canto superior esquerdo - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX, offsetY); // Ponto inicial
-        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a direita
-        corners.moveTo(offsetX, offsetY); // Volta ao ponto inicial
-        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.moveTo(offsetX, offsetY);
+        corners.lineTo(offsetX + 45 * (this.scale.width / 900), offsetY);
+        corners.moveTo(offsetX, offsetY);
+        corners.lineTo(offsetX, offsetY + 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto superior direito - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX + widthWithPadding, offsetY); // Ponto inicial
-        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY); // Linha horizontal para a esquerda
-        corners.moveTo(offsetX + widthWithPadding, offsetY); // Volta ao ponto inicial
-        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para baixo
+        corners.moveTo(offsetX + widthWithPadding, offsetY);
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / 900), offsetY);
+        corners.moveTo(offsetX + widthWithPadding, offsetY);
+        corners.lineTo(offsetX + widthWithPadding, offsetY + 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto inferior esquerdo - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX, offsetY + heightWithPadding); // Ponto inicial
-        corners.lineTo(offsetX + 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a direita
-        corners.moveTo(offsetX, offsetY + heightWithPadding); // Volta ao ponto inicial
-        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.moveTo(offsetX, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + 45 * (this.scale.width / 900), offsetY + heightWithPadding);
+        corners.moveTo(offsetX, offsetY + heightWithPadding);
+        corners.lineTo(offsetX, offsetY + heightWithPadding - 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        // Canto inferior direito - Ângulo 90 graus com taper
         corners.beginPath();
-        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Ponto inicial
-        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / BASE_WIDTH), offsetY + heightWithPadding); // Linha horizontal para a esquerda
-        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding); // Volta ao ponto inicial
-        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / BASE_WIDTH)); // Linha vertical para cima
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + widthWithPadding - 45 * (this.scale.width / 900), offsetY + heightWithPadding);
+        corners.moveTo(offsetX + widthWithPadding, offsetY + heightWithPadding);
+        corners.lineTo(offsetX + widthWithPadding, offsetY + heightWithPadding - 60 * (this.scale.width / 900));
         corners.strokePath();
 
-        corners.setDepth(999); // Abaixo do texto
+        corners.setDepth(999);
 
         this.instructionsText.setAlpha(0);
         this.tweens.add({
@@ -301,19 +291,19 @@ class InstructionsScene extends Phaser.Scene {
             duration: 1500
         });
 
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200, 80, 0xFFFF00);
         this.continueButton.setStrokeStyle(2, 0xFFFFFF);
         this.continueButton.setDepth(1002);
         this.continueButton.setInteractive({ useHandCursor: true });
 
-        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'CONTINUAR', {
+        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
             fontFamily: 'VT323',
-            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${30 * (this.scale.width / 900)}px`,
             color: '#e9bb00'
         }).setOrigin(0.5).setDepth(1003);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xe9bb00, 1);
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
             text.setColor(hover ? '#000000' : '#000000');
         };
 
@@ -336,17 +326,21 @@ class InstructionsScene extends Phaser.Scene {
             if (this.cameras && this.cameras.main) {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
+            if (fundo && fundo.active) {
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setDisplaySize(900, 1600);
+            }
             if (this.instructionsText && this.instructionsText.active) {
                 this.instructionsText.setPosition(this.scale.width / 2, this.scale.height / 2);
-                this.instructionsText.setFontSize(48 * (this.scale.width / BASE_WIDTH));
+                this.instructionsText.setFontSize(48 * (this.scale.width / 900));
                 this.instructionsText.setWordWrapWidth(this.scale.width * 0.8);
             }
             if (this.continueButton && this.continueButton.active) {
-                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.continueButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.continueButton.setSize(200 * (this.scale.width / 900), 80 * (this.scale.height / 1600));
                 this.continueButton.setInteractive();
-                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.continueText.setFontSize(30 * (this.scale.width / 900));
             }
         };
 
@@ -354,7 +348,8 @@ class InstructionsScene extends Phaser.Scene {
         resize.call(this);
     }
 }
-// -------- BRIEFING SCENE --------
+
+// -------- BriefingScene --------
 class BriefingScene extends Phaser.Scene {
     constructor() {
         super('BriefingScene');
@@ -365,9 +360,9 @@ class BriefingScene extends Phaser.Scene {
     }
 
     create() {
-        const fundo = this.add.image(this.scale.width / 2, this.scale.height / 2, 'fundo1')
-            .setOrigin(0.5)
-            .setDisplaySize(this.scale.width, this.scale.height);
+        const fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
+            .setOrigin(0.5, 0)
+            .setDisplaySize(900, 1600);
 
         this.stars = [];
         for (let i = 0; i < 50; i++) {
@@ -398,7 +393,7 @@ class BriefingScene extends Phaser.Scene {
             levelDescriptions[currentLevel - 1],
             {
                 fontFamily: 'VT323',
-                fontSize: `${48 * (this.scale.width / BASE_WIDTH)}px`,
+                fontSize: `${48 * (this.scale.width / 900)}px`,
                 color: '#e9bb00',
                 align: 'center',
                 lineSpacing: 20,
@@ -412,13 +407,13 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 200, 80, 0xFFFF00);
+        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200, 80, 0xFFFF00);
         this.startButton.setStrokeStyle(2, 0xFFFFFF);
         this.startButton.setDepth(1201);
         this.startButton.setInteractive({ useHandCursor: true });
-        this.startText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)), 'INICIAR', {
+        this.startText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'INICIAR', {
             fontFamily: 'VT323',
-            fontSize: `${30 * (this.scale.width / BASE_WIDTH)}px`,
+            fontSize: `${30 * (this.scale.width / 900)}px`,
             color: '#000000'
         }).setOrigin(0.5).setDepth(1202);
 
@@ -447,8 +442,8 @@ class BriefingScene extends Phaser.Scene {
                 this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
             if (fundo && fundo.active) {
-                fundo.setPosition(this.scale.width / 2, this.scale.height / 2);
-                fundo.setDisplaySize(this.scale.width, this.scale.height);
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setDisplaySize(900, 1600);
             }
             if (this.stars) {
                 this.stars.forEach(star => {
@@ -461,15 +456,15 @@ class BriefingScene extends Phaser.Scene {
             }
             if (this.briefingText && this.briefingText.active) {
                 this.briefingText.setPosition(this.scale.width / 2, this.scale.height / 2);
-                this.briefingText.setFontSize(40 * (this.scale.width / BASE_WIDTH));
+                this.briefingText.setFontSize(48 * (this.scale.width / 900));
                 this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
             }
             if (this.startButton && this.startButton.active) {
-                this.startButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.startButton.setSize(200 * (this.scale.width / BASE_WIDTH), 80 * (this.scale.height / BASE_HEIGHT));
+                this.startButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.startButton.setSize(200 * (this.scale.width / 900), 80 * (this.scale.height / 1600));
                 this.startButton.setInteractive();
-                this.startText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-                this.startText.setFontSize(30 * (this.scale.width / BASE_WIDTH));
+                this.startText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.startText.setFontSize(30 * (this.scale.width / 900));
             }
         };
 
