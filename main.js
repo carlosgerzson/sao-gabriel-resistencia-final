@@ -57,23 +57,23 @@ class IntroScene extends Phaser.Scene {
         });
 
         const resize = () => {
-    if (this.cameras && this.cameras.main) {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
-    }
-    const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-    if (fundo && fundo.active) {
-        fundo.setPosition(this.scale.width / 2, 0);
-        fundo.setScale(scale);
-    }
-    // Ajuste os outros elementos (botões, textos) com scale
-    if (this.continueButton && this.continueButton.active) {
-        this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueButton.setSize(200 * scale, 80 * scale);
-        this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
-        this.continueButton.setInteractive();
-        this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
-    }
+            if (this.cameras && this.cameras.main) {
+                this.cameras.main.setSize(this.scale.width, this.scale.height);
+            }
+            const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+            if (fundo && fundo.active) {
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setScale(scale);
+            }
+            // Ajuste os outros elementos (botões, textos) com scale
+            if (this.continueButton && this.continueButton.active) {
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueButton.setSize(200 * scale, 80 * scale);
+                this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
+                this.continueButton.setInteractive();
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
+            }
         };
 
         this.scale.on('resize', resize, this);
@@ -190,23 +190,23 @@ class InstructionsScene2 extends Phaser.Scene {
         });
 
         const resize = () => {
-    if (this.cameras && this.cameras.main) {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
-    }
-    const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-    if (fundo && fundo.active) {
-        fundo.setPosition(this.scale.width / 2, 0);
-        fundo.setScale(scale);
-    }
-    // Ajuste os outros elementos (botões, textos) com scale
-    if (this.continueButton && this.continueButton.active) {
-        this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueButton.setSize(200 * scale, 80 * scale);
-        this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
-        this.continueButton.setInteractive();
-        this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
-    }
+            if (this.cameras && this.cameras.main) {
+                this.cameras.main.setSize(this.scale.width, this.scale.height);
+            }
+            const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+            if (fundo && fundo.active) {
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setScale(scale);
+            }
+            // Ajuste os outros elementos (botões, textos) com scale
+            if (this.continueButton && this.continueButton.active) {
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueButton.setSize(200 * scale, 80 * scale);
+                this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
+                this.continueButton.setInteractive();
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
+            }
         };
 
         this.scale.on('resize', resize, this);
@@ -324,23 +324,23 @@ class InstructionsScene extends Phaser.Scene {
         });
 
         const resize = () => {
-    if (this.cameras && this.cameras.main) {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
-    }
-    const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-    if (fundo && fundo.active) {
-        fundo.setPosition(this.scale.width / 2, 0);
-        fundo.setScale(scale);
-    }
-    // Ajuste os outros elementos (botões, textos) com scale
-    if (this.continueButton && this.continueButton.active) {
-        this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueButton.setSize(200 * scale, 80 * scale);
-        this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
-        this.continueButton.setInteractive();
-        this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
-        this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
-    }
+            if (this.cameras && this.cameras.main) {
+                this.cameras.main.setSize(this.scale.width, this.scale.height);
+            }
+            const scale = Math.max(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+            if (fundo && fundo.active) {
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setScale(scale);
+            }
+            // Ajuste os outros elementos (botões, textos) com scale
+            if (this.continueButton && this.continueButton.active) {
+                this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueButton.setSize(200 * scale, 80 * scale);
+                this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
+                this.continueButton.setInteractive();
+                this.continueText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
+                this.continueText.setFontSize(30 * (this.scale.width / BASE_WIDTH) * scale);
+            }
         };
 
         this.scale.on('resize', resize, this);
@@ -437,36 +437,36 @@ class BriefingScene extends Phaser.Scene {
         });
 
         const resize = () => {
-    if (this.cameras && this.cameras.main) {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
-    }
-    if (fundo && fundo.active) {
-        const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
-        fundo.setPosition(this.scale.width / 2, 0);
-        fundo.setScale(scale); // Substituí setDisplaySize por setScale para escalonamento proporcional
-    }
-    if (this.stars) {
-        this.stars.forEach(star => {
-            if (star.active) {
-                star.x = Phaser.Math.Between(0, this.scale.width);
-                star.y = Phaser.Math.Between(0, this.scale.height);
-                star.setScale(1);
+            if (this.cameras && this.cameras.main) {
+                this.cameras.main.setSize(this.scale.width, this.scale.height);
             }
-        });
-    }
-    if (this.briefingText && this.briefingText.active) {
-        this.briefingText.setPosition(this.scale.width / 2, this.scale.height / 2);
-        this.briefingText.setFontSize(48 * (this.scale.width / 900));
-        this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
-    }
-    if (this.startButton && this.startButton.active) {
-        this.startButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
-        this.startButton.setSize(200 * (this.scale.width / 900), 80 * (this.scale.height / 1600));
-        this.startButton.setInteractive();
-        this.startText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
-        this.startText.setFontSize(30 * (this.scale.width / 900));
-    }
-};
+            if (fundo && fundo.active) {
+                const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
+                fundo.setPosition(this.scale.width / 2, 0);
+                fundo.setScale(scale); // Substituí setDisplaySize por setScale para escalonamento proporcional
+            }
+            if (this.stars) {
+                this.stars.forEach(star => {
+                    if (star.active) {
+                        star.x = Phaser.Math.Between(0, this.scale.width);
+                        star.y = Phaser.Math.Between(0, this.scale.height);
+                        star.setScale(1);
+                    }
+                });
+            }
+            if (this.briefingText && this.briefingText.active) {
+                this.briefingText.setPosition(this.scale.width / 2, this.scale.height / 2);
+                this.briefingText.setFontSize(48 * (this.scale.width / 900));
+                this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
+            }
+            if (this.startButton && this.startButton.active) {
+                this.startButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.startButton.setSize(200 * (this.scale.width / 900), 80 * (this.scale.height / 1600));
+                this.startButton.setInteractive();
+                this.startText.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)));
+                this.startText.setFontSize(30 * (this.scale.width / 900));
+            }
+        };
 
         this.scale.on('resize', resize, this);
         resize.call(this);
