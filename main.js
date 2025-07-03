@@ -69,7 +69,7 @@ class IntroScene extends Phaser.Scene {
             this.fundo.setPosition(this.scale.width / 2, 0);
             this.fundo.setScale(baseScale);
             // Adicionar padding lateral (exemplo: 20px de cada lado)
-            this.fundo.setPosition(this.scale.width / 2 + 20, 0); // Ajuste para padding à direita
+            //this.fundo.setPosition(this.scale.width / 2 + 20, 0); // Ajuste para padding à direita
         }
         if (this.continueButton && this.continueButton.active) {
             this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));
@@ -206,7 +206,7 @@ class InstructionsScene2 extends Phaser.Scene {
             this.fundo.setPosition(this.scale.width / 2, 0);
             this.fundo.setScale(baseScale);
             // Adicionar padding lateral (exemplo: 20px de cada lado)
-            this.fundo.setPosition(this.scale.width / 2 + 20, 0); // Ajuste para padding à direita
+            //this.fundo.setPosition(this.scale.width / 2 + 20, 0); // Ajuste para padding à direita
         }
         if (this.continueButton && this.continueButton.active) {
             this.continueButton.setPosition(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / BASE_HEIGHT)));

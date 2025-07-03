@@ -55,13 +55,13 @@ class GameScene extends Phaser.Scene {
             .setOrigin(0.5, 0)
             .setScale(baseScale);
 
-        this.timerText = this.add.text(20, 20, '00:20', {
+        this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
             fontSize: '40px',
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft = 20;
+        this.timeLeft = 10;
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
