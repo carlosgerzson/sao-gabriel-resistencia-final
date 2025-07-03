@@ -49,15 +49,15 @@ class GameScene extends Phaser.Scene {
         } else {
             colorPrefix = 'blue';
         }
-        // Ajuste o fundo para preencher a viewport mantendo a proporção
-        const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
+        // Ajuste o fundo com escala baseada na menor proporção para evitar over-zoom
+        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
         this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
-            .setScale(scale);
+            .setScale(baseScale);
 
-        this.timerText = this.add.text(20 * (this.scale.width / 900), 20 * (this.scale.height / 1600), '00:20', {
+        this.timerText = this.add.text(20, 20, '00:20', {
             fontFamily: 'VT323',
-            fontSize: `${40 * (this.scale.width / 900)}px`,
+            fontSize: '40px',
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
@@ -80,8 +80,8 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        const buildingWidth = 510 * scale;
-        const buildingHeight = 550 * scale;
+        const buildingWidth = 510 * baseScale;
+        const buildingHeight = 550 * baseScale;
         this.buildingContainer = this.add.container(this.scale.width / 2, this.scale.height - buildingHeight - (48 * (this.scale.height / 1600)));
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
@@ -91,11 +91,11 @@ class GameScene extends Phaser.Scene {
         background.setDepth(900);
         this.buildingContainer.add(background);
 
-        const chamasSpriteHeight = 375 * scale;
-        this.currentChamasSprite = this.add.sprite(0, 550 * scale - (chamasSpriteHeight / 2), 'chamas101');
+        const chamasSpriteHeight = 375 * baseScale;
+        this.currentChamasSprite = this.add.sprite(0, 550 * baseScale - (chamasSpriteHeight / 2), 'chamas101');
         this.buildingContainer.add(this.currentChamasSprite);
         this.currentChamasSprite.setDepth(910);
-        this.currentChamasSprite.setScale(0.3 * scale);
+        this.currentChamasSprite.setScale(0.3 * baseScale);
         this.currentChamasSprite.setVisible(false);
 
         this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_predio`).source[0].height / this.textures.get(`${this.levelPrefix}_predio`).source[0].width));
@@ -105,7 +105,7 @@ class GameScene extends Phaser.Scene {
 
         this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`).setOrigin(0.5, 1).setDepth(20);
         this.silhuetaSprite.displayWidth = this.scale.width;
-        this.silhuetaSprite.displayHeight = 384 * (this.scale.height / 1600) * scale;
+        this.silhuetaSprite.displayHeight = 384 * (this.scale.height / 1600) * baseScale;
 
         const towerAndCannonDefinitions = [
             {
@@ -113,14 +113,14 @@ class GameScene extends Phaser.Scene {
                 towerAsset: `torre_e_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.144,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 218 * (this.scale.width / 900) * scale,
-                towerTargetHeight: 709 * (this.scale.height / 1600) * scale,
+                towerTargetWidth: 218 * baseScale,
+                towerTargetHeight: 709 * baseScale,
                 towerDepth: 30,
                 cannonAsset: 'canhao_e',
                 cannonX: this.scale.width * 0.144,
                 cannonY: this.scale.height * 0.613,
-                cannonTargetWidth: 39 * (this.scale.width / 900) * scale,
-                cannonTargetHeight: 141 * (this.scale.height / 1600) * scale,
+                cannonTargetWidth: 39 * baseScale,
+                cannonTargetHeight: 141 * baseScale,
                 cannonDepth: 10
             },
             {
@@ -128,14 +128,14 @@ class GameScene extends Phaser.Scene {
                 towerAsset: `torre_c_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.65,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 148 * (this.scale.width / 900) * scale,
-                towerTargetHeight: 637 * (this.scale.height / 1600) * scale,
+                towerTargetWidth: 148 * baseScale,
+                towerTargetHeight: 637 * baseScale,
                 towerDepth: 18,
                 cannonAsset: 'canhao_c',
                 cannonX: this.scale.width * 0.65,
                 cannonY: this.scale.height * 0.647,
-                cannonTargetWidth: 33 * (this.scale.width / 900) * scale,
-                cannonTargetHeight: 103 * (this.scale.height / 1600) * scale,
+                cannonTargetWidth: 33 * baseScale,
+                cannonTargetHeight: 103 * baseScale,
                 cannonDepth: 10
             },
             {
@@ -143,14 +143,14 @@ class GameScene extends Phaser.Scene {
                 towerAsset: `torre_d_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.881,
                 towerBaseY: this.scale.height,
-                towerTargetWidth: 190 * (this.scale.width / 900) * scale,
-                towerTargetHeight: 782 * (this.scale.height / 1600) * scale,
+                towerTargetWidth: 190 * baseScale,
+                towerTargetHeight: 782 * baseScale,
                 towerDepth: 18,
                 cannonAsset: 'canhao_d',
                 cannonX: this.scale.width * 0.881,
                 cannonY: this.scale.height * 0.563,
-                cannonTargetWidth: 39 * (this.scale.width / 900) * scale,
-                cannonTargetHeight: 125 * (this.scale.height / 1600) * scale,
+                cannonTargetWidth: 39 * baseScale,
+                cannonTargetHeight: 125 * baseScale,
                 cannonDepth: 10
             }
         ];
@@ -208,7 +208,7 @@ class GameScene extends Phaser.Scene {
         this.onAntiMissileHit = function (x, y) {
             const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8);
             explosionCircle.setDepth(920);
-            const explosionVisualRadius = 100 * (this.scale.width / 900) * scale;
+            const explosionVisualRadius = 100 * baseScale;
             const explosionAnimationDuration = 500;
             this.tweens.add({
                 targets: explosionCircle,
@@ -218,7 +218,7 @@ class GameScene extends Phaser.Scene {
                 duration: explosionAnimationDuration,
                 onComplete: () => {
                     explosionCircle.destroy();
-                    this.handleExplosionCollision(x, y, explosionVisualRadius + (50 * (this.scale.width / 900) * scale));
+                    this.handleExplosionCollision(x, y, explosionVisualRadius + (50 * baseScale));
                 }
             });
         }.bind(this);
@@ -227,7 +227,7 @@ class GameScene extends Phaser.Scene {
             console.log(`Explosão em x: ${x}, y: ${y}`);
             const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 1.0);
             explosionCircle.setDepth(930);
-            const explosionVisualRadius = 250 * (this.scale.width / 900) * scale;
+            const explosionVisualRadius = 250 * baseScale;
             const explosionAnimationDuration = 550;
             this.tweens.add({
                 targets: explosionCircle,
@@ -292,21 +292,21 @@ class GameScene extends Phaser.Scene {
             const height = this.scale.height;
             console.log(`Resize: width=${width}, height=${height}`);
 
-            const scale = Math.max(width / 900, height / 1600);
+            const baseScale = Math.min(width / 900, height / 1600); // Usa o menor para evitar stretch vertical
             if (this.gameBackground && this.gameBackground.active) {
                 this.gameBackground.setPosition(width / 2, 0);
-                this.gameBackground.setScale(scale);
+                this.gameBackground.setScale(baseScale);
             }
 
             if (this.silhuetaSprite && this.silhuetaSprite.active) {
                 this.silhuetaSprite.setPosition(width / 2, height);
                 this.silhuetaSprite.displayWidth = width;
-                this.silhuetaSprite.displayHeight = 384 * (height / 1600) * scale;
+                this.silhuetaSprite.displayHeight = 384 * (height / 1600) * baseScale;
             }
 
             if (this.buildingContainer && this.buildingContainer.active) {
-                const buildingWidth = 510 * scale;
-                const buildingHeight = 550 * scale;
+                const buildingWidth = 510 * baseScale;
+                const buildingHeight = 550 * baseScale;
                 this.buildingContainer.setPosition(width / 2, height - buildingHeight - (48 * (height / 1600)));
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(this.building.texture.key).source[0].height / this.textures.get(this.building.texture.key).source[0].width));
@@ -314,9 +314,9 @@ class GameScene extends Phaser.Scene {
             }
 
             if (this.currentChamasSprite && this.currentChamasSprite.active) {
-                const chamasSpriteHeight = 375 * scale;
-                this.currentChamasSprite.setPosition(0, 550 * scale - (chamasSpriteHeight / 2));
-                this.currentChamasSprite.setScale(0.3 * scale);
+                const chamasSpriteHeight = 375 * baseScale;
+                this.currentChamasSprite.setPosition(0, 550 * baseScale - (chamasSpriteHeight / 2));
+                this.currentChamasSprite.setScale(0.3 * baseScale);
             }
 
             if (this.allTowerSprites) {
@@ -339,25 +339,25 @@ class GameScene extends Phaser.Scene {
             }
 
             if (this.timerText && this.timerText.active) {
-                this.timerText.setPosition(20 * (width / 900), 20 * (height / 1600));
-                this.timerText.setFontSize(40 * (width / 900) * scale);
+                this.timerText.setPosition(20, 20);
+                this.timerText.setFontSize(40 * baseScale);
             }
 
             if (missiles) {
                 missiles.forEach(missile => {
                     if (missile && missile.active) {
-                        missile.displayWidth = 10 * (width / 900) * scale;
-                        missile.displayHeight = 30 * (height / 1600) * scale;
-                        missile.targetX = Phaser.Math.Between(width / 2 - 255 * scale, width / 2 + 255 * scale);
-                        missile.targetY = height - 315 * scale;
+                        missile.displayWidth = 10 * baseScale;
+                        missile.displayHeight = 30 * baseScale;
+                        missile.targetX = Phaser.Math.Between(width / 2 - 255 * baseScale, width / 2 + 255 * baseScale);
+                        missile.targetY = height - 315 * baseScale;
                     }
                 });
             }
             if (antiMissiles) {
                 antiMissiles.forEach(anti => {
                     if (anti && anti.active) {
-                        anti.displayWidth = 15 * (width / 900) * scale;
-                        anti.displayHeight = 60 * (height / 1600) * scale;
+                        anti.displayWidth = 15 * baseScale;
+                        anti.displayHeight = 60 * baseScale;
                     }
                 });
             }
@@ -375,15 +375,15 @@ class GameScene extends Phaser.Scene {
             const delayBetweenMissiles = 800;
             for (let i = 0; i < 2; i++) {
                 this.time.delayedCall(i * delayBetweenMissiles, () => {
-                    const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
+                    const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
                     const spawnX = Phaser.Math.Between(0, this.scale.width);
                     const spawnY = 0;
-                    const missile = this.add.rectangle(spawnX, spawnY, 10 * (this.scale.width / 900) * scale, 30 * (this.scale.height / 1600) * scale, 0x00ff00);
+                    const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
                     missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
-                    missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * scale, this.scale.width / 2 + 255 * scale);
-                    missile.targetY = this.scale.height - 315 * scale;
-                    missile.displayWidth = 10 * (this.scale.width / 900) * scale;
-                    missile.displayHeight = 30 * (this.scale.height / 1600) * scale;
+                    missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
+                    missile.targetY = this.scale.height - 315 * baseScale;
+                    missile.displayWidth = 10 * baseScale;
+                    missile.displayHeight = 30 * baseScale;
                     missile.setDepth(1000);
                     missile.setActive(true);
                     missile.setVisible(true);
@@ -397,12 +397,12 @@ class GameScene extends Phaser.Scene {
         if (!gameEnded) {
             const launchX = cannon.sprite.x;
             const launchY = cannon.sprite.y;
-            const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
+            const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
             const antiMissile = this.add.image(launchX, launchY, 'antimissile');
             antiMissile.setOrigin(0.5, 1);
             antiMissile.setDepth(5);
-            antiMissile.displayWidth = 12 * (this.scale.width / 900) * scale;
-            antiMissile.displayHeight = 76 * (this.scale.height / 1600) * scale;
+            antiMissile.displayWidth = 12 * baseScale;
+            antiMissile.displayHeight = 76 * baseScale;
             antiMissiles.push(antiMissile);
             this.tweens.add({
                 targets: antiMissile,
@@ -423,9 +423,9 @@ class GameScene extends Phaser.Scene {
     }
 
     updateBuildingState(levelPrefix) {
-        const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
-        const buildingWidth = 510 * scale;
-        const buildingHeight = 550 * scale;
+        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
+        const buildingWidth = 510 * baseScale;
+        const buildingHeight = 550 * baseScale;
         const key = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
         const newHeight = buildingHeight * (this.textures.get(key).source[0].height / this.textures.get(key).source[0].width);
         this.building.setTexture(key).setDisplaySize(buildingWidth, newHeight).setPosition(0, buildingHeight);
@@ -448,12 +448,12 @@ class GameScene extends Phaser.Scene {
             destroyedCount++;
         }
 
-        const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
+        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
         this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
             success ? 'SUCESSO!' : 'FALHA!',
             {
                 fontFamily: 'VT323',
-                fontSize: `${60 * (this.scale.width / 900)}px` * scale,
+                fontSize: '60px' * baseScale,
                 color: success ? '#00FF00' : '#FF0000',
                 align: 'center'
             }
@@ -469,7 +469,7 @@ class GameScene extends Phaser.Scene {
             `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
             {
                 fontFamily: 'VT323',
-                fontSize: `${40 * (this.scale.width / 900)}px` * scale,
+                fontSize: '40px' * baseScale,
                 color: '#FFFFFF',
                 align: 'center',
                 lineSpacing: 20
@@ -482,8 +482,8 @@ class GameScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200 * scale, 80 * scale, 0xFFFF00);
-        this.continueButton.setStrokeStyle(2 * scale, 0xFFFFFF);
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200 * baseScale, 80 * baseScale, 0xFFFF00);
+        this.continueButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
         this.continueButton.setDepth(2000);
         this.continueButton.setVisible(true);
         this.continueButton.setAlpha(1);
@@ -491,7 +491,7 @@ class GameScene extends Phaser.Scene {
 
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
             fontFamily: 'VT323',
-            fontSize: `${30 * (this.scale.width / 900)}px` * scale,
+            fontSize: '30px' * baseScale,
             color: '#000000'
         }).setOrigin(0.5).setDepth(2001);
         this.continueText.setVisible(true);
@@ -527,12 +527,12 @@ class GameScene extends Phaser.Scene {
 
                     this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1')
                         .setOrigin(0.5, 0)
-                        .setScale(scale)
+                        .setScale(baseScale)
                         .setDepth(1000);
 
                     this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / 1600)), 'FIM DE JOGO!', {
                         fontFamily: 'VT323',
-                        fontSize: `${80 * (this.scale.width / 900)}px` * scale,
+                        fontSize: '80px' * baseScale,
                         color: '#FFFFFF',
                         align: 'center'
                     }).setOrigin(0.5).setDepth(1200);
@@ -555,11 +555,11 @@ class GameScene extends Phaser.Scene {
 
                     this.performanceText = this.add.text(this.scale.width / 2, this.scale.height / 2, performanceMessage, {
                         fontFamily: 'VT323',
-                        fontSize: `${40 * (this.scale.width / 900)}px` * scale,
+                        fontSize: '40px' * baseScale,
                         color: '#FFFFFF',
                         align: 'center',
                         lineSpacing: 20,
-                        wordWrap: { width: 800 * (this.scale.width / 900) * scale }
+                        wordWrap: { width: 800 * baseScale }
                     }).setOrigin(0.5).setDepth(1201);
                     this.performanceText.setAlpha(0);
                     this.tweens.add({
@@ -572,7 +572,7 @@ class GameScene extends Phaser.Scene {
                         `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
                         {
                             fontFamily: 'VT323',
-                            fontSize: `${40 * (this.scale.width / 900)}px` * scale,
+                            fontSize: '40px' * baseScale,
                             color: '#FFFFFF',
                             align: 'center',
                             lineSpacing: 20
@@ -585,13 +585,13 @@ class GameScene extends Phaser.Scene {
                         duration: 2000
                     });
 
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 300 * scale, 100 * scale, 0x00FF00);
-                    this.restartButton.setStrokeStyle(4 * scale, 0xFFFFFF);
+                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 300 * baseScale, 100 * baseScale, 0x00FF00);
+                    this.restartButton.setStrokeStyle(4 * baseScale, 0xFFFFFF);
                     this.restartButton.setDepth(2000);
                     this.restartButton.setInteractive({ useHandCursor: true });
                     this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 'REINICIAR', {
                         fontFamily: 'VT323',
-                        fontSize: `${40 * (this.scale.width / 900)}px` * scale,
+                        fontSize: '40px' * baseScale,
                         color: '#000000'
                     }).setOrigin(0.5).setDepth(2001);
 
@@ -619,11 +619,11 @@ class GameScene extends Phaser.Scene {
 
     update() {
         if (gameEnded) return;
-        const scale = Math.max(this.scale.width / 900, this.scale.height / 1600);
-        const collisionTopY = this.scale.height - 315 * scale;
-        const collisionBottomY = collisionTopY + 50 * scale;
-        const collisionLeftX = this.scale.width / 2 - 255 * scale;
-        const collisionRightX = this.scale.width / 2 + 255 * scale;
+        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
+        const collisionTopY = this.scale.height - 315 * baseScale;
+        const collisionBottomY = collisionTopY + 50 * baseScale;
+        const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
+        const collisionRightX = this.scale.width / 2 + 255 * baseScale;
 
         for (let i = missiles.length - 1; i >= 0; i--) {
             const missile = missiles[i];
