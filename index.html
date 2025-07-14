@@ -1,116 +1,210 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
-    <title>São Gabriel: Resistência Final</title>
-    <link rel="icon" href="data:,"> <!-- Evita o erro 404 do favicon.ico -->
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
-    <script src="main.js" defer></script> <!-- Carrega primeiro para definir as cenas iniciais -->
-    <script src="gameScene.js" defer></script> <!-- Carrega depois para definir a GameScene -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <style>
-        .vt323-regular {
-            font-family: "VT323", monospace;
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000000; /* Fundo preto da página */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #phaser-game {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        canvas {
-            background-color: #000000; /* Fundo preto do canvas */
-        }
-    </style>
-    <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-            return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-                try {
-                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                    var firstSheetName = workbook.SheetNames[0];
-                    var worksheet = workbook.Sheets[firstSheetName];
-
-                    // Convert sheet to JSON to filter blank rows
-                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                    // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                    var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                    // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                    var headerRowIndex = filteredData.findIndex((row, index) =>
-                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                    );
-                    // Fallback
-                    if (headerRowIndex === -1 || headerRowIndex > 25) {
-                        headerRowIndex = 0;
-                    }
-
-                    // Convert filtered JSON back to CSV
-                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                    return csv;
-                } catch (e) {
-                    console.error(e);
-                    return "";
-                }
-            }
-            return gk_fileData[filename] || "";
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+      margin: 0;
+      padding: 0;
+      background-color: #00FF00 !important; /* Fundo verde inicial */
+      min-height: 100vh;
+      width: 100%;
+      position: relative; /* Para posicionamento absoluto */
+    }
+    .bg-image { 
+      position: relative;
+      width: 100%; /* Ocupa toda a largura da viewport */
+      min-height: 100vh; /* Preenche a altura da viewport */
+      overflow-y: auto; /* Rolagem se necessário */
+      display: flex;
+      align-items: center; /* Mantém centralização */
+      justify-content: center;
+    }
+    .bg-img { 
+      max-width: 100%; /* Limita a largura à viewport */
+      max-height: 100vh; /* Limita a altura à viewport */
+      width: auto; /* Ajusta proporcionalmente */
+      height: auto; /* Preserva proporção */
+      object-fit: contain; /* Mantém proporção 900x1600 sem cortes */
+      display: block;
+      z-index: 0; /* Fundo1 atrás */
+    }
+    .bg-img-bottom { 
+      position: absolute; /* Ancorado no bottom */
+      bottom: 0;
+      left: 0;
+      width: 100%; /* Ajustado dinamicamente por JS */
+      height: auto; /* Ajusta altura proporcionalmente */
+      object-fit: contain; /* Preserva proporção sem cortar */
+      z-index: 1; /* Fundo2 na frente */
+    }
+    .text-layer { 
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff; /* Fundo baseado no Phaser */
+      padding: 20px; /* Baseado no padding do Phaser */
+      border-radius: 15px; /* Corners arredondados */
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+      font-size: 24px; /* Baseado no fontSize do Phaser */
+      color: #000; /* Baseado na cor do Phaser */
+      z-index: 1; /* Na frente do fundo1 */
+    }
+    .btn-custom { 
+      position: fixed; /* Fixa no bottom da viewport */
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2; /* Acima de tudo */
+      border: none !important;
+      padding: 0.5rem 1rem;
+      min-height: 40px;
+      display: block; /* Garante visibilidade */
+    }
+    .btn-custom .btn-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: clamp(12px, 1.5vw, 16px);
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .raffle-btn {
+      position: fixed;
+      bottom: 4rem; /* Acima do botão CONTINUAR */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2; /* Acima de tudo */
+      padding: 0.5rem 1rem;
+      min-height: 40px;
+      background-color: #28a745; /* Verde para o bife */
+      border-color: #28a745;
+    }
+    .raffle-btn .btn-text {
+      color: white;
+    }
+    @media (max-width: 576px) { /* Dispositivos móveis */
+      .btn-custom, .raffle-btn { 
+        bottom: 0.5rem;
+        width: 30%;
+        min-width: 80px;
+        min-height: 35px;
+        padding: 0.25rem 0.75rem;
+      }
+      .btn-custom .btn-text, .raffle-btn .btn-text {
+        font-size: clamp(10px, 2vw, 14px);
+      }
+      .bg-img-bottom {
+        width: 100vw; /* Usa a largura da viewport em móveis */
+      }
+    }
+    @media (min-height: 700px) { 
+      .bg-img {
+        height: 100vh; /* Ocupa toda a altura da viewport */
+        width: auto; /* Ajusta a largura proporcionalmente */
+        max-width: 100%; /* Limita à largura da viewport */
+        object-fit: cover; /* Preenche a viewport, cortando excedente */
+      }
+      .bg-img-bottom {
+        height: auto; /* Ajusta altura proporcionalmente à largura */
+      }
+      .text-layer {
+        max-width: 350px; /* Ajuste para telas altas */
+        font-size: 20px; /* Ajuste proporcional */
+      }
+    }
+  </style>
 </head>
-
 <body>
-    <div id="phaser-game"></div>
-    <script defer>
-        window.onload = function () {
-            // Aguarda a carga dos scripts antes de inicializar
-            window.setTimeout(() => {
-                const config = {
-                    type: Phaser.AUTO,
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                    scale: {
-                        mode: Phaser.Scale.RESIZE, // resize
-                        autoCenter: Phaser.Scale.CENTER_BOTH, // center_both
-                        parent: 'phaser-game',
-                        width: window.innerWidth,
-                        height: window.innerHeight
-                    },
-                    scene: [IntroScene, InstructionsScene2, InstructionsScene, BriefingScene, GameScene],
-                    backgroundColor: '#000000',
-                    render: {
-                        pixelArt: false,
-                        antialias: true
-                    }
-                };
-                const game = new Phaser.Game(config);
-                console.log("Jogo Phaser inicializado a partir do index.html");
-            }, 100); // Pequeno atraso para garantir que os scripts sejam carregados
-        };
-    </script>
-</body>
+  <div class="bg-image">
+    <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+    <img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom">
+    <button class="btn btn-success raffle-btn" onclick="toggleRaffle()">
+      <span class="btn-text">Sorteio do Bife!</span>
+    </button>
+    <button class="btn btn-warning btn-custom" onclick="goToInstruction2()">
+      <span class="btn-text">CONTINUAR</span>
+    </button>
+  </div>
+  <script>
+    let participants = [];
+    let isRaffleActive = false;
 
+    // Função para ajustar a largura do fundo2 com base no fundo1
+    function adjustFundo2Width() {
+      const fundo1 = document.getElementById('bgImg');
+      const fundo2 = document.getElementById('bgImgBottom');
+      if (fundo1 && fundo2) {
+        const fundo1Width = fundo1.width;
+        fundo2.style.width = `${fundo1Width}px`; // Sincroniza a largura
+        fundo2.style.left = '50%';
+        fundo2.style.transform = 'translateX(-50%)'; // Centraliza
+      }
+    }
+
+    // Executa ao carregar e redimensionar
+    window.addEventListener('load', adjustFundo2Width);
+    window.addEventListener('resize', adjustFundo2Width);
+
+    function addParticipant() {
+      const names = ["João Gaúcho", "Maria do Churrasco", "Pedro do Pampa", "Ana do Fogo"];
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const number = Math.floor(Math.random() * 100) + 1;
+      participants.push({ name: randomName, number: number });
+      alert(`${randomName} entrou no sorteio com o número ${number}!`);
+    }
+
+    function toggleRaffle() {
+      if (!isRaffleActive) {
+        addParticipant();
+        isRaffleActive = true;
+        setTimeout(() => {
+          if (participants.length > 0) {
+            const winner = participants[Math.floor(Math.random() * participants.length)];
+            alert(`Sorteio do Bife! O vencedor é ${winner.name} (nº ${winner.number})! Pegue seu bife antes que acabe! 🥩😂`);
+          } else {
+            alert("Ninguém entrou ainda! Tente novamente! 😅");
+          }
+          participants = []; // Reseta para novo sorteio
+          isRaffleActive = false;
+        }, 2000); // Simula um delay de 2 segundos
+      }
+    }
+
+    function goToInstruction2() {
+      document.body.innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">INSTRUÇÃO 2\nTexto aqui...</div><button class="btn btn-success raffle-btn" onclick="toggleRaffle()"><span class="btn-text">Sorteio do Bife!</span></button><button class="btn btn-warning btn-custom" onclick="goToInstruction1()"><span class="btn-text">INSTRUÇÃO 1</span></button></div>';
+      adjustFundo2Width(); // Ajusta após recarregar
+    }
+    function goToInstruction1() {
+      document.body.innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">INSTRUÇÃO 1\nTexto aqui...</div><button class="btn btn-success raffle-btn" onclick="toggleRaffle()"><span class="btn-text">Sorteio do Bife!</span></button><button class="btn btn-warning btn-custom" onclick="startGame()"><span class="btn-text">INSTRUÇÃO 2</span></button></div>';
+      adjustFundo2Width(); // Ajusta após recarregar
+    }
+    function startGame() {
+      document.body.innerHTML = '<div id="gameContainer" style="width: 100%; height: 100vh;"></div>';
+      var script1 = document.createElement('script');
+      script1.src = 'phaser.min.js';
+      script1.onload = function() {
+        var script2 = document.createElement('script');
+        script2.src = 'MAIN.js'; // Supondo que MAIN.js contém as cenas
+        script2.onload = function() {
+          new Phaser.Game({
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'gameContainer',
+            scene: [MainScene] // Substitua por sua cena principal
+          });
+        };
+        document.body.appendChild(script2);
+      };
+      document.body.appendChild(script1);
+    }
+  </script>
+</body>
 </html>

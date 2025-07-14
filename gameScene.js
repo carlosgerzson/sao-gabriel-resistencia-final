@@ -1,19 +1,221 @@
-class GameScene extends Phaser.Scene {
-    constructor() {
-        super('GameScene');
+let cannons = [];
+let missiles = [];
+let antiMissiles = [];
+let currentLevel = 1;
+const TOTAL_LEVELS = 10;
+let destroyedCount = 0;
+let preservedCount = 0;
+let gameEnded = false;
+
+const BASE_WIDTH = 900;
+const BASE_HEIGHT = 1600;
+
+// -------- IntroScene --------
+class IntroScene extends Phaser.Scene {
+    constructor() { super('IntroScene'); }
+    preload() { this.load.image('fundointro1', 'assets/fundoIntro.jpeg'); }
+    create() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundointro1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
+            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1001).setInteractive({ useHandCursor: true });
+        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
+            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000'
+        }).setOrigin(0.5).setDepth(1002);
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
+        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
+        this.continueButton.on('pointerdown', () => {
+            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
+            this.continueButton.once('pointerup', () => this.scene.start('InstructionsScene2'));
+        });
+        this.input.on('pointerdown', () => this.game.canvas.focus());
+        this.scale.on('resize', this.resize, this); this.resize();
     }
-
-    preload() {
-        let colorPrefix;
-        if ([1, 4, 7, 10].includes(currentLevel)) {
-            colorPrefix = 'red';
-        } else if ([3, 6, 9].includes(currentLevel)) {
-            colorPrefix = 'yellow';
-        } else {
-            colorPrefix = 'blue';
+    resize() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        if (this.continueButton) {
+            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
+            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
+            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
         }
-        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
+    }
+}
 
+// -------- InstructionsScene2 --------
+class InstructionsScene2 extends Phaser.Scene {
+    constructor() { super('InstructionsScene2'); }
+    preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
+    create() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        const instructionsText = "BEM-VINDO AO JOGO!\n\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\nBoa sorte, DEFENSOR!";
+        this.instructionsText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, instructionsText, {
+            fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+        }).setOrigin(0.5).setDepth(1000);
+        const textBounds = this.instructionsText.getBounds();
+        const padding = 20 * baseScale;
+        const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
+        const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
+        const widthWithPadding = textBounds.width + padding * 2;
+        const heightWithPadding = textBounds.height + padding * 2;
+        this.corners = this.add.graphics().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding).setDepth(999);
+        this.instructionsText.setAlpha(0); this.tweens.add({ targets: this.instructionsText, alpha: 1, duration: 1500 });
+        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
+            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1002).setInteractive({ useHandCursor: true });
+        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
+            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#e9bb00'
+        }).setOrigin(0.5).setDepth(1003);
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
+        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
+        this.continueButton.on('pointerdown', () => {
+            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
+            this.continueButton.once('pointerup', () => this.scene.start('InstructionsScene'));
+        });
+        this.input.on('pointerdown', () => this.game.canvas.focus());
+        this.scale.on('resize', this.resize, this); this.resize();
+    }
+    resize() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        if (this.instructionsText) {
+            this.instructionsText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
+            const textBounds = this.instructionsText.getBounds();
+            const padding = 20 * baseScale;
+            const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
+            const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
+            const widthWithPadding = textBounds.width + padding * 2;
+            const heightWithPadding = textBounds.height + padding * 2;
+            this.corners.clear().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding);
+        }
+        if (this.continueButton) {
+            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
+            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
+            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
+        }
+    }
+}
+
+// -------- InstructionsScene --------
+class InstructionsScene extends Phaser.Scene {
+    constructor() { super('InstructionsScene'); }
+    preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
+    create() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        const instructionsText = "Mas uma cidade resiste.!\n\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado da existência.\n\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!";
+        this.instructionsText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, instructionsText, {
+            fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+        }).setOrigin(0.5).setDepth(1000);
+        const textBounds = this.instructionsText.getBounds();
+        const padding = 20 * baseScale;
+        const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
+        const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
+        const widthWithPadding = textBounds.width + padding * 2;
+        const heightWithPadding = textBounds.height + padding * 2;
+        this.corners = this.add.graphics().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding).setDepth(999);
+        this.instructionsText.setAlpha(0); this.tweens.add({ targets: this.instructionsText, alpha: 1, duration: 1500 });
+        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
+            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1002).setInteractive({ useHandCursor: true });
+        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
+            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#e9bb00'
+        }).setOrigin(0.5).setDepth(1003);
+        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
+        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
+        this.continueButton.on('pointerdown', () => {
+            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
+            this.continueButton.once('pointerup', () => this.scene.start('BriefingScene'));
+        });
+        this.input.on('pointerdown', () => this.game.canvas.focus());
+        this.scale.on('resize', this.resize, this); this.resize();
+    }
+    resize() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        if (this.instructionsText) {
+            this.instructionsText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
+            const textBounds = this.instructionsText.getBounds();
+            const padding = 20 * baseScale;
+            const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
+            const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
+            const widthWithPadding = textBounds.width + padding * 2;
+            const heightWithPadding = textBounds.height + padding * 2;
+            this.corners.clear().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding);
+        }
+        if (this.continueButton) {
+            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
+            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
+            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
+        }
+    }
+}
+
+// -------- BriefingScene --------
+class BriefingScene extends Phaser.Scene {
+    constructor() { super('BriefingScene'); }
+    preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
+    create() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        this.stars = []; for (let i = 0; i < 50; i++) this.stars.push(this.add.circle(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight), Phaser.Math.Between(1, 3), 0xFFFFFF).setAlpha(Phaser.Math.FloatBetween(0.2, 1)));
+        const levelDescriptions = ["ALVO 1: CLUBE COMERCIAL! \n\nO calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.", "Nível 2: ...", "Nível 3: ...", "Nível 4: ...", "Nível 5: ...", "Nível 6: ...", "Nível 7: ...", "Nível 8: ...", "Nível 9: ...", "Nível 10: ..."];
+        this.briefingText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, levelDescriptions[currentLevel - 1], {
+            fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+        }).setOrigin(0.5).setDepth(1200).setAlpha(0);
+        this.tweens.add({ targets: this.briefingText, alpha: 1, duration: 2000 });
+        this.startButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
+            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1201).setInteractive({ useHandCursor: true });
+        this.startText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'INICIAR', {
+            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000'
+        }).setOrigin(0.5).setDepth(1202);
+        this.startButton.defaultFillColor = 0xFFFF00;
+        this.startButton.on('pointerover', () => this.startButton.setFillStyle(0xFFFFFF, 1));
+        this.startButton.on('pointerout', () => this.startButton.setFillStyle(0xFFFF00, 1));
+        this.startButton.on('pointerdown', () => {
+            this.startButton.setFillStyle(0xFFFF00, 1); this.startText.setColor('#FFFFFF');
+            this.startButton.once('pointerup', () => this.scene.start('GameScene'));
+        });
+        this.input.on('pointerdown', () => this.game.canvas.focus());
+        this.scale.on('resize', this.resize, this); this.resize();
+    }
+    resize() {
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+        if (this.stars) this.stars.forEach(star => { if (star.active) star.setPosition(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight)).setScale(baseScale); });
+        if (this.briefingText) this.briefingText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
+        if (this.startButton) {
+            this.startButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
+            this.startButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
+            this.startText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
+        }
+    }
+}
+
+// -------- GameScene --------
+class GameScene extends Phaser.Scene {
+    constructor() { super('GameScene'); }
+    preload() {
+        let colorPrefix; if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red'; else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow'; else colorPrefix = 'blue';
+        console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
         this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
         this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
@@ -25,12 +227,7 @@ class GameScene extends Phaser.Scene {
         this.load.image('antimissile', 'assets/antimissile.png');
         this.load.audio('explosion_air', 'assets/explosion_air.mp3');
         this.load.audio('explosion_target', 'assets/explosion_target.mp3');
-
-        const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
-        spriteNames.forEach(name => {
-            this.load.image(`chamas${name}`, `assets/chamas1/chamas${name}.png`);
-        });
-
+        ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'].forEach(name => this.load.image(`chamas${name}`, `assets/chamas1/chamas${name}.png`));
         this.levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
         this.load.image(`${this.levelPrefix}_predio`, `${this.levelPrefix}_predio.png`);
         this.load.image(`${this.levelPrefix}_dano1`, `${this.levelPrefix}_dano1.png`);
@@ -38,617 +235,331 @@ class GameScene extends Phaser.Scene {
         this.load.image(`${this.levelPrefix}_destruido`, `${this.levelPrefix}_destruido.png`);
         this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`);
     }
-
     create() {
         this.cameras.main.setSize(this.scale.width, this.scale.height);
-        let colorPrefix;
-        if ([1, 4, 7, 10].includes(currentLevel)) {
-            colorPrefix = 'red';
-        } else if ([3, 6, 9].includes(currentLevel)) {
-            colorPrefix = 'yellow';
-        } else {
-            colorPrefix = 'blue';
-        }
-        // Ajuste o fundo com escala baseada na menor proporção para evitar over-zoom
-        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-        this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
-            .setOrigin(0.5, 0)
-            .setScale(baseScale);
+        let colorPrefix; if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red'; else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow'; else colorPrefix = 'blue';
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8; // Reduz 20% para ajustar altura
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
 
-        this.timerText = this.add.text(20, 20, '00:10', {
-            fontFamily: 'VT323',
-            fontSize: '40px',
-            color: '#FFFFFF'
+        this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
+            .setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+
+        this.timerText = this.add.text(gameAreaWidth * 0.15, 40 * baseScale, '00:10', {
+            fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 30)}px`, color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
         this.timeLeft = 10;
         this.timerEvent = this.time.addEvent({
-            delay: 1000,
-            callback: () => {
-                this.timeLeft--;
-                let minutes = Math.floor(this.timeLeft / 60);
-                let seconds = this.timeLeft % 60;
+            delay: 1000, callback: () => {
+                this.timeLeft--; let minutes = Math.floor(this.timeLeft / 60); let seconds = this.timeLeft % 60;
                 this.timerText.setText(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-                if (this.timeLeft <= 0) {
-                    if (this.buildingState < 3) {
-                        this.endLevel(true);
-                    } else {
-                        this.endLevel(false);
-                    }
-                }
-            },
-            loop: true
+                if (this.timeLeft <= 0) (this.buildingState < 3) ? this.endLevel(true) : this.endLevel(false);
+            }, loop: true
         });
 
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, this.scale.height - buildingHeight - (48 * (this.scale.height / 1600)));
-        this.buildingContainer.setSize(buildingWidth, buildingHeight);
-        this.buildingContainer.setDepth(900);
+        this.buildingContainer = this.add.container(this.scale.width / 2, gameAreaHeight - buildingHeight - (24 * baseScale));
+        this.buildingContainer.setSize(buildingWidth, buildingHeight).setDepth(900);
 
-        const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_fundo`).source[0].height / this.textures.get(`${this.levelPrefix}_fundo`).source[0].width));
-        background.setPosition(0, buildingHeight);
-        background.setDepth(900);
+        const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`)
+            .setOrigin(0.5, 1).setScale(baseScale).setDisplaySize(buildingWidth, buildingHeight);
+        background.setPosition(0, buildingHeight).setDepth(900);
         this.buildingContainer.add(background);
 
         const chamasSpriteHeight = 375 * baseScale;
         this.currentChamasSprite = this.add.sprite(0, 550 * baseScale - (chamasSpriteHeight / 2), 'chamas101');
         this.buildingContainer.add(this.currentChamasSprite);
-        this.currentChamasSprite.setDepth(910);
-        this.currentChamasSprite.setScale(0.3 * baseScale);
-        this.currentChamasSprite.setVisible(false);
+        this.currentChamasSprite.setDepth(910).setScale(0.3 * baseScale).setVisible(false);
 
-        this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`).setOrigin(0.5, 1).setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(`${this.levelPrefix}_predio`).source[0].height / this.textures.get(`${this.levelPrefix}_predio`).source[0].width));
-        this.building.setPosition(0, buildingHeight);
-        this.building.setDepth(920);
+        this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
+            .setOrigin(0.5, 1).setScale(baseScale).setDisplaySize(buildingWidth, buildingHeight);
+        this.building.setPosition(0, buildingHeight).setDepth(920);
         this.buildingContainer.add(this.building);
 
-        this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`).setOrigin(0.5, 1).setDepth(20);
-        this.silhuetaSprite.displayWidth = this.scale.width;
-        this.silhuetaSprite.displayHeight = 384 * (this.scale.height / 1600) * baseScale;
+        this.silhuetaSprite = this.add.image(this.scale.width / 2, gameAreaHeight, `silhueta_urbana_${colorPrefix}`)
+            .setOrigin(0.5, 1).setScale(baseScale).setDisplaySize(gameAreaWidth, 250 * baseScale).setDepth(20);
 
         const towerAndCannonDefinitions = [
-            {
-                name: 'Torre Esquerda',
-                towerAsset: `torre_e_${colorPrefix}`,
-                towerBaseX: this.scale.width * 0.144,
-                towerBaseY: this.scale.height,
-                towerTargetWidth: 218 * baseScale,
-                towerTargetHeight: 709 * baseScale,
-                towerDepth: 30,
-                cannonAsset: 'canhao_e',
-                cannonX: this.scale.width * 0.144,
-                cannonY: this.scale.height * 0.613,
-                cannonTargetWidth: 39 * baseScale,
-                cannonTargetHeight: 141 * baseScale,
-                cannonDepth: 10
-            },
-            {
-                name: 'Torre Central',
-                towerAsset: `torre_c_${colorPrefix}`,
-                towerBaseX: this.scale.width * 0.65,
-                towerBaseY: this.scale.height,
-                towerTargetWidth: 148 * baseScale,
-                towerTargetHeight: 637 * baseScale,
-                towerDepth: 18,
-                cannonAsset: 'canhao_c',
-                cannonX: this.scale.width * 0.65,
-                cannonY: this.scale.height * 0.647,
-                cannonTargetWidth: 33 * baseScale,
-                cannonTargetHeight: 103 * baseScale,
-                cannonDepth: 10
-            },
-            {
-                name: 'Torre Direita',
-                towerAsset: `torre_d_${colorPrefix}`,
-                towerBaseX: this.scale.width * 0.881,
-                towerBaseY: this.scale.height,
-                towerTargetWidth: 190 * baseScale,
-                towerTargetHeight: 782 * baseScale,
-                towerDepth: 18,
-                cannonAsset: 'canhao_d',
-                cannonX: this.scale.width * 0.881,
-                cannonY: this.scale.height * 0.563,
-                cannonTargetWidth: 39 * baseScale,
-                cannonTargetHeight: 125 * baseScale,
-                cannonDepth: 10
-            }
+            { name: 'Torre Esquerda', towerAsset: `torre_e_${colorPrefix}`, towerBaseX: gameAreaWidth * 0.144, towerBaseY: gameAreaHeight, towerScale: baseScale, cannonAsset: 'canhao_e', cannonX: gameAreaWidth * 0.144, cannonY: gameAreaHeight * 0.613, cannonScale: baseScale },
+            { name: 'Torre Central', towerAsset: `torre_c_${colorPrefix}`, towerBaseX: gameAreaWidth * 0.65, towerBaseY: gameAreaHeight, towerScale: baseScale, cannonAsset: 'canhao_c', cannonX: gameAreaWidth * 0.65, cannonY: gameAreaHeight * 0.647, cannonScale: baseScale },
+            { name: 'Torre Direita', towerAsset: `torre_d_${colorPrefix}`, towerBaseX: gameAreaWidth * 0.881, towerBaseY: gameAreaHeight, towerScale: baseScale, cannonAsset: 'canhao_d', cannonX: gameAreaWidth * 0.881, cannonY: gameAreaHeight * 0.563, cannonScale: baseScale }
         ];
 
-        this.allCannonsSprites = [];
-        this.towers = [];
-        this.allTowerSprites = [];
-
+        this.allCannonsSprites = []; this.towers = []; this.allTowerSprites = [];
         towerAndCannonDefinitions.forEach((def) => {
-            const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset).setOrigin(0.5, 1);
-            tower.setDepth(def.towerDepth);
-            tower.displayWidth = def.towerTargetWidth;
-            tower.displayHeight = def.towerTargetHeight;
+            const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
+                .setOrigin(0.5, 1).setScale(def.towerScale).setDisplaySize(218 * def.towerScale, 709 * def.towerScale).setDepth(30);
             this.allTowerSprites.push({ sprite: tower, def: def });
-
-            const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset);
-            cannon.setOrigin(0.5, 1);
-            cannon.setDepth(def.cannonDepth);
-            cannon.displayWidth = def.cannonTargetWidth;
-            cannon.displayHeight = def.cannonTargetHeight;
+            const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset)
+                .setOrigin(0.5, 1).setScale(def.cannonScale).setDisplaySize(39 * def.cannonScale, 141 * def.cannonScale).setDepth(10);
             this.allCannonsSprites.push({ sprite: cannon, def: def });
-
-            cannons.push({ sprite: cannon, tower: tower });
-            this.towers.push(tower);
+            cannons.push({ sprite: cannon, tower: tower }); this.towers.push(tower);
         });
 
-        this.buildingState = 0;
-        this.waveCount = 0;
-
-        const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
-        const frames = spriteNames.map(name => ({ key: `chamas${name}` }));
-        this.anims.create({
-            key: 'chamasAnim',
-            frames: frames,
-            frameRate: 16,
-            repeat: -1
-        });
-
+        this.buildingState = 0; this.waveCount = 0;
+        ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'].map(name => ({ key: `chamas${name}` }));
+        this.anims.create({ key: 'chamasAnim', frames: this.anims.generateFrameNames('chamas'), frameRate: 16, repeat: -1 });
         this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true });
 
         this.input.on('pointerdown', (pointer) => {
-            console.log('Clique detectado');
             if (!gameEnded) {
-                const gamePointerX = pointer.x;
-                const gamePointerY = pointer.y;
+                const gamePointerX = pointer.x; const gamePointerY = pointer.y;
                 cannons.forEach(cannon => {
                     const cannonAngle = Phaser.Math.Angle.Between(cannon.sprite.x, cannon.sprite.y, gamePointerX, gamePointerY);
-                    cannon.sprite.rotation = cannonAngle + Math.PI / 2;
-                    this.fireAntiMissile(cannon, gamePointerX, gamePointerY);
+                    cannon.sprite.rotation = cannonAngle + Math.PI / 2; this.fireAntiMissile(cannon, gamePointerX, gamePointerY);
                 });
             }
             this.game.canvas.focus();
         });
 
-        this.onAntiMissileHit = function (x, y) {
-            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8);
-            explosionCircle.setDepth(920);
-            const explosionVisualRadius = 100 * baseScale;
-            const explosionAnimationDuration = 500;
+        this.onAntiMissileHit = (x, y) => {
+            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 0.8).setDepth(920);
+            const explosionVisualRadius = 100 * baseScale; const explosionAnimationDuration = 500;
             this.tweens.add({
-                targets: explosionCircle,
-                radius: explosionVisualRadius,
-                alpha: 0,
-                ease: 'Quadratic.Out',
-                duration: explosionAnimationDuration,
-                onComplete: () => {
-                    explosionCircle.destroy();
-                    this.handleExplosionCollision(x, y, explosionVisualRadius + (50 * baseScale));
-                }
+                targets: explosionCircle, radius: explosionVisualRadius, alpha: 0, ease: 'Quadratic.Out', duration: explosionAnimationDuration,
+                onComplete: () => { explosionCircle.destroy(); this.handleExplosionCollision(x, y, explosionVisualRadius + 50 * baseScale); }
             });
-        }.bind(this);
+        };
 
-        this.onMissileHit = function (x, y) {
-            console.log(`Explosão em x: ${x}, y: ${y}`);
-            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 1.0);
-            explosionCircle.setDepth(930);
-            const explosionVisualRadius = 250 * baseScale;
-            const explosionAnimationDuration = 550;
+        this.onMissileHit = (x, y) => {
+            const explosionCircle = this.add.circle(x, y, 0, 0xffff00, 1.0).setDepth(930);
+            const explosionVisualRadius = 250 * baseScale; const explosionAnimationDuration = 550;
             this.tweens.add({
-                targets: explosionCircle,
-                radius: explosionVisualRadius,
-                alpha: 0,
-                ease: 'Quadratic.Out',
-                duration: explosionAnimationDuration,
-                onComplete: () => {
-                    explosionCircle.destroy();
-                }
+                targets: explosionCircle, radius: explosionVisualRadius, alpha: 0, ease: 'Quadratic.Out', duration: explosionAnimationDuration,
+                onComplete: () => explosionCircle.destroy()
             });
-        }.bind(this);
+        };
 
-        this.onBuildingHit = function (x, y) {
-            console.log(`Colisão detectada em x: ${x}, y: ${y}`);
+        this.onBuildingHit = (x, y) => {
             this.onMissileHit(x, y);
-            try {
-                this.sound.play('explosion_target');
-                console.log('Som explosion_target tocado');
-            } catch (e) {
-                console.error('Erro ao tocar explosion_target:', e);
-            }
+            try { this.sound.play('explosion_target'); } catch (e) { console.error('Erro ao tocar explosion_target:', e); }
             this.time.delayedCall(500, () => {
                 if (this.currentChamasSprite && this.currentChamasSprite.active) {
-                    if (this.currentChamasSprite.visible) {
-                        this.currentChamasSprite.stop();
-                    }
-                    this.currentChamasSprite.setVisible(true);
-                    if (this.anims.get('chamasAnim')) {
-                        this.currentChamasSprite.play('chamasAnim');
-                    }
+                    if (this.currentChamasSprite.visible) this.currentChamasSprite.stop();
+                    this.currentChamasSprite.setVisible(true).play('chamasAnim');
                 }
-
                 if (this.buildingState < 3) {
-                    this.buildingState++;
-                    this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
-                    if (this.buildingState === 3) {
-                        this.endLevel(false);
-                    }
+                    this.buildingState++; this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
+                    if (this.buildingState === 3) this.endLevel(false);
                 }
-            }, [], this);
-        }.bind(this);
+            });
+        };
 
-        this.handleExplosionCollision = function (explosionX, explosionY, explosionRadius) {
+        this.handleExplosionCollision = (explosionX, explosionY, explosionRadius) => {
             for (let i = missiles.length - 1; i >= 0; i--) {
                 const missile = missiles[i];
-                if (!missile || !missile.active) {
-                    missiles.splice(i, 1);
-                    continue;
-                }
-                const distance = Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y);
-                if (distance < explosionRadius) {
-                    missile.destroy();
-                    missiles.splice(i, 1);
-                    this.sound.play('explosion_air');
+                if (!missile || !missile.active) { missiles.splice(i, 1); continue; }
+                if (Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y) < explosionRadius) {
+                    missile.destroy(); missiles.splice(i, 1); this.sound.play('explosion_air');
                 }
             }
-        }.bind(this);
+        };
 
         this.resize = () => {
             const width = this.scale.width;
             const height = this.scale.height;
-            console.log(`Resize: width=${width}, height=${height}`);
+            if (width === 0 || height === 0) { this.scene.restart(); return; }
+            const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT) * 0.8;
+            const gameAreaWidth = width * 0.9;
+            const gameAreaHeight = height * 0.9;
+            const minFontSize = 20;
 
-            const baseScale = Math.min(width / 900, height / 1600); // Usa o menor para evitar stretch vertical
-            if (this.gameBackground && this.gameBackground.active) {
-                this.gameBackground.setPosition(width / 2, 0);
-                this.gameBackground.setScale(baseScale);
-            }
-
-            if (this.silhuetaSprite && this.silhuetaSprite.active) {
-                this.silhuetaSprite.setPosition(width / 2, height);
-                this.silhuetaSprite.displayWidth = width;
-                this.silhuetaSprite.displayHeight = 384 * (height / 1600) * baseScale;
-            }
-
-            if (this.buildingContainer && this.buildingContainer.active) {
+            if (this.gameBackground) this.gameBackground.setPosition(width / 2, 0).setScale(baseScale).setDisplaySize(width, height);
+            if (this.silhuetaSprite) this.silhuetaSprite.setPosition(width / 2, gameAreaHeight).setScale(baseScale).setDisplaySize(gameAreaWidth, 250 * baseScale);
+            if (this.buildingContainer) {
                 const buildingWidth = 510 * baseScale;
                 const buildingHeight = 550 * baseScale;
-                this.buildingContainer.setPosition(width / 2, height - buildingHeight - (48 * (height / 1600)));
+                this.buildingContainer.setPosition(width / 2, gameAreaHeight - buildingHeight - (24 * baseScale));
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
-                this.building.setDisplaySize(buildingWidth, buildingHeight * (this.textures.get(this.building.texture.key).source[0].height / this.textures.get(this.building.texture.key).source[0].width));
-                this.building.setPosition(0, buildingHeight);
+                this.building.setScale(baseScale).setDisplaySize(buildingWidth, buildingHeight).setPosition(0, buildingHeight);
+                const background = this.buildingContainer.getAt(0);
+                if (background) background.setScale(baseScale).setDisplaySize(buildingWidth, buildingHeight);
             }
-
-            if (this.currentChamasSprite && this.currentChamasSprite.active) {
+            if (this.currentChamasSprite) {
                 const chamasSpriteHeight = 375 * baseScale;
-                this.currentChamasSprite.setPosition(0, 550 * baseScale - (chamasSpriteHeight / 2));
-                this.currentChamasSprite.setScale(0.3 * baseScale);
+                this.currentChamasSprite.setPosition(0, 550 * baseScale - (chamasSpriteHeight / 2)).setScale(0.3 * baseScale);
             }
-
-            if (this.allTowerSprites) {
-                this.allTowerSprites.forEach(tower => {
-                    if (tower.sprite.active) {
-                        tower.sprite.setPosition(tower.def.towerBaseX, height);
-                        tower.sprite.displayWidth = tower.def.towerTargetWidth;
-                        tower.sprite.displayHeight = tower.def.towerTargetHeight;
-                    }
-                });
+            if (this.allTowerSprites) this.allTowerSprites.forEach(tower => {
+                if (tower.sprite.active) {
+                    tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight)
+                        .setScale(tower.def.towerScale).setDisplaySize(218 * tower.def.towerScale, 709 * tower.def.towerScale);
+                }
+            });
+            if (this.allCannonsSprites) this.allCannonsSprites.forEach(cannon => {
+                if (cannon.sprite.active) {
+                    cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY)
+                        .setScale(cannon.def.cannonScale).setDisplaySize(39 * cannon.def.cannonScale, 141 * cannon.def.cannonScale);
+                }
+            });
+            if (this.timerText) this.timerText.setPosition(gameAreaWidth * 0.15, 40 * baseScale).setFontSize(`${Math.max(40 * baseScale, 30)}px`);
+            if (this.resultText) {
+                this.resultText.setPosition(gameAreaWidth / 2, gameAreaHeight * 0.25)
+                    .setFontSize(`${Math.max(60 * baseScale, 30)}px`)
+                    .setWordWrapWidth(gameAreaWidth * 0.8);
             }
-            if (this.allCannonsSprites) {
-                this.allCannonsSprites.forEach(cannon => {
-                    if (cannon.sprite.active) {
-                        cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
-                        cannon.sprite.displayWidth = cannon.def.cannonTargetWidth;
-                        cannon.sprite.displayHeight = cannon.def.cannonTargetHeight;
-                    }
-                });
+            if (this.statsText) {
+                this.statsText.setPosition(gameAreaWidth / 2, gameAreaHeight * 0.30)
+                    .setFontSize(`${Math.max(40 * baseScale, 24)}px`)
+                    .setWordWrapWidth(gameAreaWidth * 0.8);
             }
-
-            if (this.timerText && this.timerText.active) {
-                this.timerText.setPosition(20, 20);
-                this.timerText.setFontSize(40 * baseScale);
+            if (this.continueButton) {
+                this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale))
+                    .setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
+                this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale))
+                    .setFontSize(`${Math.max(30 * baseScale, 20)}px`).setWordWrapWidth(200 * baseScale);
             }
-
-            if (missiles) {
-                missiles.forEach(missile => {
-                    if (missile && missile.active) {
-                        missile.displayWidth = 10 * baseScale;
-                        missile.displayHeight = 30 * baseScale;
-                        missile.targetX = Phaser.Math.Between(width / 2 - 255 * baseScale, width / 2 + 255 * baseScale);
-                        missile.targetY = height - 315 * baseScale;
-                    }
-                });
+            if (this.endText) {
+                this.endText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2 - (150 * baseScale))
+                    .setFontSize(`${Math.max(80 * baseScale, 30)}px`)
+                    .setWordWrapWidth(gameAreaWidth * 0.8);
             }
-            if (antiMissiles) {
-                antiMissiles.forEach(anti => {
-                    if (anti && anti.active) {
-                        anti.displayWidth = 15 * baseScale;
-                        anti.displayHeight = 60 * baseScale;
-                    }
-                });
+            if (this.performanceText) {
+                this.performanceText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2)
+                    .setFontSize(`${Math.max(40 * baseScale, 24)}px`)
+                    .setWordWrapWidth(gameAreaWidth * 0.8);
             }
+            if (this.restartButton) {
+                this.restartButton.setPosition(gameAreaWidth / 2, gameAreaHeight - (120 * baseScale))
+                    .setSize(300 * baseScale, 100 * baseScale).setStrokeStyle(4 * baseScale, 0xFFFFFF);
+                this.restartText.setPosition(gameAreaWidth / 2, gameAreaHeight - (120 * baseScale))
+                    .setFontSize(`${Math.max(40 * baseScale, 24)}px`).setWordWrapWidth(300 * baseScale);
+            }
+            if (missiles) missiles.forEach(missile => {
+                if (missile && missile.active) {
+                    missile.setSize(10 * baseScale, 30 * baseScale);
+                    missile.targetX = Phaser.Math.Between(gameAreaWidth / 2 - 255 * baseScale, gameAreaWidth / 2 + 255 * baseScale);
+                    missile.targetY = gameAreaHeight - 315 * baseScale;
+                }
+            });
+            if (antiMissiles) antiMissiles.forEach(anti => {
+                if (anti && anti.active) anti.setSize(12 * baseScale, 76 * baseScale);
+            });
         };
 
-        this.scale.on('resize', this.resize, this);
-        this.resize();
+        this.scale.on('resize', this.resize, this); this.resize();
     }
-
     spawnWave() {
         if (!gameEnded) {
-            this.waveCount++;
-            const baseSpeed = 70;
-            const speedIncrementPerWave = 20;
-            const delayBetweenMissiles = 800;
-            for (let i = 0; i < 2; i++) {
-                this.time.delayedCall(i * delayBetweenMissiles, () => {
-                    const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-                    const spawnX = Phaser.Math.Between(0, this.scale.width);
-                    const spawnY = 0;
-                    const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
-                    missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
-                    missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
-                    missile.targetY = this.scale.height - 315 * baseScale;
-                    missile.displayWidth = 10 * baseScale;
-                    missile.displayHeight = 30 * baseScale;
-                    missile.setDepth(1000);
-                    missile.setActive(true);
-                    missile.setVisible(true);
-                    missiles.push(missile);
-                }, [], this);
-            }
+            this.waveCount++; const baseSpeed = 70; const speedIncrementPerWave = 20; const delayBetweenMissiles = 800;
+            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
+            const gameAreaWidth = this.scale.width * 0.9;
+            const gameAreaHeight = this.scale.height * 0.9;
+            for (let i = 0; i < 2; i++) this.time.delayedCall(i * delayBetweenMissiles, () => {
+                const spawnX = Phaser.Math.Between(0, this.scale.width);
+                const spawnY = 0;
+                const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
+                missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
+                missile.targetX = Phaser.Math.Between(gameAreaWidth / 2 - 255 * baseScale, gameAreaWidth / 2 + 255 * baseScale);
+                missile.targetY = gameAreaHeight - 315 * baseScale;
+                missile.setDepth(1000).setActive(true).setVisible(true);
+                missiles.push(missile);
+            }, [], this);
         }
     }
-
     fireAntiMissile(cannon, targetGameX, targetGameY) {
         if (!gameEnded) {
-            const launchX = cannon.sprite.x;
-            const launchY = cannon.sprite.y;
-            const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-            const antiMissile = this.add.image(launchX, launchY, 'antimissile');
-            antiMissile.setOrigin(0.5, 1);
-            antiMissile.setDepth(5);
-            antiMissile.displayWidth = 12 * baseScale;
-            antiMissile.displayHeight = 76 * baseScale;
+            const launchX = cannon.sprite.x; const launchY = cannon.sprite.y;
+            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
+            const antiMissile = this.add.image(launchX, launchY, 'antimissile')
+                .setOrigin(0.5, 1).setScale(baseScale).setDisplaySize(12 * baseScale, 76 * baseScale).setDepth(5);
             antiMissiles.push(antiMissile);
             this.tweens.add({
-                targets: antiMissile,
-                x: targetGameX,
-                y: targetGameY,
-                duration: 650,
-                ease: 'Linear',
-                onUpdate: (tween, target) => {
-                    const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
-                    target.rotation = currentAngle + Math.PI / 2;
-                },
-                onComplete: () => {
-                    antiMissile.destroy();
-                    this.onAntiMissileHit(targetGameX, targetGameY);
-                }
+                targets: antiMissile, x: targetGameX, y: targetGameY, duration: 650, ease: 'Linear',
+                onUpdate: (tween, target) => target.rotation = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY) + Math.PI / 2,
+                onComplete: () => { antiMissile.destroy(); this.onAntiMissileHit(targetGameX, targetGameY); }
             });
         }
     }
-
     updateBuildingState(levelPrefix) {
-        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-        const buildingWidth = 510 * baseScale;
-        const buildingHeight = 550 * baseScale;
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
+        const buildingWidth = 510 * baseScale; const buildingHeight = 550 * baseScale;
         const key = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
-        const newHeight = buildingHeight * (this.textures.get(key).source[0].height / this.textures.get(key).source[0].width);
-        this.building.setTexture(key).setDisplaySize(buildingWidth, newHeight).setPosition(0, buildingHeight);
-        this.building.setDepth(920);
+        this.building.setTexture(key).setScale(baseScale).setDisplaySize(buildingWidth, buildingHeight).setPosition(0, buildingHeight).setDepth(920);
     }
-
     endLevel(success) {
-        this.time.removeAllEvents();
-        gameEnded = true;
-        missiles.forEach(missile => {
-            if (missile.active) missile.setActive(false).setVisible(false);
-        });
-        antiMissiles.forEach(anti => {
-            if (anti.active) anti.setActive(false).setVisible(false);
-        });
-
-        if (success) {
-            preservedCount++;
-        } else {
-            destroyedCount++;
-        }
-
-        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-        this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
-            success ? 'SUCESSO!' : 'FALHA!',
-            {
-                fontFamily: 'VT323',
-                fontSize: '60px' * baseScale,
-                color: success ? '#00FF00' : '#FF0000',
-                align: 'center'
-            }
-        ).setOrigin(0.5).setDepth(1500);
-        this.resultText.setAlpha(0);
-        this.tweens.add({
-            targets: this.resultText,
-            alpha: { from: 0, to: 1 },
-            duration: 2000
-        });
-
-        this.statsText = this.add.text(this.scale.width / 2, this.scale.height * 0.30,
-            `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
-            {
-                fontFamily: 'VT323',
-                fontSize: '40px' * baseScale,
-                color: '#FFFFFF',
-                align: 'center',
-                lineSpacing: 20
-            }
-        ).setOrigin(0.5).setDepth(1501);
-        this.statsText.setAlpha(0);
-        this.tweens.add({
-            targets: this.statsText,
-            alpha: { from: 0, to: 1 },
-            duration: 2000
-        });
-
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 200 * baseScale, 80 * baseScale, 0xFFFF00);
-        this.continueButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
-        this.continueButton.setDepth(2000);
-        this.continueButton.setVisible(true);
-        this.continueButton.setAlpha(1);
-        this.continueButton.setInteractive({ useHandCursor: true });
-
-        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * (this.scale.height / 1600)), 'CONTINUAR', {
-            fontFamily: 'VT323',
-            fontSize: '30px' * baseScale,
-            color: '#000000'
+        this.time.removeAllEvents(); gameEnded = true;
+        missiles.forEach(missile => { if (missile.active) missile.setActive(false).setVisible(false); });
+        antiMissiles.forEach(anti => { if (anti.active) anti.setActive(false).setVisible(false); });
+        if (success) preservedCount++; else destroyedCount++;
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        const minFontSize = 20;
+        this.resultText = this.add.text(gameAreaWidth / 2, gameAreaHeight * 0.25, success ? 'SUCESSO!' : 'FALHA!', {
+            fontFamily: 'VT323', fontSize: `${Math.max(60 * baseScale, 30)}px`, color: success ? '#00FF00' : '#FF0000', align: 'center', wordWrap: { width: gameAreaWidth * 0.8 }
+        }).setOrigin(0.5).setDepth(1500).setAlpha(0);
+        this.tweens.add({ targets: this.resultText, alpha: 1, duration: 2000 });
+        this.statsText = this.add.text(gameAreaWidth / 2, gameAreaHeight * 0.30, `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`, {
+            fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 24)}px`, color: '#FFFFFF', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+        }).setOrigin(0.5).setDepth(1501).setAlpha(0);
+        this.tweens.add({ targets: this.statsText, alpha: 1, duration: 2000 });
+        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFFF00)
+            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(2000).setInteractive({ useHandCursor: true });
+        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale), 'CONTINUAR', {
+            fontFamily: 'VT323', fontSize: `${Math.max(30 * baseScale, 20)}px`, color: '#000000', wordWrap: { width: 200 * baseScale }
         }).setOrigin(0.5).setDepth(2001);
-        this.continueText.setVisible(true);
-
-        const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
-            text.setColor('#000000');
-        };
-
         this.continueButton.defaultFillColor = 0xFFFF00;
-        this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
-        this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
+        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
+        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
         this.continueButton.on('pointerdown', () => {
-            console.log('Botão clicado - pointerdown');
-            this.continueButton.setFillStyle(0xFFFF00, 1);
-            this.continueText.setColor('#000000');
+            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#000000');
             this.continueButton.once('pointerup', () => {
-                console.log('Botão clicado - pointerup');
-                console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`);
-                updateButtonState(this.continueButton, this.continueText, false);
                 const totalLevels = typeof TOTAL_LEVELS !== 'undefined' ? TOTAL_LEVELS : 10;
-                if (currentLevel < totalLevels) {
-                    currentLevel++;
-                    gameEnded = false;
-                    this.scene.start('BriefingScene');
-                } else {
-                    console.log('Entrando no modo FIM DE JOGO');
-                    if (this.gameBackground) this.gameBackground.destroy();
-                    if (this.resultText) this.resultText.destroy();
-                    if (this.statsText) this.statsText.destroy();
-                    this.continueButton.destroy();
-                    this.continueText.destroy();
-
-                    this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1')
-                        .setOrigin(0.5, 0)
-                        .setScale(baseScale)
-                        .setDepth(1000);
-
-                    this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * (this.scale.height / 1600)), 'FIM DE JOGO!', {
-                        fontFamily: 'VT323',
-                        fontSize: '80px' * baseScale,
-                        color: '#FFFFFF',
-                        align: 'center'
+                if (currentLevel < totalLevels) { currentLevel++; gameEnded = false; this.scene.start('BriefingScene'); }
+                else {
+                    this.gameBackground.destroy(); this.resultText.destroy(); this.statsText.destroy(); this.continueButton.destroy(); this.continueText.destroy();
+                    this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height).setDepth(1000);
+                    this.endText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2 - (150 * baseScale), 'FIM DE JOGO!', {
+                        fontFamily: 'VT323', fontSize: `${Math.max(80 * baseScale, 30)}px`, color: '#FFFFFF', align: 'center', wordWrap: { width: gameAreaWidth * 0.8 }
                     }).setOrigin(0.5).setDepth(1200);
-                    this.tweens.add({
-                        targets: this.endText,
-                        scale: { from: 1, to: 1.2 },
-                        duration: 1000,
-                        yoyo: true,
-                        repeat: -1
-                    });
-
-                    let performanceMessage = '';
-                    if (preservedCount >= 8) {
-                        performanceMessage = 'Excelente! Você é um verdadeiro defensor do patrimônio!';
-                    } else if (preservedCount >= 5) {
-                        performanceMessage = 'Bom trabalho! Você preservou mais da metade!';
-                    } else {
-                        performanceMessage = 'Foi difícil, mas você fez o seu melhor!';
-                    }
-
-                    this.performanceText = this.add.text(this.scale.width / 2, this.scale.height / 2, performanceMessage, {
-                        fontFamily: 'VT323',
-                        fontSize: '40px' * baseScale,
-                        color: '#FFFFFF',
-                        align: 'center',
-                        lineSpacing: 20,
-                        wordWrap: { width: 800 * baseScale }
-                    }).setOrigin(0.5).setDepth(1201);
-                    this.performanceText.setAlpha(0);
-                    this.tweens.add({
-                        targets: this.performanceText,
-                        alpha: { from: 0, to: 1 },
-                        duration: 2000
-                    });
-
-                    this.statsText = this.add.text(this.scale.width / 2, this.scale.height / 2 + (150 * (this.scale.height / 1600)),
-                        `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
-                        {
-                            fontFamily: 'VT323',
-                            fontSize: '40px' * baseScale,
-                            color: '#FFFFFF',
-                            align: 'center',
-                            lineSpacing: 20
-                        }
-                    ).setOrigin(0.5).setDepth(1201);
-                    this.statsText.setAlpha(0);
-                    this.tweens.add({
-                        targets: this.statsText,
-                        alpha: { from: 0, to: 1 },
-                        duration: 2000
-                    });
-
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 300 * baseScale, 100 * baseScale, 0x00FF00);
-                    this.restartButton.setStrokeStyle(4 * baseScale, 0xFFFFFF);
-                    this.restartButton.setDepth(2000);
-                    this.restartButton.setInteractive({ useHandCursor: true });
-                    this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * (this.scale.height / 1600)), 'REINICIAR', {
-                        fontFamily: 'VT323',
-                        fontSize: '40px' * baseScale,
-                        color: '#000000'
+                    this.tweens.add({ targets: this.endText, scale: { from: 1, to: 1.2 }, duration: 1000, yoyo: true, repeat: -1 });
+                    let performanceMessage = preservedCount >= 8 ? 'Excelente! Você é um verdadeiro defensor do patrimônio!' : preservedCount >= 5 ? 'Bom trabalho! Você preservou mais da metade!' : 'Foi difícil, mas você fez o seu melhor!';
+                    this.performanceText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, performanceMessage, {
+                        fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 24)}px`, color: '#FFFFFF', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+                    }).setOrigin(0.5).setDepth(1201).setAlpha(0);
+                    this.tweens.add({ targets: this.performanceText, alpha: 1, duration: 2000 });
+                    this.statsText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2 + (150 * baseScale), `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`, {
+                        fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 24)}px`, color: '#FFFFFF', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
+                    }).setOrigin(0.5).setDepth(1201).setAlpha(0);
+                    this.tweens.add({ targets: this.statsText, alpha: 1, duration: 2000 });
+                    this.restartButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - (120 * baseScale), 300 * baseScale, 100 * baseScale, 0x00FF00)
+                        .setStrokeStyle(4 * baseScale, 0xFFFFFF).setDepth(2000).setInteractive({ useHandCursor: true });
+                    this.restartText = this.add.text(gameAreaWidth / 2, gameAreaHeight - (120 * baseScale), 'REINICIAR', {
+                        fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 24)}px`, color: '#000000', wordWrap: { width: 300 * baseScale }
                     }).setOrigin(0.5).setDepth(2001);
-
                     this.restartButton.defaultFillColor = 0x00FF00;
-                    this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
-                    this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
+                    this.restartButton.on('pointerover', () => this.restartButton.setFillStyle(0xFFFFFF, 1));
+                    this.restartButton.on('pointerout', () => this.restartButton.setFillStyle(0x00FF00, 1));
                     this.restartButton.on('pointerdown', () => {
-                        console.log('Botão reiniciar clicado - pointerdown');
-                        this.restartButton.setFillStyle(0x00FF00, 1);
-                        this.restartText.setColor('#000000');
-                        this.restartButton.once('pointerup', () => {
-                            console.log('Botão reiniciar clicado - pointerup');
-                            updateButtonState(this.restartButton, this.restartText, false);
-                            destroyedCount = 0;
-                            preservedCount = 0;
-                            currentLevel = 1;
-                            gameEnded = false;
-                            this.scene.start('IntroScene');
-                        }, this);
-                    }, this);
+                        this.restartButton.setFillStyle(0x00FF00, 1); this.restartText.setColor('#000000');
+                        this.restartButton.once('pointerup', () => { destroyedCount = 0; preservedCount = 0; currentLevel = 1; gameEnded = false; this.scene.start('IntroScene'); });
+                    });
                 }
-            }, this);
-        }, this);
+            });
+        });
     }
-
     update() {
         if (gameEnded) return;
-        const baseScale = Math.min(this.scale.width / 900, this.scale.height / 1600);
-        const collisionTopY = this.scale.height - 315 * baseScale;
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
+        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaHeight = this.scale.height * 0.9;
+        const collisionTopY = gameAreaHeight - 315 * baseScale;
         const collisionBottomY = collisionTopY + 50 * baseScale;
-        const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
-        const collisionRightX = this.scale.width / 2 + 255 * baseScale;
-
+        const collisionLeftX = gameAreaWidth / 2 - 255 * baseScale;
+        const collisionRightX = gameAreaWidth / 2 + 255 * baseScale;
         for (let i = missiles.length - 1; i >= 0; i--) {
             const missile = missiles[i];
-            if (!missile || !missile.active) {
-                missiles.splice(i, 1);
-                continue;
-            }
-
+            if (!missile || !missile.active) { missiles.splice(i, 1); continue; }
             const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY);
             missile.x += Math.cos(angle) * missile.speed * (1 / 60);
             missile.y += Math.sin(angle) * missile.speed * (1 / 60);
             missile.rotation = angle + Math.PI / 2;
-
             if (missile.y >= collisionTopY && missile.y <= collisionBottomY && missile.x >= collisionLeftX && missile.x <= collisionRightX) {
-                this.onBuildingHit(missile.x, missile.y);
-                missile.destroy();
-                missiles.splice(i, 1);
-            } else if (missile.y > this.scale.height) {
-                missile.destroy();
-                missiles.splice(i, 1);
-            }
+                this.onBuildingHit(missile.x, missile.y); missile.destroy(); missiles.splice(i, 1);
+            } else if (missile.y > gameAreaHeight) { missile.destroy(); missiles.splice(i, 1); }
         }
-
-        if (missiles.length === 0 && this.waveCount < 5) {
-            this.spawnWave();
-        }
+        if (missiles.length === 0 && this.waveCount < 5) this.spawnWave();
     }
 }
