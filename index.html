@@ -89,7 +89,7 @@
         }
         .btn-custom {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 65px;
@@ -131,12 +131,18 @@
                 const fundo2 = document.getElementById('bgImgBottom');
                 if (fundo1 && fundo2 && container) {
                     const containerHeight = container.offsetHeight;
-                    const fundo2NaturalHeight = 1506; // Altura natural do fundo2 (ajustar se diferente)
+                    const fundo2NaturalHeight = 1506; // Altura natural do fundo2
                     fundo2.style.width = `${fundo1.width}px`;
-                    fundo2.style.height = `${Math.min(containerHeight, fundo2NaturalHeight)}px`; // Limita à altura natural
+                    fundo2.style.height = `${Math.min(containerHeight, fundo2NaturalHeight)}px`; // Limita à altura natural ou container
                     fundo2.style.left = '50%';
                     fundo2.style.transform = 'translateX(-50%)';
                     fundo2.style.opacity = '1';
+                    // Ajuste para garantir que a base apareça
+                    if (containerHeight > fundo2NaturalHeight) {
+                        fundo2.style.top = `${containerHeight - fundo2NaturalHeight}px`;
+                    } else {
+                        fundo2.style.top = '0';
+                    }
                 }
             }, 100);
         }
