@@ -39,13 +39,13 @@
             height: 100%;
             overflow: visible;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
         }
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
             z-index: 0;
             position: absolute;
@@ -74,7 +74,7 @@
             font-family: 'VT323';
             font-size: 24px;
             padding: 20px;
-            background-color: rgba(59, 5, 5, 0.8);
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
             z-index: 10;
             width: 70%;
@@ -88,7 +88,7 @@
         }
         .btn-custom {
             position: absolute;
-            bottom: 20px;
+            bottom: 5%;
             left: 50%;
             transform: translateX(-50%);
             font-size: 65px;
@@ -115,10 +115,10 @@
                 min-width: 110px;
                 min-height: 85px;
             }
-            .text-layer { font-size: 23px; width: 85%; }
+            .text-layer { font-size: 24px; width: 85%; }
         }
         @media (min-height: 700px) {
-            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
+            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: contain; }
             .bg-img-bottom { height: auto; }
         }
     </style>
@@ -131,7 +131,7 @@
                 if (fundo1 && fundo2 && container) {
                     const containerHeight = container.offsetHeight;
                     fundo2.style.width = `${fundo1.width}px`;
-                    fundo2.style.height = 'auto'; // Ajuste para altura natural, respeitando bottom: 0
+                    fundo2.style.height = 'auto'; // Usa a altura natural do fundo2
                     fundo2.style.left = '50%';
                     fundo2.style.transform = 'translateX(-50%)';
                     fundo2.style.opacity = '1';
