@@ -25,11 +25,10 @@
         }
         #gameContainer {
             position: relative;
-            width: 100%;
-            aspect-ratio: 9 / 16;
+            height: 100vh;
+            width: calc(100vh * 9 / 16);
             max-width: 900px;
             max-height: 1600px;
-            min-height: 100vh;
             overflow: auto;
             margin: auto;
         }
@@ -58,7 +57,7 @@
             left: 0;
             width: 100%;
             height: auto;
-            object-fit: cover;
+            object-fit: contain;
             z-index: 1;
             opacity: 0;
             transition: opacity 0.3s;
@@ -89,7 +88,7 @@
         }
         .btn-custom {
             position: absolute;
-            bottom: 30px;
+            bottom: 5%;
             left: 50%;
             transform: translateX(-50%);
             font-size: 65px;
@@ -133,16 +132,10 @@
                     const containerHeight = container.offsetHeight;
                     const fundo2NaturalHeight = 1506; // Altura natural do fundo2
                     fundo2.style.width = `${fundo1.width}px`;
-                    fundo2.style.height = `${Math.min(containerHeight, fundo2NaturalHeight)}px`; // Limita à altura natural ou container
+                    fundo2.style.height = `${fundo2NaturalHeight}px`; // Usa a altura natural
                     fundo2.style.left = '50%';
                     fundo2.style.transform = 'translateX(-50%)';
                     fundo2.style.opacity = '1';
-                    // Ajuste para garantir que a base apareça
-                    if (containerHeight > fundo2NaturalHeight) {
-                        fundo2.style.top = `${containerHeight - fundo2NaturalHeight}px`;
-                    } else {
-                        fundo2.style.top = '0';
-                    }
                 }
             }, 100);
         }
