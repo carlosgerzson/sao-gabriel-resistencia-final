@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>São Gabriel: Resistência Final</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="data:,">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -45,7 +45,7 @@
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
             z-index: 0;
             position: absolute;
@@ -88,14 +88,14 @@
         }
         .btn-custom {
             position: absolute;
-            bottom: 5%;
+            bottom: 2%;
             left: 50%;
             transform: translateX(-50%);
             font-size: 65px;
             padding: 20px 30px;
             min-width: 110px;
             min-height: 85px;
-            z-index: 30;
+            z-index: 40;
             background: none;
             border: none;
             color: #39ff14;
@@ -109,7 +109,7 @@
             color: #ffc107;
         }
         @media (max-width: 576px) {
-            .bg-img-bottom { width: 100%; }
+            .bg-img-bottom { width: 100%; height: auto; }
             .btn-custom {
                 font-size: 65px;
                 min-width: 110px;
@@ -118,7 +118,7 @@
             .text-layer { font-size: 24px; width: 85%; }
         }
         @media (min-height: 700px) {
-            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: contain; }
+            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
             .bg-img-bottom { height: auto; }
         }
     </style>
@@ -131,7 +131,7 @@
                 if (fundo1 && fundo2 && container) {
                     const containerHeight = container.offsetHeight;
                     fundo2.style.width = `${fundo1.width}px`;
-                    fundo2.style.height = 'auto'; // Usa a altura natural do fundo2
+                    fundo2.style.height = 'auto'; // Usa a altura natural, preservando laterais
                     fundo2.style.left = '50%';
                     fundo2.style.transform = 'translateX(-50%)';
                     fundo2.style.opacity = '1';
