@@ -1,198 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>São Gabriel: Resistência Final</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <link rel="icon" href="data:,">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <style>
-        .vt323-regular { font-family: "VT323", monospace; font-weight: 400; font-style: normal; }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0af350; /* Temporário, mudar para #000 depois */
-            min-height: 100vh;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #gameContainer {
-            position: relative;
-            height: 100vh;
-            width: calc(100vh * 9 / 16);
-            max-width: 900px;
-            max-height: 1600px;
-            overflow: auto;
-            margin: auto;
-        }
-        .bg-image {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-        }
-        .bg-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            z-index: 0;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-        }
-        .bg-img-bottom {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 0.3s;
-            min-height: 10vh;
-            box-sizing: border-box;
-        }
-        .text-layer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -55%);
-            text-align: center;
-            color: #e9bb00;
-            font-family: 'VT323';
-            font-size: 24px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            z-index: 10;
-            width: 70%;
-            min-height: 120px;
-            height: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            word-wrap: break-word;
-            box-sizing: border-box;
-        }
-        .btn-custom {
-            position: absolute;
-            bottom: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 65px;
-            padding: 20px 30px;
-            min-width: 110px;
-            min-height: 85px;
-            z-index: 50;
-            background: none;
-            border: none;
-            color: #39ff14;
-            cursor: pointer;
-            transition: color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-custom:hover {
-            color: #ffc107;
-        }
-        @media (max-width: 576px) {
-            .bg-img-bottom { width: 100%; height: auto; }
-            .btn-custom {
-                font-size: 65px;
-                min-width: 110px;
-                min-height: 85px;
-            }
-            .text-layer { font-size: 24px; width: 85%; }
-        }
-        @media (min-height: 700px) {
-            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
-            .bg-img-bottom { height: auto; }
-        }
-    </style>
-    <script>
-        function adjustFundo2Width() {
-            setTimeout(() => {
-                const container = document.getElementById('gameContainer');
-                const fundo1 = document.getElementById('bgImg');
-                const fundo2 = document.getElementById('bgImgBottom');
-                if (fundo1 && fundo2 && container) {
-                    const containerHeight = container.offsetHeight;
-                    const fundo2NaturalHeight = 1506; // Altura natural do fundo2
-                    fundo2.style.width = `${fundo1.width}px`;
-                    fundo2.style.height = `${fundo2NaturalHeight}px`; // Usa a altura natural
-                    fundo2.style.left = '50%';
-                    fundo2.style.transform = 'translateX(-50%)';
-                    fundo2.style.opacity = '1';
-                }
-            }, 100);
-        }
-
-        function handleResize() {
-            adjustFundo2Width();
-        }
-
-        window.addEventListener('resize', handleResize);
-
-        function showIntro() {
-            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom"><button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button></div>';
-            adjustFundo2Width();
-        }
-
-        function goToInstruction2() {
-            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">BEM-VINDO AO JOGO!\n\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\nBoa sorte, DEFENSOR!</div><button class="btn-custom" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></button></div>';
-            adjustFundo2Width();
-        }
-
-        function goToInstruction1() {
-            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">INSTRUÇÃO 1\nTexto aqui...</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
-            adjustFundo2Width();
-        }
-
-        function startGame() {
-            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
-            var script1 = document.createElement('script');
-            script1.src = 'https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js';
-            script1.onload = function() {
-                var script2 = document.createElement('script');
-                script2.src = 'gameScene.js';
-                script2.onload = function() {
-                    new Phaser.Game({
-                        type: Phaser.AUTO,
-                        width: document.getElementById('gameContainer').offsetWidth,
-                        height: document.getElementById('gameContainer').offsetHeight,
-                        parent: 'gameContainerInner',
-                        scene: [BriefingScene],
-                        scale: {
-                            mode: Phaser.Scale.RESIZE,
-                            autoCenter: Phaser.Scale.CENTER_BOTH
-                        },
-                        backgroundColor: '#c8f309',
-                        render: { pixelArt: false, antialias: true }
-                    });
-                    console.log("Jogo Phaser inicializado a partir do startGame()");
-                };
-                document.body.appendChild(script2);
-            };
-            document.body.appendChild(script1);
-        }
-
-        window.onload = showIntro;
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+      margin: 0;
+      padding: 0;
+      background-color: #00FF00 !important; /* Fundo verde inicial */
+      min-height: 100vh;
+      width: 100%;
+      position: relative; /* Para posicionamento absoluto */
+    }
+    .bg-image { 
+      position: relative;
+      width: 100%; /* Ocupa toda a largura da viewport */
+      min-height: 100vh; /* Preenche a altura da viewport */
+      overflow-y: auto; /* Rolagem se necessário */
+      display: flex;
+      align-items: center; /* Mantém centralização */
+      justify-content: center;
+    }
+    .bg-img { 
+      max-width: 100%; /* Limita a largura à viewport */
+      max-height: 100vh; /* Limita a altura à viewport */
+      width: auto; /* Ajusta proporcionalmente */
+      height: auto; /* Preserva proporção */
+      object-fit: contain; /* Mantém proporção 900x1600 sem cortes */
+      display: block;
+      z-index: 0; /* Fundo1 atrás */
+    }
+    .bg-img-bottom { 
+      position: absolute; /* Ancorado no bottom */
+      bottom: 0;
+      left: 0;
+      width: 100%; /* Ajustado dinamicamente por JS */
+      height: auto; /* Ajusta altura proporcionalmente */
+      object-fit: contain; /* Preserva proporção sem cortar */
+      z-index: 1; /* Fundo2 na frente */
+    }
+    .text-layer { 
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff; /* Fundo branco baseado no Phaser */
+      border-radius: 15px; /* Corners arredondados */
+      padding: 20px; /* Baseado no padding do Phaser */
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+      font-size: 24px; /* Baseado no fontSize do Phaser */
+      color: #000; /* Cor ajustada */
+      z-index: 1; /* Na frente do fundo1 */
+    }
+    .btn-custom { 
+      position: fixed; /* Fixa no bottom da viewport */
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2; /* Acima de tudo */
+      border: none !important;
+      padding: 0;
+      min-height: 60px; /* Ajustado para ícone */
+      width: 60px; /* Ajustado para ícone */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s; /* Animação suave */
+    }
+    .btn-custom i {
+      font-size: 40px; /* Tamanho da seta */
+      color: #e9bb00; /* Cor do Phaser */
+      transition: color 0.3s; /* Transição de cor */
+    }
+    .btn-custom:hover {
+      transform: scale(1.1); /* Efeito de zoom */
+      i { color: #ffffff; } /* Cor ao passar o mouse */
+    }
+    .raffle-btn {
+      display: none; /* Desativado o Sorteio do Bife */
+    }
+    @media (max-width: 576px) { /* Dispositivos móveis */
+      .btn-custom { 
+        bottom: 0.5rem;
+        min-height: 40px;
+        width: 40px;
+      }
+      .btn-custom i {
+        font-size: 30px; /* Ajuste para móveis */
+      }
+      .bg-img-bottom {
+        width: 100vw; /* Usa a largura da viewport em móveis */
+      }
+    }
+    @media (min-height: 700px) { 
+      .bg-img {
+        height: 100vh; /* Ocupa toda a altura da viewport */
+        width: auto; /* Ajusta a largura proporcionalmente */
+        max-width: 100%; /* Limita à largura da viewport */
+        object-fit: cover; /* Preenche a viewport, cortando excedente */
+      }
+      .bg-img-bottom {
+        height: auto; /* Ajusta altura proporcionalmente à largura */
+      }
+      .text-layer {
+        max-width: 350px; /* Ajuste para telas altas */
+        font-size: 20px; /* Ajuste proporcional */
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="gameContainer"></div>
+  <div class="bg-image">
+    <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+    <img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom">
+    <button class="btn btn-warning btn-custom" onclick="goToInstruction2()">
+      <i class="fas fa-arrow-right"></i> <!-- Seta moderna -->
+    </button>
+  </div>
+  <script>
+    // Função para ajustar a largura do fundo2 com base no fundo1
+    function adjustFundo2Width() {
+      const fundo1 = document.getElementById('bgImg');
+      const fundo2 = document.getElementById('bgImgBottom');
+      if (fundo1 && fundo2) {
+        const fundo1Width = fundo1.width;
+        fundo2.style.width = `${fundo1Width}px`; // Sincroniza a largura
+        fundo2.style.left = '50%';
+        fundo2.style.transform = 'translateX(-50%)'; // Centraliza
+      }
+    }
+
+    // Executa ao carregar e redimensionar
+    window.addEventListener('load', adjustFundo2Width);
+    window.addEventListener('resize', adjustFundo2Width);
+
+    function goToInstruction2() {
+      document.body.innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">BEM-VINDO AO JOGO!\n\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\nBoa sorte, DEFENSOR!</div><button class="btn btn-warning btn-custom" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></button></div>';
+      adjustFundo2Width(); // Ajusta após recarregar
+    }
+    function goToInstruction1() {
+      document.body.innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">INSTRUÇÃO 1\nTexto aqui...</div><button class="btn btn-warning btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
+      adjustFundo2Width(); // Ajusta após recarregar
+    }
+    function startGame() {
+      document.body.innerHTML = '<div id="gameContainer" style="width: 100%; height: 100vh;"></div>';
+      var script1 = document.createElement('script');
+      script1.src = 'phaser.min.js';
+      script1.onload = function() {
+        var script2 = document.createElement('script');
+        script2.src = 'MAIN.js'; // Supondo que MAIN.js contém as cenas
+        script2.onload = function() {
+          new Phaser.Game({
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'gameContainer',
+            scene: [MainScene] // Substitua por sua cena principal
+          });
+        };
+        document.body.appendChild(script2);
+      };
+      document.body.appendChild(script1);
+    }
+  </script>
 </body>
 </html>
