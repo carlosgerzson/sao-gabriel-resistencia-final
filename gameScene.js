@@ -10,168 +10,13 @@ let gameEnded = false;
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
 
-// -------- IntroScene --------
-class IntroScene extends Phaser.Scene {
-    constructor() { super('IntroScene'); }
-    preload() { this.load.image('fundointro1', 'assets/fundoIntro.jpeg'); }
-    create() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundointro1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
-            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1001).setInteractive({ useHandCursor: true });
-        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
-            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000'
-        }).setOrigin(0.5).setDepth(1002);
-        this.continueButton.defaultFillColor = 0xFFFF00;
-        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
-        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
-        this.continueButton.on('pointerdown', () => {
-            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
-            this.continueButton.once('pointerup', () => this.scene.start('InstructionsScene2'));
-        });
-        this.input.on('pointerdown', () => this.game.canvas.focus());
-        this.scale.on('resize', this.resize, this); this.resize();
-    }
-    resize() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        if (this.continueButton) {
-            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
-            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
-        }
-    }
-}
-
-// -------- InstructionsScene2 --------
-class InstructionsScene2 extends Phaser.Scene {
-    constructor() { super('InstructionsScene2'); }
-    preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
-    create() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        const instructionsText = "BEM-VINDO AO JOGO!\n\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\n\nBoa sorte, DEFENSOR!";
-        this.instructionsText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, instructionsText, {
-            fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
-        }).setOrigin(0.5).setDepth(1000);
-        const textBounds = this.instructionsText.getBounds();
-        const padding = 20 * baseScale;
-        const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
-        const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
-        const widthWithPadding = textBounds.width + padding * 2;
-        const heightWithPadding = textBounds.height + padding * 2;
-        this.corners = this.add.graphics().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding).setDepth(999);
-        this.instructionsText.setAlpha(0); this.tweens.add({ targets: this.instructionsText, alpha: 1, duration: 1500 });
-        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
-            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1002).setInteractive({ useHandCursor: true });
-        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
-            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#e9bb00'
-        }).setOrigin(0.5).setDepth(1003);
-        this.continueButton.defaultFillColor = 0xFFFF00;
-        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
-        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
-        this.continueButton.on('pointerdown', () => {
-            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
-            this.continueButton.once('pointerup', () => this.scene.start('InstructionsScene'));
-        });
-        this.input.on('pointerdown', () => this.game.canvas.focus());
-        this.scale.on('resize', this.resize, this); this.resize();
-    }
-    resize() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        if (this.instructionsText) {
-            this.instructionsText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
-            const textBounds = this.instructionsText.getBounds();
-            const padding = 20 * baseScale;
-            const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
-            const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
-            const widthWithPadding = textBounds.width + padding * 2;
-            const heightWithPadding = textBounds.height + padding * 2;
-            this.corners.clear().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding);
-        }
-        if (this.continueButton) {
-            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
-            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
-        }
-    }
-}
-
-// -------- InstructionsScene --------
-class InstructionsScene extends Phaser.Scene {
-    constructor() { super('InstructionsScene'); }
-    preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
-    create() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        const instructionsText = "Mas uma cidade resiste.!\n\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado da existência.\n\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!";
-        this.instructionsText = this.add.text(gameAreaWidth / 2, gameAreaHeight / 2, instructionsText, {
-            fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
-        }).setOrigin(0.5).setDepth(1000);
-        const textBounds = this.instructionsText.getBounds();
-        const padding = 20 * baseScale;
-        const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
-        const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
-        const widthWithPadding = textBounds.width + padding * 2;
-        const heightWithPadding = textBounds.height + padding * 2;
-        this.corners = this.add.graphics().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding).setDepth(999);
-        this.instructionsText.setAlpha(0); this.tweens.add({ targets: this.instructionsText, alpha: 1, duration: 1500 });
-        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
-            .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1002).setInteractive({ useHandCursor: true });
-        this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'CONTINUAR', {
-            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#e9bb00'
-        }).setOrigin(0.5).setDepth(1003);
-        this.continueButton.defaultFillColor = 0xFFFF00;
-        this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
-        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
-        this.continueButton.on('pointerdown', () => {
-            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#FFFFFF');
-            this.continueButton.once('pointerup', () => this.scene.start('BriefingScene'));
-        });
-        this.input.on('pointerdown', () => this.game.canvas.focus());
-        this.scale.on('resize', this.resize, this); this.resize();
-    }
-    resize() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
-        const gameAreaHeight = this.scale.height * 0.9;
-        if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
-        if (this.instructionsText) {
-            this.instructionsText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
-            const textBounds = this.instructionsText.getBounds();
-            const padding = 20 * baseScale;
-            const offsetX = gameAreaWidth / 2 - textBounds.width / 2 - padding;
-            const offsetY = gameAreaHeight / 2 - textBounds.height / 2 - padding;
-            const widthWithPadding = textBounds.width + padding * 2;
-            const heightWithPadding = textBounds.height + padding * 2;
-            this.corners.clear().lineStyle(4 * baseScale, 0xe9bb00, 1).strokeRect(offsetX, offsetY, widthWithPadding, heightWithPadding);
-        }
-        if (this.continueButton) {
-            this.continueButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
-            this.continueButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.continueText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
-        }
-    }
-}
-
 // -------- BriefingScene --------
 class BriefingScene extends Phaser.Scene {
     constructor() { super('BriefingScene'); }
     preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
     create() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaWidth = this.scale.width * 1; // Aumentado de 0.9 para 1 pra centralizar melhor
         const gameAreaHeight = this.scale.height * 0.9;
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
         this.stars = []; for (let i = 0; i < 50; i++) this.stars.push(this.add.circle(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight), Phaser.Math.Between(1, 3), 0xFFFFFF).setAlpha(Phaser.Math.FloatBetween(0.2, 1)));
@@ -180,9 +25,9 @@ class BriefingScene extends Phaser.Scene {
             fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
         }).setOrigin(0.5).setDepth(1200).setAlpha(0);
         this.tweens.add({ targets: this.briefingText, alpha: 1, duration: 2000 });
-        this.startButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00)
+        this.startButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00) // Aumentado de 160 para 250
             .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1201).setInteractive({ useHandCursor: true });
-        this.startText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale, 'INICIAR', {
+        this.startText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale, 'INICIAR', {
             fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000'
         }).setOrigin(0.5).setDepth(1202);
         this.startButton.defaultFillColor = 0xFFFF00;
@@ -197,15 +42,15 @@ class BriefingScene extends Phaser.Scene {
     }
     resize() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 0.9;
+        const gameAreaWidth = this.scale.width * 1; // Ajuste para 1%
         const gameAreaHeight = this.scale.height * 0.9;
         if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
         if (this.stars) this.stars.forEach(star => { if (star.active) star.setPosition(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight)).setScale(baseScale); });
         if (this.briefingText) this.briefingText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
         if (this.startButton) {
-            this.startButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale);
+            this.startButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale); // de 160 Ajuste para 50
             this.startButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.startText.setPosition(gameAreaWidth / 2, gameAreaHeight - 160 * baseScale).setFontSize(`${30 * baseScale}px`);
+            this.startText.setPosition(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale).setFontSize(`${30 * baseScale}px`);
         }
     }
 }
@@ -238,7 +83,7 @@ class GameScene extends Phaser.Scene {
     create() {
         this.cameras.main.setSize(this.scale.width, this.scale.height);
         let colorPrefix; if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red'; else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow'; else colorPrefix = 'blue';
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8; // Reduz 20% para ajustar altura
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT) * 0.8;
         const gameAreaWidth = this.scale.width * 0.9;
         const gameAreaHeight = this.scale.height * 0.9;
 
@@ -534,7 +379,7 @@ class GameScene extends Phaser.Scene {
                     this.restartButton.on('pointerout', () => this.restartButton.setFillStyle(0x00FF00, 1));
                     this.restartButton.on('pointerdown', () => {
                         this.restartButton.setFillStyle(0x00FF00, 1); this.restartText.setColor('#000000');
-                        this.restartButton.once('pointerup', () => { destroyedCount = 0; preservedCount = 0; currentLevel = 1; gameEnded = false; this.scene.start('IntroScene'); });
+                        this.restartButton.once('pointerup', () => { destroyedCount = 0; preservedCount = 0; currentLevel = 1; gameEnded = false; this.scene.start('BriefingScene'); });
                     });
                 }
             });
