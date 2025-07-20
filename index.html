@@ -88,17 +88,17 @@
         }
         .btn-custom {
             position: absolute;
-            bottom: 5%;
+            bottom: 8%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 65px;
+            font-size: 85px;
             padding: 20px 30px;
             min-width: 110px;
             min-height: 85px;
             z-index: 50;
-            background: none; /* Já sem fundo, mantido */
+            background: none;
             border: none;
-            color: #39ff14; /* Verde, mantido */
+            color: #39ff14;
             cursor: pointer;
             transition: color 0.3s;
             display: flex;
@@ -108,13 +108,14 @@
         .btn-custom:hover {
             color: #ffc107;
         }
+        @media (max-height: 800px) {
+            .btn-custom {
+                bottom: 2%;
+                font-size: 50px;
+            }
+        }
         @media (max-width: 576px) {
             .bg-img-bottom { width: 100%; height: auto; max-height: calc(100vh * (1506 / 785)); }
-            .btn-custom {
-                font-size: 65px;
-                min-width: 110px;
-                min-height: 85px;
-            }
             .text-layer { font-size: 24px; width: 85%; }
         }
         @media (min-height: 700px) {
