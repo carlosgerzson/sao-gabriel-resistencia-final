@@ -67,27 +67,27 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107) // Cor warning
+        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107)
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
         this.startText = this.add.text(this.scale.width / 2, this.scale.height - 160, 'INICIAR', {
             fontFamily: 'VT323',
             fontSize: '30px',
-            color: '#000000' // Texto preto
+            color: '#000000'
         }).setOrigin(0.5).setDepth(1202);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1); // Cor warning no hover
-            text.setColor(hover ? '#000000' : '#000000'); // Texto preto
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1);
+            text.setColor(hover ? '#000000' : '#000000');
         };
 
-        this.startButton.defaultFillColor = 0xFFC107; // Cor warning
+        this.startButton.defaultFillColor = 0xFFC107;
         this.startButton.on('pointerover', () => updateButtonState(this.startButton, this.startText, true), this);
         this.startButton.on('pointerout', () => updateButtonState(this.startButton, this.startText, false), this);
         this.startButton.on('pointerdown', () => {
-            this.startButton.setFillStyle(0xFFC107, 1); // Cor warning
-            this.startText.setColor('#000000'); // Texto preto
+            this.startButton.setFillStyle(0xFFC107, 1);
+            this.startText.setColor('#000000');
             this.startButton.once('pointerup', () => {
                 this.scene.start('GameScene');
             }, this);
@@ -105,6 +105,7 @@ class BriefingScene extends Phaser.Scene {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         const minFontSize = 20;
         const gameAreaHeight = this.scale.height;
+        const isAndroid = /Android/.test(navigator.userAgent);
         if (this.fundo) {
             this.fundo.setPosition(this.scale.width / 2, 0);
             this.fundo.setScale(baseScale).setDisplaySize(this.scale.width, gameAreaHeight);
@@ -124,11 +125,15 @@ class BriefingScene extends Phaser.Scene {
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
         if (this.startButton) {
-            this.startButton.setPosition(this.scale.width / 2, gameAreaHeight - 160 * baseScale);
+            let buttonY = gameAreaHeight - 160 * baseScale;
+            if (isAndroid) {
+                buttonY -= 100 * baseScale; // Subir 100px no Android
+            }
+            this.startButton.setPosition(this.scale.width / 2, buttonY);
             this.startButton.setSize(200 * baseScale, 80 * baseScale);
             this.startButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
             this.startButton.setInteractive();
-            this.startText.setPosition(this.scale.width / 2, gameAreaHeight - 160 * baseScale);
+            this.startText.setPosition(this.scale.width / 2, buttonY);
             this.startText.setFontSize(Math.max(30 * baseScale, minFontSize) + 'px');
         }
     }
@@ -244,10 +249,14 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
 
+        const isAndroid = /Android/.test(navigator.userAgent);
         this.silhuetaSprite = this.add.image(this.scale.width / 2, gameAreaHeight, `silhueta_urbana_${colorPrefix}`)
             .setOrigin(0.5, 1)
             .setScale(baseScale)
             .setDepth(25);
+        if (isAndroid) {
+            this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+        }
 
         const towerAndCannonDefinitions = [
             {
@@ -290,7 +299,7 @@ class GameScene extends Phaser.Scene {
         this.allTowerSprites = [];
 
         towerAndCannonDefinitions.forEach((def, index) => {
-            const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20; // Apenas torreE com depth 30
+            const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20;
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
                 .setOrigin(0.5, 1)
                 .setScale(def.towerScale)
@@ -305,6 +314,10 @@ class GameScene extends Phaser.Scene {
 
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
+            if (isAndroid) {
+                tower.setY(gameAreaHeight); // bottom 0
+                cannon.setY(gameAreaHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
+            }
         });
 
         this.buildingState = 0;
@@ -424,6 +437,7 @@ class GameScene extends Phaser.Scene {
 
             const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
             const gameAreaHeight = height;
+            const isAndroid = /Android/.test(navigator.userAgent);
             if (this.gameBackground) {
                 this.gameBackground.setPosition(width / 2, 0);
                 this.gameBackground.setScale(baseScale).setDisplaySize(width, height);
@@ -431,13 +445,17 @@ class GameScene extends Phaser.Scene {
 
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
-                this.silhuetaSprite.setScale(baseScale);
+                if (isAndroid) {
+                    this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+                }
             }
 
             if (this.buildingContainer) {
-                const buildingWidth = 510 * baseScale;
-                const buildingHeight = 550 * baseScale;
-                this.buildingContainer.setPosition(width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
+                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale);
+                if (isAndroid) {
+                    containerY = gameAreaHeight - buildingHeight; // Ajuste pro ~48px do bottom
+                }
+                this.buildingContainer.setPosition(width / 2, containerY);
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setScale(baseScale);
                 this.building.setPosition(0, buildingHeight);
@@ -455,6 +473,9 @@ class GameScene extends Phaser.Scene {
                 this.allTowerSprites.forEach(tower => {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
+                        if (isAndroid) {
+                            tower.sprite.setY(gameAreaHeight); // bottom 0
+                        }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
                 });
@@ -463,6 +484,9 @@ class GameScene extends Phaser.Scene {
                 this.allCannonsSprites.forEach(cannon => {
                     if (cannon.sprite.active) {
                         cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
+                        if (isAndroid) {
+                            cannon.sprite.setY(gameAreaHeight - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                        }
                         cannon.sprite.setScale(cannon.def.cannonScale);
                     }
                 });
@@ -608,29 +632,35 @@ class GameScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107) // Cor warning
+        const isAndroid = /Android/.test(navigator.userAgent);
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
             .setInteractive({ useHandCursor: true});
+        let continueButtonY = this.scale.height - (160 * baseScale);
+        if (isAndroid) {
+            continueButtonY -= 100 * baseScale; // Subir 100px no Android
+        }
+        this.continueButton.setPosition(this.scale.width / 2, continueButtonY);
 
-        this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * baseScale), 'CONTINUAR', {
+        this.continueText = this.add.text(this.scale.width / 2, continueButtonY, 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-            color: '#000000' // Texto preto
+            color: '#000000'
         }).setOrigin(0.5).setDepth(2001);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1); // Cor warning no hover
-            text.setColor('#000000'); // Texto preto
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1);
+            text.setColor('#000000');
         };
 
-        this.continueButton.defaultFillColor = 0xFFC107; // Cor warning
+        this.continueButton.defaultFillColor = 0xFFC107;
         this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
         this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
         this.continueButton.on('pointerdown', () => {
             console.log('Botão clicado - pointerdown');
-            this.continueButton.setFillStyle(0xFFC107, 1); // Cor warning
-            this.continueText.setColor('#000000'); // Texto preto
+            this.continueButton.setFillStyle(0xFFC107, 1);
+            this.continueText.setColor('#000000');
             this.continueButton.once('pointerup', () => {
                 console.log('Botão clicado - pointerup');
                 console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`);
@@ -709,23 +739,29 @@ class GameScene extends Phaser.Scene {
                         duration: 2000
                     });
 
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107) // Cor warning
+                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
                         .setStrokeStyle(4 * baseScale, 0xFFFFFF)
                         .setDepth(2000)
                         .setInteractive({ useHandCursor: true});
-                    this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * baseScale), 'REINICIAR', {
+                    let restartButtonY = this.scale.height - (250 * baseScale);
+                    if (isAndroid) {
+                        restartButtonY -= 100 * baseScale; // Subir 100px no Android
+                    }
+                    this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
+
+                    this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
                         fontFamily: 'VT323',
                         fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                        color: '#000000' // Texto preto
+                        color: '#000000'
                     }).setOrigin(0.5).setDepth(2001);
 
-                    this.restartButton.defaultFillColor = 0xFFC107; // Cor warning
+                    this.restartButton.defaultFillColor = 0xFFC107;
                     this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
                     this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
                     this.restartButton.on('pointerdown', () => {
                         console.log('Botão REINICIAR - pointerdown');
-                        this.restartButton.setFillStyle(0xFFC107, 1); // Cor warning
-                        this.restartText.setColor('#000000'); // Texto preto
+                        this.restartButton.setFillStyle(0xFFC107, 1);
+                        this.restartText.setColor('#000000');
                         this.restartButton.once('pointerup', () => {
                             console.log('Botão REINICIAR - pointerup');
                             updateButtonState(this.restartButton, this.restartText, false);
