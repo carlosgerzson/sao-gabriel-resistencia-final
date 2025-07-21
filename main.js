@@ -21,8 +21,11 @@ class BriefingScene extends Phaser.Scene {
     }
 
     create() {
+        // Previne piscadas forçando o fundo imediatamente
+        this.cameras.main.setBackgroundColor('#000000'); // Fundo preto inicial
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
-            .setOrigin(0.5, 0);
+            .setOrigin(0.5, 0)
+            .setDisplaySize(this.scale.width, this.scale.height);
 
         this.stars = [];
         for (let i = 0; i < 50; i++) {
@@ -192,6 +195,8 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        // Previne piscadas forçando o fundo imediatamente
+        this.cameras.main.setBackgroundColor('#000000'); // Fundo preto inicial
         this.cameras.main.setSize(this.scale.width, this.scale.height);
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
@@ -204,7 +209,8 @@ class GameScene extends Phaser.Scene {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
-            .setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
+            .setScale(baseScale)
+            .setDisplaySize(this.scale.width, this.scale.height);
 
         this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
@@ -265,7 +271,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+            this.silhuetaSprite.setY(gameAreaHeight - 10); // Ajuste fino pra subir um pouco
         }
 
         const towerAndCannonDefinitions = [
@@ -325,8 +331,8 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(gameAreaHeight); // bottom 0
-                cannon.setY(gameAreaHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                tower.setY(gameAreaHeight - 10); // Ajuste fino pra subir um pouco
+                cannon.setY(gameAreaHeight - 10 - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
 
@@ -456,13 +462,13 @@ class GameScene extends Phaser.Scene {
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+                    this.silhuetaSprite.setY(gameAreaHeight - 10); // Ajuste fino
                 }
             }
 
             if (this.buildingContainer) {
                 const buildingHeight = 550 * baseScale;
-                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale); // ~48px em todos os casos
+                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale);
                 this.buildingContainer.setPosition(width / 2, containerY);
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setScale(baseScale);
@@ -482,7 +488,7 @@ class GameScene extends Phaser.Scene {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         if (isAndroid) {
-                            tower.sprite.setY(gameAreaHeight); // bottom 0
+                            tower.sprite.setY(gameAreaHeight - 10); // Ajuste fino
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
@@ -493,7 +499,7 @@ class GameScene extends Phaser.Scene {
                     if (cannon.sprite.active) {
                         cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
                         if (isAndroid) {
-                            cannon.sprite.setY(gameAreaHeight - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                            cannon.sprite.setY(gameAreaHeight - 10 - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
                         }
                         cannon.sprite.setScale(cannon.def.cannonScale);
                     }
