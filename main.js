@@ -67,11 +67,17 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
+        const isAndroid = /Android/.test(navigator.userAgent);
         this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107)
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
-        this.startText = this.add.text(this.scale.width / 2, this.scale.height - 160, 'INICIAR', {
+        let startButtonY = this.scale.height - 160;
+        if (isAndroid) {
+            startButtonY -= 100;
+        }
+        this.startButton.setPosition(this.scale.width / 2, startButtonY);
+        this.startText = this.add.text(this.scale.width / 2, startButtonY, 'INICIAR', {
             fontFamily: 'VT323',
             fontSize: '30px',
             color: '#000000'
@@ -120,7 +126,11 @@ class BriefingScene extends Phaser.Scene {
             });
         }
         if (this.briefingText) {
-            this.briefingText.setPosition(this.scale.width / 2, gameAreaHeight / 2);
+            let textY = gameAreaHeight / 2;
+            if (isAndroid) {
+                textY = gameAreaHeight * 0.4;
+            }
+            this.briefingText.setPosition(this.scale.width / 2, textY);
             this.briefingText.setFontSize(Math.max(48 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
@@ -255,7 +265,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(gameAreaHeight);
+            this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
         }
 
         const towerAndCannonDefinitions = [
@@ -315,7 +325,7 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(gameAreaHeight);
+                tower.setY(gameAreaHeight); // bottom 0
                 cannon.setY(gameAreaHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
@@ -446,16 +456,13 @@ class GameScene extends Phaser.Scene {
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(gameAreaHeight);
+                    this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
                 }
             }
 
             if (this.buildingContainer) {
                 const buildingHeight = 550 * baseScale;
-                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale); // Padrão com 48px de offset
-                if (isAndroid) {
-                    containerY = gameAreaHeight - buildingHeight; // Remove offset no Android
-                }
+                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale); // ~48px em todos os casos
                 this.buildingContainer.setPosition(width / 2, containerY);
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setScale(baseScale);
@@ -475,7 +482,7 @@ class GameScene extends Phaser.Scene {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         if (isAndroid) {
-                            tower.sprite.setY(gameAreaHeight);
+                            tower.sprite.setY(gameAreaHeight); // bottom 0
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
