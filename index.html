@@ -175,7 +175,7 @@
             script1.src = 'https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js';
             script1.onload = function() {
                 var script2 = document.createElement('script');
-                script2.src = 'gameScene.js';
+                script2.src = 'main.js';
                 script2.onload = function() {
                     new Phaser.Game({
                         type: Phaser.AUTO,
@@ -184,8 +184,8 @@
                         parent: 'gameContainerInner',
                         scene: [BriefingScene, GameScene,],
                         scale: {
-                            mode: Phaser.Scale.RESIZE,
-                            autoCenter: Phaser.Scale.CENTER_BOTH
+                            mode: Phaser.Scale.FIT,
+                            autoCenter: Phaser.Scale.NO_CENTER
                         },
                         backgroundColor: '#c8f309',
                         render: { pixelArt: false, antialias: true }

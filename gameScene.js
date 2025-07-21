@@ -16,7 +16,7 @@ class BriefingScene extends Phaser.Scene {
     preload() { this.load.image('fundo1', 'assets/fundo1.png'); }
     create() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 1; // Aumentado de 0.9 para 1 pra centralizar melhor
+        const gameAreaWidth = this.scale.width * 1;
         const gameAreaHeight = this.scale.height * 0.9;
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1').setOrigin(0.5, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
         this.stars = []; for (let i = 0; i < 50; i++) this.stars.push(this.add.circle(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight), Phaser.Math.Between(1, 3), 0xFFFFFF).setAlpha(Phaser.Math.FloatBetween(0.2, 1)));
@@ -25,16 +25,16 @@ class BriefingScene extends Phaser.Scene {
             fontFamily: 'VT323', fontSize: `${48 * baseScale}px`, color: '#e9bb00', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
         }).setOrigin(0.5).setDepth(1200).setAlpha(0);
         this.tweens.add({ targets: this.briefingText, alpha: 1, duration: 2000 });
-        this.startButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale, 200 * baseScale, 80 * baseScale, 0xFFFF00) // Aumentado de 160 para 250
+        this.startButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale, 200 * baseScale, 80 * baseScale, 0xffca28) // Mudado pra tom "warning" (#ffca28)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(1201).setInteractive({ useHandCursor: true });
-        this.startText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale, 'INICIAR', {
-            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000'
+        this.startText = this.add.text(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale, 'INICIAR', {
+            fontFamily: 'VT323', fontSize: `${30 * baseScale}px`, color: '#000000' // Voltado pra preto como você preferiu
         }).setOrigin(0.5).setDepth(1202);
-        this.startButton.defaultFillColor = 0xFFFF00;
+        this.startButton.defaultFillColor = 0xffca28;
         this.startButton.on('pointerover', () => this.startButton.setFillStyle(0xFFFFFF, 1));
-        this.startButton.on('pointerout', () => this.startButton.setFillStyle(0xFFFF00, 1));
+        this.startButton.on('pointerout', () => this.startButton.setFillStyle(0xffca28, 1));
         this.startButton.on('pointerdown', () => {
-            this.startButton.setFillStyle(0xFFFF00, 1); this.startText.setColor('#FFFFFF');
+            this.startButton.setFillStyle(0xffca28, 1); this.startText.setColor('#FFFFFF');
             this.startButton.once('pointerup', () => this.scene.start('GameScene'));
         });
         this.input.on('pointerdown', () => this.game.canvas.focus());
@@ -42,15 +42,16 @@ class BriefingScene extends Phaser.Scene {
     }
     resize() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaWidth = this.scale.width * 1; // Ajuste para 1%
+        const gameAreaWidth = this.scale.width * 1;
         const gameAreaHeight = this.scale.height * 0.9;
         if (this.fundo) this.fundo.setPosition(this.scale.width / 2, 0).setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
         if (this.stars) this.stars.forEach(star => { if (star.active) star.setPosition(Phaser.Math.Between(0, gameAreaWidth), Phaser.Math.Between(0, gameAreaHeight)).setScale(baseScale); });
         if (this.briefingText) this.briefingText.setPosition(gameAreaWidth / 2, gameAreaHeight / 2).setFontSize(`${48 * baseScale}px`).setWordWrapWidth(gameAreaWidth * 0.8);
         if (this.startButton) {
-            this.startButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale); // de 160 Ajuste para 50
+            this.startButton.setPosition(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale);
             this.startButton.setSize(200 * baseScale, 80 * baseScale).setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.startText.setPosition(gameAreaWidth / 2, gameAreaHeight - 250 * baseScale).setFontSize(`${30 * baseScale}px`);
+            this.startText.setPosition(gameAreaWidth / 2, gameAreaHeight - 50 * baseScale);
+            this.startText.setFontSize(`${30 * baseScale}px`);
         }
     }
 }
@@ -340,16 +341,16 @@ class GameScene extends Phaser.Scene {
             fontFamily: 'VT323', fontSize: `${Math.max(40 * baseScale, 24)}px`, color: '#FFFFFF', align: 'center', lineSpacing: 20, wordWrap: { width: gameAreaWidth * 0.8 }
         }).setOrigin(0.5).setDepth(1501).setAlpha(0);
         this.tweens.add({ targets: this.statsText, alpha: 1, duration: 2000 });
-        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFFF00)
+        this.continueButton = this.add.rectangle(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale), 200 * baseScale, 80 * baseScale, 0xffca28) // Tom "warning" aqui também
             .setStrokeStyle(2 * baseScale, 0xFFFFFF).setDepth(2000).setInteractive({ useHandCursor: true });
         this.continueText = this.add.text(gameAreaWidth / 2, gameAreaHeight - (100 * baseScale), 'CONTINUAR', {
             fontFamily: 'VT323', fontSize: `${Math.max(30 * baseScale, 20)}px`, color: '#000000', wordWrap: { width: 200 * baseScale }
         }).setOrigin(0.5).setDepth(2001);
-        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.defaultFillColor = 0xffca28;
         this.continueButton.on('pointerover', () => this.continueButton.setFillStyle(0xFFFFFF, 1));
-        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xFFFF00, 1));
+        this.continueButton.on('pointerout', () => this.continueButton.setFillStyle(0xffca28, 1));
         this.continueButton.on('pointerdown', () => {
-            this.continueButton.setFillStyle(0xFFFF00, 1); this.continueText.setColor('#000000');
+            this.continueButton.setFillStyle(0xffca28, 1); this.continueText.setColor('#000000');
             this.continueButton.once('pointerup', () => {
                 const totalLevels = typeof TOTAL_LEVELS !== 'undefined' ? TOTAL_LEVELS : 10;
                 if (currentLevel < totalLevels) { currentLevel++; gameEnded = false; this.scene.start('BriefingScene'); }
