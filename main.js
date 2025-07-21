@@ -18,11 +18,12 @@ class BriefingScene extends Phaser.Scene {
 
     preload() {
         this.load.image('fundo1', 'assets/fundo1.png');
+        this.load.on('complete', () => {
+            this.cameras.main.setBackgroundColor('#000000'); // Fundo preto após preload
+        });
     }
 
     create() {
-        // Previne piscadas forçando o fundo imediatamente
-        this.cameras.main.setBackgroundColor('#000000'); // Fundo preto inicial
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
             .setOrigin(0.5, 0)
             .setDisplaySize(this.scale.width, this.scale.height);
@@ -97,9 +98,9 @@ class BriefingScene extends Phaser.Scene {
         this.startButton.on('pointerdown', () => {
             this.startButton.setFillStyle(0xFFC107, 1);
             this.startText.setColor('#000000');
-            this.startButton.once('pointerup', () => {
+            this.time.delayedCall(100, () => {
                 this.scene.start('GameScene');
-            }, this);
+            }, [], this);
         });
 
         this.input.on('pointerdown', () => this.game.canvas.focus());
@@ -192,11 +193,12 @@ class GameScene extends Phaser.Scene {
         this.load.image(`${this.levelPrefix}_dano2`, `${this.levelPrefix}_dano2.png`);
         this.load.image(`${this.levelPrefix}_destruido`, `${this.levelPrefix}_destruido.png`);
         this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`);
+        this.load.on('complete', () => {
+            this.cameras.main.setBackgroundColor('#000000'); // Fundo preto após preload
+        });
     }
 
     create() {
-        // Previne piscadas forçando o fundo imediatamente
-        this.cameras.main.setBackgroundColor('#000000'); // Fundo preto inicial
         this.cameras.main.setSize(this.scale.width, this.scale.height);
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
@@ -271,7 +273,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(gameAreaHeight - 10); // Ajuste fino pra subir um pouco
+            this.silhuetaSprite.setY(this.cameras.main.displayHeight); // Usa altura visível
         }
 
         const towerAndCannonDefinitions = [
@@ -331,8 +333,8 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(gameAreaHeight - 10); // Ajuste fino pra subir um pouco
-                cannon.setY(gameAreaHeight - 10 - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                tower.setY(this.cameras.main.displayHeight); // Usa altura visível
+                cannon.setY(this.cameras.main.displayHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
 
@@ -462,7 +464,7 @@ class GameScene extends Phaser.Scene {
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(gameAreaHeight - 10); // Ajuste fino
+                    this.silhuetaSprite.setY(this.cameras.main.displayHeight);
                 }
             }
 
@@ -488,7 +490,7 @@ class GameScene extends Phaser.Scene {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         if (isAndroid) {
-                            tower.sprite.setY(gameAreaHeight - 10); // Ajuste fino
+                            tower.sprite.setY(this.cameras.main.displayHeight);
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
@@ -499,7 +501,7 @@ class GameScene extends Phaser.Scene {
                     if (cannon.sprite.active) {
                         cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
                         if (isAndroid) {
-                            cannon.sprite.setY(gameAreaHeight - 10 - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                            cannon.sprite.setY(this.cameras.main.displayHeight - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
                         }
                         cannon.sprite.setScale(cannon.def.cannonScale);
                     }
@@ -675,121 +677,47 @@ class GameScene extends Phaser.Scene {
             console.log('Botão clicado - pointerdown');
             this.continueButton.setFillStyle(0xFFC107, 1);
             this.continueText.setColor('#000000');
-            this.continueButton.once('pointerup', () => {
-                console.log('Botão clicado - pointerup');
-                console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`);
-                updateButtonState(this.continueButton, this.continueText, false);
-                const totalLevels = typeof TOTAL_LEVELS !== 'undefined' ? TOTAL_LEVELS : 10;
-                if (currentLevel < totalLevels) {
-                    currentLevel++;
-                    gameEnded = false;
+            this.time.delayedCall(100, () => {
+                this.scene.start('BriefingScene');
+            }, [], this);
+        });
+
+        this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
+            .setStrokeStyle(4 * baseScale, 0xFFFFFF)
+            .setDepth(2000)
+            .setInteractive({ useHandCursor: true});
+        let restartButtonY = this.scale.height - (250 * baseScale);
+        if (isAndroid) {
+            restartButtonY -= 100 * baseScale;
+        }
+        this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
+
+        this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
+            fontFamily: 'VT323',
+            fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
+            color: '#000000'
+        }).setOrigin(0.5).setDepth(2001);
+
+        this.restartButton.defaultFillColor = 0xFFC107;
+        this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
+        this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
+        this.restartButton.on('pointerdown', () => {
+            console.log('Botão REINICIAR - pointerdown');
+            this.restartButton.setFillStyle(0xFFC107, 1);
+            this.restartText.setColor('#000000');
+            this.restartButton.once('pointerup', () => {
+                console.log('Botão REINICIAR - pointerup');
+                updateButtonState(this.restartButton, this.restartText, false);
+                destroyedCount = 0;
+                preservedCount = 0;
+                currentLevel = 1;
+                gameEnded = false;
+                this.time.delayedCall(100, () => {
                     this.scene.start('BriefingScene');
-                } else {
-                    console.log('Entrando no modo FIM DE JOGO');
-                    if (this.gameBackground) this.gameBackground.destroy();
-                    if (this.resultText) this.resultText.destroy();
-                    if (this.statsText) this.statsText.destroy();
-                    this.continueButton.destroy();
-                    this.continueText.destroy();
-
-                    this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1')
-                        .setOrigin(0.5, 0)
-                        .setScale(baseScale)
-                        .setDisplaySize(this.scale.width, this.scale.height)
-                        .setDepth(1000);
-
-                    this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * baseScale), 'FIM DE JOGO!', {
-                        fontFamily: 'VT323',
-                        fontSize: Math.max(80 * baseScale, minFontSize) + 'px',
-                        color: '#FFFFFF',
-                        align: 'center'
-                    }).setOrigin(0.5).setDepth(1200);
-                    this.tweens.add({
-                        targets: this.endText,
-                        scale: { from: 1, to: 1.2 },
-                        duration: 1000,
-                        yoyo: true,
-                        repeat: -1
-                    });
-
-                    let performanceMessage = '';
-                    if (preservedCount >= 8) {
-                        performanceMessage = 'Excelente! Você é um verdadeiro defensor do patrimônio!';
-                    } else if (preservedCount >= 5) {
-                        performanceMessage = 'Bom trabalho! Você preservou mais da metade!';
-                    } else {
-                        performanceMessage = 'Foi difícil, mas você fez o seu melhor!';
-                    }
-
-                    this.performanceText = this.add.text(this.scale.width / 2, this.scale.height / 2, performanceMessage, {
-                        fontFamily: 'VT323',
-                        fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                        color: '#FFFFFF',
-                        align: 'center',
-                        lineSpacing: 20,
-                        wordWrap: { width: 800 * baseScale }
-                    }).setOrigin(0.5).setDepth(1201);
-                    this.performanceText.setAlpha(0);
-                    this.tweens.add({
-                        targets: this.performanceText,
-                        alpha: { from: 0, to: 1 },
-                        duration: 2000
-                    });
-
-                    this.statsText = this.add.text(this.scale.width / 2, this.scale.height / 2 + (150 * baseScale),
-                        `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
-                        {
-                            fontFamily: 'VT323',
-                            fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                            color: '#FFFFFF',
-                            align: 'center',
-                            lineSpacing: 20
-                        }
-                    ).setOrigin(0.5).setDepth(1201);
-                    this.statsText.setAlpha(0);
-                    this.tweens.add({
-                        targets: this.statsText,
-                        alpha: { from: 0, to: 1 },
-                        duration: 2000
-                    });
-
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
-                        .setStrokeStyle(4 * baseScale, 0xFFFFFF)
-                        .setDepth(2000)
-                        .setInteractive({ useHandCursor: true});
-                    let restartButtonY = this.scale.height - (250 * baseScale);
-                    if (isAndroid) {
-                        restartButtonY -= 100 * baseScale;
-                    }
-                    this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
-
-                    this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
-                        fontFamily: 'VT323',
-                        fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                        color: '#000000'
-                    }).setOrigin(0.5).setDepth(2001);
-
-                    this.restartButton.defaultFillColor = 0xFFC107;
-                    this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
-                    this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
-                    this.restartButton.on('pointerdown', () => {
-                        console.log('Botão REINICIAR - pointerdown');
-                        this.restartButton.setFillStyle(0xFFC107, 1);
-                        this.restartText.setColor('#000000');
-                        this.restartButton.once('pointerup', () => {
-                            console.log('Botão REINICIAR - pointerup');
-                            updateButtonState(this.restartButton, this.restartText, false);
-                            destroyedCount = 0;
-                            preservedCount = 0;
-                            currentLevel = 1;
-                            gameEnded = false;
-                            this.scene.start('BriefingScene');
-                        }, this);
-                    });
-                }
+                }, [], this);
             }, this);
-        }, this);
-    }
+        });
+}
 
     update() {
         if (gameEnded) return;
