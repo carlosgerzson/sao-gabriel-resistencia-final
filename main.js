@@ -10,7 +10,6 @@ let gameEnded = false;
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
 
-
 // -------- BriefingScene --------
 class BriefingScene extends Phaser.Scene {
     constructor() {
@@ -68,27 +67,27 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFFF00)
+        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107) // Cor warning
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
         this.startText = this.add.text(this.scale.width / 2, this.scale.height - 160, 'INICIAR', {
             fontFamily: 'VT323',
             fontSize: '30px',
-            color: '#000000'
+            color: '#000000' // Texto preto
         }).setOrigin(0.5).setDepth(1202);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
-            text.setColor(hover ? '#000000' : '#000000');
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1); // Cor warning no hover
+            text.setColor(hover ? '#000000' : '#000000'); // Texto preto
         };
 
-        this.startButton.defaultFillColor = 0xFFFF00;
+        this.startButton.defaultFillColor = 0xFFC107; // Cor warning
         this.startButton.on('pointerover', () => updateButtonState(this.startButton, this.startText, true), this);
         this.startButton.on('pointerout', () => updateButtonState(this.startButton, this.startText, false), this);
         this.startButton.on('pointerdown', () => {
-            this.startButton.setFillStyle(0xFFFF00, 1);
-            this.startText.setColor('#FFFFFF');
+            this.startButton.setFillStyle(0xFFC107, 1); // Cor warning
+            this.startText.setColor('#000000'); // Texto preto
             this.startButton.once('pointerup', () => {
                 this.scene.start('GameScene');
             }, this);
@@ -104,31 +103,32 @@ class BriefingScene extends Phaser.Scene {
 
     resize() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const minFontSize = 20; // Tamanho mínimo para telas pequenas
+        const minFontSize = 20;
+        const gameAreaHeight = this.scale.height;
         if (this.fundo) {
             this.fundo.setPosition(this.scale.width / 2, 0);
-            this.fundo.setScale(baseScale);
+            this.fundo.setScale(baseScale).setDisplaySize(this.scale.width, gameAreaHeight);
         }
         if (this.stars) {
             this.stars.forEach(star => {
                 if (star.active) {
                     star.x = Phaser.Math.Between(0, this.scale.width);
-                    star.y = Phaser.Math.Between(0, this.scale.height);
+                    star.y = Phaser.Math.Between(0, gameAreaHeight);
                     star.setScale(baseScale);
                 }
             });
         }
         if (this.briefingText) {
-            this.briefingText.setPosition(this.scale.width / 2, this.scale.height / 2);
+            this.briefingText.setPosition(this.scale.width / 2, gameAreaHeight / 2);
             this.briefingText.setFontSize(Math.max(48 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
         if (this.startButton) {
-            this.startButton.setPosition(this.scale.width / 2, this.scale.height - 160 * baseScale);
+            this.startButton.setPosition(this.scale.width / 2, gameAreaHeight - 160 * baseScale);
             this.startButton.setSize(200 * baseScale, 80 * baseScale);
             this.startButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
             this.startButton.setInteractive();
-            this.startText.setPosition(this.scale.width / 2, this.scale.height - 160 * baseScale);
+            this.startText.setPosition(this.scale.width / 2, gameAreaHeight - 160 * baseScale);
             this.startText.setFontSize(Math.max(30 * baseScale, minFontSize) + 'px');
         }
     }
@@ -189,7 +189,7 @@ class GameScene extends Phaser.Scene {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
-            .setScale(baseScale);
+            .setScale(baseScale).setDisplaySize(this.scale.width, this.scale.height);
 
         this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
@@ -216,9 +216,10 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
+        const gameAreaHeight = this.scale.height;
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, this.scale.height - buildingHeight - (48 * baseScale));
+        this.buildingContainer = this.add.container(this.scale.width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
@@ -243,43 +244,43 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
 
-        this.silhuetaSprite = this.add.image(this.scale.width / 2, this.scale.height, `silhueta_urbana_${colorPrefix}`)
+        this.silhuetaSprite = this.add.image(this.scale.width / 2, gameAreaHeight, `silhueta_urbana_${colorPrefix}`)
             .setOrigin(0.5, 1)
             .setScale(baseScale)
-            .setDepth(20);
+            .setDepth(25);
 
         const towerAndCannonDefinitions = [
             {
                 name: 'Torre Esquerda',
                 towerAsset: `torre_e_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.144,
-                towerBaseY: this.scale.height,
+                towerBaseY: gameAreaHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_e',
                 cannonX: this.scale.width * 0.144,
-                cannonY: this.scale.height * 0.613,
+                cannonY: gameAreaHeight - (this.textures.get(`torre_e_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             },
             {
                 name: 'Torre Central',
                 towerAsset: `torre_c_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.65,
-                towerBaseY: this.scale.height,
+                towerBaseY: gameAreaHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_c',
                 cannonX: this.scale.width * 0.65,
-                cannonY: this.scale.height * 0.647,
+                cannonY: gameAreaHeight - (this.textures.get(`torre_c_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             },
             {
                 name: 'Torre Direita',
                 towerAsset: `torre_d_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.881,
-                towerBaseY: this.scale.height,
+                towerBaseY: gameAreaHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_d',
                 cannonX: this.scale.width * 0.881,
-                cannonY: this.scale.height * 0.563,
+                cannonY: gameAreaHeight - (this.textures.get(`torre_d_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             }
         ];
@@ -288,17 +289,18 @@ class GameScene extends Phaser.Scene {
         this.towers = [];
         this.allTowerSprites = [];
 
-        towerAndCannonDefinitions.forEach((def) => {
+        towerAndCannonDefinitions.forEach((def, index) => {
+            const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20; // Apenas torreE com depth 30
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
                 .setOrigin(0.5, 1)
                 .setScale(def.towerScale)
-                .setDepth(18); // 20
+                .setDepth(towerDepth);
             this.allTowerSprites.push({ sprite: tower, def: def });
 
             const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset)
                 .setOrigin(0.5, 1)
                 .setScale(def.cannonScale)
-                .setDepth(10);
+                .setDepth(15);
             this.allCannonsSprites.push({ sprite: cannon, def: def });
 
             cannons.push({ sprite: cannon, tower: tower });
@@ -421,20 +423,21 @@ class GameScene extends Phaser.Scene {
             console.log(`Resize: width=${width}, height=${height}`);
 
             const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+            const gameAreaHeight = height;
             if (this.gameBackground) {
                 this.gameBackground.setPosition(width / 2, 0);
-                this.gameBackground.setScale(baseScale);
+                this.gameBackground.setScale(baseScale).setDisplaySize(width, height);
             }
 
             if (this.silhuetaSprite) {
-                this.silhuetaSprite.setPosition(width / 2, height);
+                this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 this.silhuetaSprite.setScale(baseScale);
             }
 
             if (this.buildingContainer) {
                 const buildingWidth = 510 * baseScale;
                 const buildingHeight = 550 * baseScale;
-                this.buildingContainer.setPosition(width / 2, height - buildingHeight - (48 * baseScale));
+                this.buildingContainer.setPosition(width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setScale(baseScale);
                 this.building.setPosition(0, buildingHeight);
@@ -451,7 +454,7 @@ class GameScene extends Phaser.Scene {
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
                     if (tower.sprite.active) {
-                        tower.sprite.setPosition(tower.def.towerBaseX, height);
+                        tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         tower.sprite.setScale(tower.def.towerScale);
                     }
                 });
@@ -475,7 +478,7 @@ class GameScene extends Phaser.Scene {
                     if (missile && missile.active) {
                         missile.setSize(10 * baseScale, 30 * baseScale);
                         missile.targetX = Phaser.Math.Between(width / 2 - 255 * baseScale, width / 2 + 255 * baseScale);
-                        missile.targetY = height - 315 * baseScale;
+                        missile.targetY = gameAreaHeight - 315 * baseScale;
                     }
                 });
             }
@@ -571,7 +574,7 @@ class GameScene extends Phaser.Scene {
         }
 
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const minFontSize = 20; // Tamanho mínimo para telas pequenas
+        const minFontSize = 20;
         this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
             success ? 'SUCESSO!' : 'FALHA!',
             {
@@ -589,7 +592,7 @@ class GameScene extends Phaser.Scene {
         });
 
         this.statsText = this.add.text(this.scale.width / 2, this.scale.height * 0.30,
-            `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
+            `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
             {
                 fontFamily: 'VT323',
                 fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
@@ -605,29 +608,29 @@ class GameScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFFF00)
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107) // Cor warning
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
-            .setInteractive({ useHandCursor: true });
+            .setInteractive({ useHandCursor: true});
 
         this.continueText = this.add.text(this.scale.width / 2, this.scale.height - (160 * baseScale), 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-            color: '#000000'
+            color: '#000000' // Texto preto
         }).setOrigin(0.5).setDepth(2001);
 
         const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFFF00, 1);
-            text.setColor('#000000');
+            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1); // Cor warning no hover
+            text.setColor('#000000'); // Texto preto
         };
 
-        this.continueButton.defaultFillColor = 0xFFFF00;
+        this.continueButton.defaultFillColor = 0xFFC107; // Cor warning
         this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
         this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
         this.continueButton.on('pointerdown', () => {
             console.log('Botão clicado - pointerdown');
-            this.continueButton.setFillStyle(0xFFFF00, 1);
-            this.continueText.setColor('#000000');
+            this.continueButton.setFillStyle(0xFFC107, 1); // Cor warning
+            this.continueText.setColor('#000000'); // Texto preto
             this.continueButton.once('pointerup', () => {
                 console.log('Botão clicado - pointerup');
                 console.log(`currentLevel: ${currentLevel}, TOTAL_LEVELS: ${TOTAL_LEVELS}`);
@@ -648,6 +651,7 @@ class GameScene extends Phaser.Scene {
                     this.gameBackground = this.add.image(this.scale.width / 2, 0, 'fundo1')
                         .setOrigin(0.5, 0)
                         .setScale(baseScale)
+                        .setDisplaySize(this.scale.width, this.scale.height)
                         .setDepth(1000);
 
                     this.endText = this.add.text(this.scale.width / 2, this.scale.height / 2 - (200 * baseScale), 'FIM DE JOGO!', {
@@ -689,7 +693,7 @@ class GameScene extends Phaser.Scene {
                     });
 
                     this.statsText = this.add.text(this.scale.width / 2, this.scale.height / 2 + (150 * baseScale),
-                        `Destruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
+                        `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
                         {
                             fontFamily: 'VT323',
                             fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
@@ -705,31 +709,31 @@ class GameScene extends Phaser.Scene {
                         duration: 2000
                     });
 
-                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0x00FF00)
+                    this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107) // Cor warning
                         .setStrokeStyle(4 * baseScale, 0xFFFFFF)
                         .setDepth(2000)
-                        .setInteractive({ useHandCursor: true });
+                        .setInteractive({ useHandCursor: true});
                     this.restartText = this.add.text(this.scale.width / 2, this.scale.height - (250 * baseScale), 'REINICIAR', {
                         fontFamily: 'VT323',
                         fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                        color: '#000000'
+                        color: '#000000' // Texto preto
                     }).setOrigin(0.5).setDepth(2001);
 
-                    this.restartButton.defaultFillColor = 0x00FF00;
+                    this.restartButton.defaultFillColor = 0xFFC107; // Cor warning
                     this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
                     this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
                     this.restartButton.on('pointerdown', () => {
-                        console.log('Botão reiniciar clicado - pointerdown');
-                        this.restartButton.setFillStyle(0x00FF00, 1);
-                        this.restartText.setColor('#000000');
+                        console.log('Botão REINICIAR - pointerdown');
+                        this.restartButton.setFillStyle(0xFFC107, 1); // Cor warning
+                        this.restartText.setColor('#000000'); // Texto preto
                         this.restartButton.once('pointerup', () => {
-                            console.log('Botão reiniciar clicado - pointerup');
+                            console.log('Botão REINICIAR - pointerup');
                             updateButtonState(this.restartButton, this.restartText, false);
                             destroyedCount = 0;
                             preservedCount = 0;
                             currentLevel = 1;
                             gameEnded = false;
-                            this.scene.start('IntroScene');
+                            this.scene.start('BriefingScene');
                         }, this);
                     });
                 }
@@ -740,7 +744,8 @@ class GameScene extends Phaser.Scene {
     update() {
         if (gameEnded) return;
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const collisionTopY = this.scale.height - 315 * baseScale;
+        const gameAreaHeight = this.scale.height;
+        const collisionTopY = gameAreaHeight - 315 * baseScale;
         const collisionBottomY = collisionTopY + 50 * baseScale;
         const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
         const collisionRightX = this.scale.width / 2 + 255 * baseScale;
