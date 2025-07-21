@@ -127,7 +127,7 @@ class BriefingScene extends Phaser.Scene {
         if (this.startButton) {
             let buttonY = gameAreaHeight - 160 * baseScale;
             if (isAndroid) {
-                buttonY -= 100 * baseScale; // Subir 100px no Android
+                buttonY -= 100 * baseScale;
             }
             this.startButton.setPosition(this.scale.width / 2, buttonY);
             this.startButton.setSize(200 * baseScale, 80 * baseScale);
@@ -255,7 +255,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+            this.silhuetaSprite.setY(gameAreaHeight);
         }
 
         const towerAndCannonDefinitions = [
@@ -315,7 +315,7 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(gameAreaHeight); // bottom 0
+                tower.setY(gameAreaHeight);
                 cannon.setY(gameAreaHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
@@ -446,14 +446,15 @@ class GameScene extends Phaser.Scene {
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(gameAreaHeight); // bottom 0
+                    this.silhuetaSprite.setY(gameAreaHeight);
                 }
             }
 
             if (this.buildingContainer) {
-                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale);
+                const buildingHeight = 550 * baseScale;
+                let containerY = gameAreaHeight - buildingHeight - (48 * baseScale); // Padrão com 48px de offset
                 if (isAndroid) {
-                    containerY = gameAreaHeight - buildingHeight; // Ajuste pro ~48px do bottom
+                    containerY = gameAreaHeight - buildingHeight; // Remove offset no Android
                 }
                 this.buildingContainer.setPosition(width / 2, containerY);
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
@@ -474,7 +475,7 @@ class GameScene extends Phaser.Scene {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         if (isAndroid) {
-                            tower.sprite.setY(gameAreaHeight); // bottom 0
+                            tower.sprite.setY(gameAreaHeight);
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
@@ -639,7 +640,7 @@ class GameScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true});
         let continueButtonY = this.scale.height - (160 * baseScale);
         if (isAndroid) {
-            continueButtonY -= 100 * baseScale; // Subir 100px no Android
+            continueButtonY -= 100 * baseScale;
         }
         this.continueButton.setPosition(this.scale.width / 2, continueButtonY);
 
@@ -745,7 +746,7 @@ class GameScene extends Phaser.Scene {
                         .setInteractive({ useHandCursor: true});
                     let restartButtonY = this.scale.height - (250 * baseScale);
                     if (isAndroid) {
-                        restartButtonY -= 100 * baseScale; // Subir 100px no Android
+                        restartButtonY -= 100 * baseScale;
                     }
                     this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
 
