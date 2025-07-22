@@ -170,7 +170,7 @@ class GameScene extends Phaser.Scene {
         }
         console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
 
-        // this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
+        /* this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`); */
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
         this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
         this.load.image(`torre_c_${colorPrefix}`, `assets/torre_c_${colorPrefix}.png`);
