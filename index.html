@@ -25,8 +25,8 @@
         }
         #gameContainer {
             position: relative;
-            height: 100vh;
-            width: calc(100vh * 9 / 16);
+            height: calc(var(--vh, 1vh) * 100); /* Altura dinâmica baseada no viewport real */
+            width: calc(var(--vh, 1vh) * 100 * 9 / 16); /* Proporção 9:16 com altura dinâmica */
             max-width: 900px;
             max-height: 1600px;
             overflow: hidden;
@@ -61,7 +61,7 @@
             z-index: 1;
             opacity: 0;
             transition: opacity 0.3s;
-            max-height: calc(100vh * (1506 / 785));
+            max-height: calc(var(--vh, 1vh) * 100 * (1506 / 785)); /* Ajuste dinâmico */
             box-sizing: border-box;
         }
         .text-layer {
@@ -115,12 +115,12 @@
             }
         }
         @media (max-width: 576px) {
-            .bg-img-bottom { width: 100%; height: auto; max-height: calc(100vh * (1506 / 785)); }
+            .bg-img-bottom { width: 100%; height: auto; max-height: calc(var(--vh, 1vh) * 100 * (1506 / 785)); }
             .text-layer { font-size: 24px; width: 85%; }
         }
         @media (min-height: 700px) {
             .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
-            .bg-img-bottom { height: auto; max-height: calc(100vh * (1506 / 785)); }
+            .bg-img-bottom { height: auto; max-height: calc(var(--vh, 1vh) * 100 * (1506 / 785)); }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
@@ -178,6 +178,14 @@
         }
 
         window.onload = showIntro;
+
+        // Script pra calcular vh dinâmico
+        function setViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        window.addEventListener('resize', setViewportHeight);
+        setViewportHeight();
     </script>
 </head>
 <body>

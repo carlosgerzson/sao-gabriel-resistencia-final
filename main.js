@@ -12,14 +12,18 @@ const BASE_HEIGHT = 1600;
 
 // Função para inicializar o Phaser
 window.initPhaserGame = function () {
+    const container = document.getElementById('gameContainer');
+    const maxHeight = window.innerHeight; // Usar altura real do viewport (ex.: ~2160px)
+    const aspectRatio = 9 / 16;
+    const width = Math.min(maxHeight * aspectRatio, 900); // Largura baseada na altura, limitada a 900px
     const config = {
         type: Phaser.AUTO,
-        width: document.getElementById('gameContainer').offsetWidth,
-        height: document.getElementById('gameContainer').offsetHeight,
+        width: width,
+        height: maxHeight,
         parent: 'gameContainerInner',
         scale: {
-            mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH, // Ajuste pra altura controlar a largura, melhor pra Android
-            autoCenter: Phaser.Scale.CENTER_BOTH,
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.NO_CENTER, // Alinhar ao top
         },
         scene: [BriefingScene, GameScene],
         backgroundColor: '#c8f309',
@@ -29,7 +33,7 @@ window.initPhaserGame = function () {
         }
     };
     new Phaser.Game(config);
-    console.log("Jogo Phaser inicializado a partir do main.js");
+    console.log("Jogo Phaser inicializado com width:", width, "e height:", maxHeight);
 };
 
 // -------- BriefingScene --------
@@ -48,13 +52,13 @@ class BriefingScene extends Phaser.Scene {
     create() {
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
             .setOrigin(0.5, 0)
-            .setDisplaySize(this.scale.width, this.scale.height);
+            .setDisplaySize(this.scale.width, this.cameras.main.height);
 
         this.stars = [];
         for (let i = 0; i < 50; i++) {
             const star = this.add.circle(
                 Phaser.Math.Between(0, this.scale.width),
-                Phaser.Math.Between(0, this.scale.height),
+                Phaser.Math.Between(0, this.cameras.main.height),
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
@@ -75,7 +79,7 @@ class BriefingScene extends Phaser.Scene {
             "Nível 10: Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
         ];
 
-        this.briefingText = this.add.text(this.scale.width / 2, this.scale.height / 2,
+        this.briefingText = this.add.text(this.scale.width / 2, this.cameras.main.height / 2,
             levelDescriptions[currentLevel - 1],
             {
                 fontFamily: 'VT323',
@@ -94,11 +98,11 @@ class BriefingScene extends Phaser.Scene {
         });
 
         const isAndroid = /Android/.test(navigator.userAgent);
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107)
+        this.startButton = this.add.rectangle(this.scale.width / 2, this.cameras.main.height - 160, 200, 80, 0xFFC107)
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
-        let startButtonY = this.scale.height - 160;
+        let startButtonY = this.cameras.main.height - 160;
         if (isAndroid) {
             startButtonY -= 100;
         }
@@ -134,9 +138,9 @@ class BriefingScene extends Phaser.Scene {
     }
 
     resize() {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
         const minFontSize = 20;
-        const gameAreaHeight = this.scale.height;
+        const gameAreaHeight = this.cameras.main.height;
         const isAndroid = /Android/.test(navigator.userAgent);
         if (this.fundo) {
             this.fundo.setPosition(this.scale.width / 2, 0);
@@ -221,7 +225,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
+        this.cameras.main.setSize(this.scale.width, this.cameras.main.height);
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
@@ -230,11 +234,11 @@ class GameScene extends Phaser.Scene {
         } else {
             colorPrefix = 'blue';
         }
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
         this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
             .setScale(baseScale)
-            .setDisplaySize(this.scale.width, this.scale.height);
+            .setDisplaySize(this.scale.width, this.cameras.main.height);
 
         this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
@@ -261,7 +265,7 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        const gameAreaHeight = this.scale.height;
+        const gameAreaHeight = this.cameras.main.height;
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
         this.buildingContainer = this.add.container(this.scale.width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
@@ -472,11 +476,11 @@ class GameScene extends Phaser.Scene {
 
         this.resize = () => {
             const width = this.scale.width;
-            const height = this.scale.height;
+            const height = this.cameras.main.height;
             console.log(`Resize: width=${width}, height=${height}`);
 
             const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
-            const gameAreaHeight = height;
+            const gameAreaHeight = this.cameras.main.height;
             const isAndroid = /Android/.test(navigator.userAgent);
             if (this.gameBackground) {
                 this.gameBackground.setPosition(width / 2, 0);
@@ -565,13 +569,13 @@ class GameScene extends Phaser.Scene {
             const delayBetweenMissiles = 800;
             for (let i = 0; i < 2; i++) {
                 this.time.delayedCall(i * delayBetweenMissiles, () => {
-                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
                     const spawnX = Phaser.Math.Between(0, this.scale.width);
                     const spawnY = 0;
                     const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
                     missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
                     missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
-                    missile.targetY = this.scale.height - 315 * baseScale;
+                    missile.targetY = this.cameras.main.height - 315 * baseScale;
                     missile.setDepth(1000);
                     missile.setActive(true);
                     missile.setVisible(true);
@@ -585,7 +589,7 @@ class GameScene extends Phaser.Scene {
         if (!gameEnded) {
             const launchX = cannon.sprite.x;
             const launchY = cannon.sprite.y;
-            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
             const antiMissile = this.add.image(launchX, launchY, 'antimissile')
                 .setOrigin(0.5, 1)
                 .setScale(baseScale)
@@ -610,7 +614,7 @@ class GameScene extends Phaser.Scene {
     }
 
     updateBuildingState(levelPrefix) {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
         const key = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
@@ -635,9 +639,9 @@ class GameScene extends Phaser.Scene {
             destroyedCount++;
         }
 
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
         const minFontSize = 20;
-        this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
+        this.resultText = this.add.text(this.scale.width / 2, this.cameras.main.height * 0.25,
             success ? 'SUCESSO!' : 'FALHA!',
             {
                 fontFamily: 'VT323',
@@ -653,7 +657,7 @@ class GameScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.statsText = this.add.text(this.scale.width / 2, this.scale.height * 0.30,
+        this.statsText = this.add.text(this.scale.width / 2, this.cameras.main.height * 0.30,
             `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
             {
                 fontFamily: 'VT323',
@@ -671,11 +675,11 @@ class GameScene extends Phaser.Scene {
         });
 
         const isAndroid = /Android/.test(navigator.userAgent);
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107)
+        this.continueButton = this.add.rectangle(this.scale.width / 2, this.cameras.main.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
             .setInteractive({ useHandCursor: true});
-        let continueButtonY = this.scale.height - (160 * baseScale);
+        let continueButtonY = this.cameras.main.height - (160 * baseScale);
         if (isAndroid) {
             continueButtonY -= 100 * baseScale;
         }
@@ -710,11 +714,11 @@ class GameScene extends Phaser.Scene {
 
         // Botão "Reiniciar" só aparece se for o último nível
         if (currentLevel === TOTAL_LEVELS) {
-            this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
+            this.restartButton = this.add.rectangle(this.scale.width / 2, this.cameras.main.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
                 .setStrokeStyle(4 * baseScale, 0xFFFFFF)
                 .setDepth(2000)
                 .setInteractive({ useHandCursor: true});
-            let restartButtonY = this.scale.height - (250 * baseScale);
+            let restartButtonY = this.cameras.main.height - (250 * baseScale);
             if (isAndroid) {
                 restartButtonY -= 100 * baseScale;
             }
@@ -750,8 +754,8 @@ class GameScene extends Phaser.Scene {
 
     update() {
         if (gameEnded) return;
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaHeight = this.scale.height;
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
+        const gameAreaHeight = this.cameras.main.height;
         const collisionTopY = gameAreaHeight - 315 * baseScale;
         const collisionBottomY = collisionTopY + 50 * baseScale;
         const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
