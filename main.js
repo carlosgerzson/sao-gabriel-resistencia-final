@@ -10,6 +10,28 @@ let gameEnded = false;
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
 
+// Função para inicializar o Phaser
+window.initPhaserGame = function () {
+    const config = {
+        type: Phaser.AUTO,
+        width: document.getElementById('gameContainer').offsetWidth,
+        height: document.getElementById('gameContainer').offsetHeight,
+        parent: 'gameContainerInner',
+        scale: {
+            mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH, // Ajuste pra altura controlar a largura, melhor pra Android
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+        },
+        scene: [BriefingScene, GameScene],
+        backgroundColor: '#c8f309',
+        render: {
+            pixelArt: false,
+            antialias: true
+        }
+    };
+    new Phaser.Game(config);
+    console.log("Jogo Phaser inicializado a partir do main.js");
+};
+
 // -------- BriefingScene --------
 class BriefingScene extends Phaser.Scene {
     constructor() {
@@ -19,7 +41,7 @@ class BriefingScene extends Phaser.Scene {
     preload() {
         this.load.image('fundo1', 'assets/fundo1.png');
         this.load.on('complete', () => {
-            this.cameras.main.setBackgroundColor('#000000'); // Fundo preto após preload
+            this.cameras.main.setBackgroundColor('#000000');
         });
     }
 
@@ -194,7 +216,7 @@ class GameScene extends Phaser.Scene {
         this.load.image(`${this.levelPrefix}_destruido`, `${this.levelPrefix}_destruido.png`);
         this.load.image(`${this.levelPrefix}_fundo`, `${this.levelPrefix}_fundo.png`);
         this.load.on('complete', () => {
-            this.cameras.main.setBackgroundColor('#000000'); // Fundo preto após preload
+            this.cameras.main.setBackgroundColor('#000000');
         });
     }
 
@@ -273,7 +295,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(this.cameras.main.displayHeight); // Usa altura visível
+            this.silhuetaSprite.setY(this.cameras.main.height); // Ancoragem no bottom
         }
 
         const towerAndCannonDefinitions = [
@@ -333,8 +355,8 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(this.cameras.main.displayHeight); // Usa altura visível
-                cannon.setY(this.cameras.main.displayHeight - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                tower.setY(this.cameras.main.height); // Ancoragem no bottom
+                cannon.setY(this.cameras.main.height - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
 
@@ -464,7 +486,7 @@ class GameScene extends Phaser.Scene {
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(this.cameras.main.displayHeight);
+                    this.silhuetaSprite.setY(this.cameras.main.height); // Ancoragem no bottom
                 }
             }
 
@@ -490,7 +512,7 @@ class GameScene extends Phaser.Scene {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
                         if (isAndroid) {
-                            tower.sprite.setY(this.cameras.main.displayHeight);
+                            tower.sprite.setY(this.cameras.main.height); // Ancoragem no bottom
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
@@ -501,7 +523,7 @@ class GameScene extends Phaser.Scene {
                     if (cannon.sprite.active) {
                         cannon.sprite.setPosition(cannon.def.cannonX, cannon.def.cannonY);
                         if (isAndroid) {
-                            cannon.sprite.setY(this.cameras.main.displayHeight - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
+                            cannon.sprite.setY(this.cameras.main.height - (this.textures.get(cannon.def.towerAsset).getSourceImage().height * baseScale * 0.9));
                         }
                         cannon.sprite.setScale(cannon.def.cannonScale);
                     }
@@ -678,46 +700,53 @@ class GameScene extends Phaser.Scene {
             this.continueButton.setFillStyle(0xFFC107, 1);
             this.continueText.setColor('#000000');
             this.time.delayedCall(100, () => {
-                this.scene.start('BriefingScene');
+                if (currentLevel < TOTAL_LEVELS) {
+                    currentLevel++;
+                    gameEnded = false;
+                    this.scene.start('BriefingScene');
+                }
             }, [], this);
         });
 
-        this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
-            .setStrokeStyle(4 * baseScale, 0xFFFFFF)
-            .setDepth(2000)
-            .setInteractive({ useHandCursor: true});
-        let restartButtonY = this.scale.height - (250 * baseScale);
-        if (isAndroid) {
-            restartButtonY -= 100 * baseScale;
+        // Botão "Reiniciar" só aparece se for o último nível
+        if (currentLevel === TOTAL_LEVELS) {
+            this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
+                .setStrokeStyle(4 * baseScale, 0xFFFFFF)
+                .setDepth(2000)
+                .setInteractive({ useHandCursor: true});
+            let restartButtonY = this.scale.height - (250 * baseScale);
+            if (isAndroid) {
+                restartButtonY -= 100 * baseScale;
+            }
+            this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
+
+            this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
+                fontFamily: 'VT323',
+                fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
+                color: '#000000'
+            }).setOrigin(0.5).setDepth(2001);
+
+            this.restartButton.defaultFillColor = 0xFFC107;
+            this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
+            this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
+            this.restartButton.on('pointerdown', () => {
+                console.log('Botão REINICIAR - pointerdown');
+                this.restartButton.setFillStyle(0xFFC107, 1);
+                this.restartText.setColor('#000000');
+                this.restartButton.once('pointerup', () => {
+                    console.log('Botão REINICIAR - pointerup');
+                    updateButtonState(this.restartButton, this.restartText, false);
+                    destroyedCount = 0;
+                    preservedCount = 0;
+                    currentLevel = 1;
+                    gameEnded = false;
+                    this.time.delayedCall(100, () => {
+                        this.scene.start('BriefingScene');
+                    }, [], this);
+                }, this);
+            });
         }
-        this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
-
-        this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
-            fontFamily: 'VT323',
-            fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-            color: '#000000'
-        }).setOrigin(0.5).setDepth(2001);
-
-        this.restartButton.defaultFillColor = 0xFFC107;
-        this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
-        this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
-        this.restartButton.on('pointerdown', () => {
-            console.log('Botão REINICIAR - pointerdown');
-            this.restartButton.setFillStyle(0xFFC107, 1);
-            this.restartText.setColor('#000000');
-            this.restartButton.once('pointerup', () => {
-                console.log('Botão REINICIAR - pointerup');
-                updateButtonState(this.restartButton, this.restartText, false);
-                destroyedCount = 0;
-                preservedCount = 0;
-                currentLevel = 1;
-                gameEnded = false;
-                this.time.delayedCall(100, () => {
-                    this.scene.start('BriefingScene');
-                }, [], this);
-            }, this);
-        });
-}
+    }
 
     update() {
         if (gameEnded) return;
