@@ -46,15 +46,17 @@ class BriefingScene extends Phaser.Scene {
     }
 
     create() {
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
         this.fundo = this.add.image(this.scale.width / 2, 0, 'fundo1')
             .setOrigin(0.5, 0)
-            .setDisplaySize(this.scale.width, this.scale.height);
+            .setDisplaySize(this.scale.width, visibleHeight);
 
         this.stars = [];
         for (let i = 0; i < 50; i++) {
             const star = this.add.circle(
                 Phaser.Math.Between(0, this.scale.width),
-                Phaser.Math.Between(0, this.scale.height),
+                Phaser.Math.Between(0, visibleHeight),
                 Phaser.Math.Between(1, 3),
                 0xFFFFFF
             ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
@@ -75,7 +77,7 @@ class BriefingScene extends Phaser.Scene {
             "Nível 10: Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
         ];
 
-        this.briefingText = this.add.text(this.scale.width / 2, this.scale.height / 2,
+        this.briefingText = this.add.text(this.scale.width / 2, visibleHeight / 2,
             levelDescriptions[currentLevel - 1],
             {
                 fontFamily: 'VT323',
@@ -93,12 +95,11 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
-        const isAndroid = /Android/.test(navigator.userAgent);
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.scale.height - 160, 200, 80, 0xFFC107)
+        this.startButton = this.add.rectangle(this.scale.width / 2, visibleHeight - 160, 200, 80, 0xFFC107)
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
-        let startButtonY = this.scale.height - 160;
+        let startButtonY = visibleHeight - 160;
         if (isAndroid) {
             startButtonY -= 100;
         }
@@ -136,32 +137,32 @@ class BriefingScene extends Phaser.Scene {
     resize() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         const minFontSize = 20;
-        const gameAreaHeight = this.cameras.main.height;
         const isAndroid = /Android/.test(navigator.userAgent);
+        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
         if (this.fundo) {
-            this.fundo.setPosition(this.scale.width / 2, 0); // Top fixo em 0
-            this.fundo.setScale(baseScale).setDisplaySize(this.scale.width, gameAreaHeight); // Usar altura total
+            this.fundo.setPosition(this.scale.width / 2, 0);
+            this.fundo.setScale(baseScale).setDisplaySize(this.scale.width, visibleHeight);
         }
         if (this.stars) {
             this.stars.forEach(star => {
                 if (star.active) {
                     star.x = Phaser.Math.Between(0, this.scale.width);
-                    star.y = Phaser.Math.Between(0, gameAreaHeight);
+                    star.y = Phaser.Math.Between(0, visibleHeight);
                     star.setScale(baseScale);
                 }
             });
         }
         if (this.briefingText) {
-            let textY = gameAreaHeight / 2;
+            let textY = visibleHeight / 2;
             if (isAndroid) {
-                textY = gameAreaHeight * 0.4;
+                textY = visibleHeight * 0.4;
             }
             this.briefingText.setPosition(this.scale.width / 2, textY);
             this.briefingText.setFontSize(Math.max(48 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
         if (this.startButton) {
-            let buttonY = gameAreaHeight - 160 * baseScale;
+            let buttonY = visibleHeight - 160 * baseScale;
             if (isAndroid) {
                 buttonY -= 100 * baseScale;
             }
@@ -221,7 +222,9 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setSize(this.scale.width, this.scale.height);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
+        this.cameras.main.setSize(this.scale.width, visibleHeight); // Ajustar altura da câmera
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
@@ -231,11 +234,10 @@ class GameScene extends Phaser.Scene {
             colorPrefix = 'blue';
         }
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const gameAreaHeight = this.cameras.main.height;
         this.gameBackground = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
             .setScale(baseScale)
-            .setDisplaySize(this.scale.width, gameAreaHeight);
+            .setDisplaySize(this.scale.width, visibleHeight);
 
         this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
@@ -264,7 +266,7 @@ class GameScene extends Phaser.Scene {
 
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
+        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
@@ -289,9 +291,8 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
 
-        const isAndroid = /Android/.test(navigator.userAgent);
-        this.silhuetaSprite = this.add.image(this.scale.width / 2, gameAreaHeight, `silhueta_urbana_${colorPrefix}`)
-            .setOrigin(0.5, 1) // Ancorar no bottom
+        this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
+            .setOrigin(0.5, 1)
             .setScale(baseScale)
             .setDepth(25);
 
@@ -300,33 +301,33 @@ class GameScene extends Phaser.Scene {
                 name: 'Torre Esquerda',
                 towerAsset: `torre_e_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.144,
-                towerBaseY: gameAreaHeight,
+                towerBaseY: visibleHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_e',
                 cannonX: this.scale.width * 0.144,
-                cannonY: gameAreaHeight - (this.textures.get(`torre_e_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
+                cannonY: visibleHeight - (this.textures.get(`torre_e_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             },
             {
                 name: 'Torre Central',
                 towerAsset: `torre_c_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.65,
-                towerBaseY: gameAreaHeight,
+                towerBaseY: visibleHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_c',
                 cannonX: this.scale.width * 0.65,
-                cannonY: gameAreaHeight - (this.textures.get(`torre_c_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
+                cannonY: visibleHeight - (this.textures.get(`torre_c_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             },
             {
                 name: 'Torre Direita',
                 towerAsset: `torre_d_${colorPrefix}`,
                 towerBaseX: this.scale.width * 0.881,
-                towerBaseY: gameAreaHeight,
+                towerBaseY: visibleHeight,
                 towerScale: baseScale,
                 cannonAsset: 'canhao_d',
                 cannonX: this.scale.width * 0.881,
-                cannonY: gameAreaHeight - (this.textures.get(`torre_d_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
+                cannonY: visibleHeight - (this.textures.get(`torre_d_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
                 cannonScale: baseScale
             }
         ];
@@ -338,13 +339,13 @@ class GameScene extends Phaser.Scene {
         towerAndCannonDefinitions.forEach((def, index) => {
             const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20;
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
-                .setOrigin(0.5, 1) // Ancorar no bottom
+                .setOrigin(0.5, 1)
                 .setScale(def.towerScale)
                 .setDepth(towerDepth);
             this.allTowerSprites.push({ sprite: tower, def: def });
 
             const cannon = this.add.image(def.cannonX, def.cannonY, def.cannonAsset)
-                .setOrigin(0.5, 1) // Ancorar no bottom
+                .setOrigin(0.5, 1)
                 .setScale(def.cannonScale)
                 .setDepth(15);
             this.allCannonsSprites.push({ sprite: cannon, def: def });
@@ -470,19 +471,21 @@ class GameScene extends Phaser.Scene {
             console.log('Window Inner Height:', window.innerHeight);
 
             const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
             if (this.gameBackground) {
                 this.gameBackground.setPosition(width / 2, 0);
-                this.gameBackground.setScale(baseScale).setDisplaySize(width, height);
+                this.gameBackground.setScale(baseScale).setDisplaySize(width, visibleHeight);
             }
 
             if (this.silhuetaSprite) {
-                this.silhuetaSprite.setPosition(width / 2, height);
+                this.silhuetaSprite.setPosition(width / 2, visibleHeight);
                 console.log('Silhueta Y:', this.silhuetaSprite.y);
             }
 
             if (this.buildingContainer) {
                 const buildingHeight = 550 * baseScale;
-                let containerY = height - buildingHeight - (48 * baseScale);
+                let containerY = visibleHeight - buildingHeight - (48 * baseScale);
                 this.buildingContainer.setPosition(width / 2, containerY);
                 this.buildingContainer.setSize(buildingWidth, buildingHeight);
                 this.building.setScale(baseScale);
@@ -500,7 +503,7 @@ class GameScene extends Phaser.Scene {
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
                     if (tower.sprite.active) {
-                        tower.sprite.setPosition(tower.def.towerBaseX, height);
+                        tower.sprite.setPosition(tower.def.towerBaseX, visibleHeight);
                         console.log('Torre Y:', tower.sprite.y);
                         tower.sprite.setScale(tower.def.towerScale);
                     }
@@ -525,7 +528,7 @@ class GameScene extends Phaser.Scene {
                     if (missile && missile.active) {
                         missile.setSize(10 * baseScale, 30 * baseScale);
                         missile.targetX = Phaser.Math.Between(width / 2 - 255 * baseScale, width / 2 + 255 * baseScale);
-                        missile.targetY = height - 315 * baseScale;
+                        missile.targetY = visibleHeight - 315 * baseScale;
                     }
                 });
             }
@@ -736,8 +739,9 @@ class GameScene extends Phaser.Scene {
     update() {
         if (gameEnded) return;
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const height = this.cameras.main.height;
-        const collisionTopY = height - 315 * baseScale;
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
+        const collisionTopY = visibleHeight - 315 * baseScale;
         const collisionBottomY = collisionTopY + 50 * baseScale;
         const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
         const collisionRightX = this.scale.width / 2 + 255 * baseScale;
