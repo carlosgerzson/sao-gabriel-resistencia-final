@@ -78,8 +78,8 @@
             /* padding: 20px; */
             border-radius: 15px;
             z-index: 10;
-            width: 70%;
-            min-height: 120px;
+            width: 85%; /* Padrão para todos os dispositivos, removendo media query */
+            min-height: auto; /* Ajusta automaticamente à altura do conteúdo */
             height: auto;
             display: flex;
             flex-direction: column;
@@ -114,10 +114,6 @@
                 bottom: 1.5%;
                 font-size: 40px;
             }
-        }
-        @media (max-width: 576px) {
-            .bg-img-bottom { width: 100%; height: auto; max-height: calc(100vh * (1506 / 785)); }
-            .text-layer { font-size: 24px; width: 85%; }
         }
         @media (min-height: 700px) {
             .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
