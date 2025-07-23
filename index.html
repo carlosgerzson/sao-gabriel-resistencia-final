@@ -68,24 +68,31 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -55%);
+            transform: translate(-50%, -50%); /* Mantido pra espaço vertical */
             text-align: center;
             color: #e9bb00;
             font-family: 'VT323';
-            font-size: 24px;
+            font-size: 24px; /* Padrão para outros dispositivos */
             /* Removido background-color e padding */
             /* background-color: rgba(255, 255, 255, 0.8); */
             /* padding: 20px; */
             border-radius: 15px;
             z-index: 10;
-            width: 85%; /* Padrão para todos os dispositivos, removendo media query */
-            min-height: auto; /* Ajusta automaticamente à altura do conteúdo */
+            width: 85%; /* Padrão para todos os dispositivos */
+            min-height: auto;
             height: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            max-height: 80vh; /* Limita a altura pra evitar extrapolação */
+            display: block;
+            white-space: pre-wrap; /* Preserva quebras de linha */
             word-wrap: break-word;
             box-sizing: border-box;
+            overflow-y: auto; /* Adicionado pra rolagem se necessário */
+        }
+        /* Media query refinada pra dispositivos como iPhone SE, XR, Galaxy (350-450px) */
+        @media (max-width: 450px) and (min-width: 350px) {
+            .text-layer {
+                font-size: 35px; /* Reduzido de 45px pra evitar extrapolação */
+            }
         }
         .btn-custom {
             position: absolute;
