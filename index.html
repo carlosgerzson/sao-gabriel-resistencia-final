@@ -73,8 +73,9 @@
             color: #e9bb00;
             font-family: 'VT323';
             font-size: 24px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
+            /* Removido background-color e padding */
+            /* background-color: rgba(255, 255, 255, 0.8); */
+            /* padding: 20px; */
             border-radius: 15px;
             z-index: 10;
             width: 70%;
@@ -167,7 +168,7 @@
         }
 
         function goToInstruction1() {
-            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">INSTRUÇÃO 1\nTexto aqui...</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
+            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">Mas uma cidade resiste.!\n\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado da existência.\n\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
             adjustFundo2Width();
         }
 
