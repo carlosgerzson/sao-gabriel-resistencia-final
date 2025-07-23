@@ -18,7 +18,7 @@ window.initPhaserGame = function () {
         height: document.getElementById('gameContainer').offsetHeight,
         parent: 'gameContainerInner',
         scale: {
-            mode: Phaser.Scale.FIT, // Mudança pra FIT pra melhor adaptação
+            mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH,
         },
         scene: [BriefingScene, GameScene],
@@ -136,7 +136,7 @@ class BriefingScene extends Phaser.Scene {
     resize() {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         const minFontSize = 20;
-        const gameAreaHeight = this.cameras.main.height; // Usar a altura da câmera pra melhor controle
+        const gameAreaHeight = this.cameras.main.height;
         const isAndroid = /Android/.test(navigator.userAgent);
         if (this.fundo) {
             this.fundo.setPosition(this.scale.width / 2, 0);
@@ -261,7 +261,7 @@ class GameScene extends Phaser.Scene {
             loop: true
         });
 
-        const gameAreaHeight = this.cameras.main.height; // Usar altura da câmera
+        const gameAreaHeight = this.cameras.main.height;
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
         this.buildingContainer = this.add.container(this.scale.width / 2, gameAreaHeight - buildingHeight - (48 * baseScale));
@@ -295,7 +295,7 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale)
             .setDepth(25);
         if (isAndroid) {
-            this.silhuetaSprite.setY(this.cameras.main.height); // Ancoragem no bottom
+            this.silhuetaSprite.setY(this.cameras.main.height);
         }
 
         const towerAndCannonDefinitions = [
@@ -355,7 +355,7 @@ class GameScene extends Phaser.Scene {
             cannons.push({ sprite: cannon, tower: tower });
             this.towers.push(tower);
             if (isAndroid) {
-                tower.setY(this.cameras.main.height); // Ancoragem no bottom
+                tower.setY(this.cameras.main.height);
                 cannon.setY(this.cameras.main.height - (this.textures.get(def.towerAsset).getSourceImage().height * baseScale * 0.9));
             }
         });
@@ -472,7 +472,7 @@ class GameScene extends Phaser.Scene {
 
         this.resize = () => {
             const width = this.scale.width;
-            const height = this.cameras.main.height; // Usar altura da câmera
+            const height = this.cameras.main.height;
             console.log(`Resize: width=${width}, height=${height}`);
 
             const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
@@ -485,8 +485,9 @@ class GameScene extends Phaser.Scene {
 
             if (this.silhuetaSprite) {
                 this.silhuetaSprite.setPosition(width / 2, gameAreaHeight);
+                console.log('Silhueta Y:', this.silhuetaSprite.y); // Log da posição Y da silhueta
                 if (isAndroid) {
-                    this.silhuetaSprite.setY(this.cameras.main.height); // Ancoragem no bottom
+                    this.silhuetaSprite.setY(this.cameras.main.height);
                 }
             }
 
@@ -511,8 +512,9 @@ class GameScene extends Phaser.Scene {
                 this.allTowerSprites.forEach(tower => {
                     if (tower.sprite.active) {
                         tower.sprite.setPosition(tower.def.towerBaseX, gameAreaHeight);
+                        console.log('Torre Y:', tower.sprite.y); // Log da posição Y da torre
                         if (isAndroid) {
-                            tower.sprite.setY(this.cameras.main.height); // Ancoragem no bottom
+                            tower.sprite.setY(this.cameras.main.height);
                         }
                         tower.sprite.setScale(tower.def.towerScale);
                     }
