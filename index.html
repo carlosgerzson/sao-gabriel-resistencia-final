@@ -37,7 +37,7 @@
 <body>
     <div id="gameContainer">
         <div class="bg-image" id="bgContainer">
-            <img src="ASSETS/resol-1.png" alt="Fundo" class="bg-img" id="bgImg">
+            <img src="assets/" alt="Fundo" class="bg-img" id="bgImg">
         </div>
     </div>
 
@@ -60,15 +60,15 @@
             console.log(`InnerWidth: ${innerWidth}, InnerHeight: ${innerHeight}`); // Log pra verificar
 
             if (innerWidth <= 375 && innerHeight <= 667) {
-                bgImg.src = 'ASSETS/resol-1.png'; // iPhone SE
+                bgImg.src = 'assets/resol-1.png'; // iPhone SE
             } else if (innerWidth <= 393 && innerHeight <= 737) {
-                bgImg.src = 'ASSETS/resol-2.png'; // Redmi
+                bgImg.src = 'assets]/resol-2.png'; // Redmi
             } else if (innerWidth <= 393 && innerHeight <= 852) {
-                bgImg.src = 'ASSETS/resol-3.png'; // iPhone 15 Pro
+                bgImg.src = 'assets/resol-3.png'; // iPhone 15 Pro
             } else if (innerWidth <= 768 && innerHeight <= 1024) {
-                bgImg.src = 'ASSETS/resol-4.png'; // HD
+                bgImg.src = 'assets/resol-4.png'; // HD
             } else {
-                bgImg.src = 'ASSETS/resol-5.png'; // FullHD
+                bgImg.src = 'assets/resol-5.png'; // FullHD
             }
 
             container.style.width = innerWidth + 'px';
