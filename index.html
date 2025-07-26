@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Teste de Fundos - Resistência Final</title>
+    <title>São Gabriel: Resistência Final</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, height=device-height">
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
+        .vt323-regular { font-family: "VT323", monospace; font-weight: 400; font-style: normal; }
         body {
             margin: 0;
             padding: 0;
-            background-color: #333;
+            background-color: #0af350; /* Temporário, mudar para #000 depois */
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -15,82 +25,169 @@
         }
         #gameContainer {
             position: relative;
-            width: 100%; /* Segue o innerWidth */
-            height: 100vh; /* Usa a altura corrigida */
+            height: 100vh;
+            width: calc(100vh * 9 / 16);
+            max-width: 900px;
+            max-height: 1600px;
             overflow: hidden;
-            background-color: transparent; /* Remove área azulada */
+            margin: auto;
         }
         .bg-image {
-            position: absolute;
+            position: relative;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            overflow: visible;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
         }
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ajusta proporcionalmente sem cortar */
-            object-position: center;
+            object-fit: cover;
+            display: block;
+            z-index: 0;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+        }
+        .bg-img-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-height: calc(100vh * (1506 / 785));
+            box-sizing: border-box;
+        }
+        .text-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Mantido pra espaço vertical */
+            text-align: center;
+            color: #e9bb00;
+            font-family: 'VT323';
+            font-size: 24px; /* Padrão para outros dispositivos */
+            /* Removido background-color e padding */
+            /* background-color: rgba(255, 255, 255, 0.8); */
+            /* padding: 20px; */
+            border-radius: 15px;
+            z-index: 10;
+            width: 85%; /* Padrão para todos os dispositivos */
+            min-height: auto;
+            height: auto;
+            max-height: 80vh; /* Limita a altura pra evitar extrapolação */
+            display: block;
+            white-space: pre-wrap; /* Preserva quebras de linha */
+            word-wrap: break-word;
+            box-sizing: border-box;
+            overflow-y: auto; /* Adicionado pra rolagem se necessário */
+        }
+        /* Media query refinada pra dispositivos como iPhone SE, XR, Galaxy (350-450px) */
+        /* @media (max-width: 450px) and (min-width: 350px) {
+            .text-layer {
+                font-size: 35px; *
+            }
+        }*/
+
+        .btn-custom {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 85px;
+            padding: 20px 30px;
+            min-width: 110px;
+            min-height: 85px;
+            z-index: 50;
+            background: none;
+            border: none;
+            color: #39ff14;
+            cursor: pointer;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-custom:hover {
+            color: #ffc107;
+        }
+        @media (max-height: 1000px) {
+            .btn-custom {
+                bottom: 1.5%;
+                font-size: 40px;
+            }
+        }
+        @media (min-height: 700px) {
+            .bg-img { height: 100%; width: 100%; max-width: 900px; object-fit: cover; }
+            .bg-img-bottom { height: auto; max-height: calc(100vh * (1506 / 785)); }
         }
     </style>
-</head>
-<body>
-    <div id="gameContainer">
-        <div class="bg-image" id="bgContainer">
-            <img src="assets/resol-1.png" alt="Fundo" class="bg-img" id="bgImg">
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
+    <script src="main.js" defer></script>
     <script>
-        let vh = window.outerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-        window.addEventListener('resize', () => {
-            let vh = window.outerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-            adjustBackground();
-        });
-
-        function adjustBackground() {
-            const container = document.getElementById('gameContainer');
-            const bgImg = document.getElementById('bgImg');
-            const innerWidth = window.innerWidth;
-            const outerHeight = window.outerHeight;
-
-            // Corrige altura baseada em dispositivos
-            let adjustedHeight = outerHeight;
-            if (innerWidth <= 400) {
-                if (adjustedHeight > 800) adjustedHeight = 737; // Redmi (393x737)
-                else if (adjustedHeight > 870) adjustedHeight = 852; // iPhone 15 (393x852)
-            }
-
-            let adjustedVh = adjustedHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${adjustedVh}px`);
-
-            console.log(`InnerWidth: ${innerWidth}, OuterHeight: ${outerHeight}, AdjustedHeight: ${adjustedHeight}, Resol:`);
-
-            if (innerWidth <= 380 && adjustedHeight <= 670) {
-                bgImg.src = 'assets/resol-1.png'; // iPhone SE
-                console.log('resol-1');
-            } else if (innerWidth <= 400 && adjustedHeight <= 740) {
-                bgImg.src = 'assets/resol-2.png'; // Redmi
-                console.log('resol-2');
-            } else if (innerWidth <= 400 && adjustedHeight <= 900) {
-                bgImg.src = 'assets/resol-3.png'; // iPhone 15 Pro
-                console.log('resol-3');
-            } else if (innerWidth <= 800 && adjustedHeight <= 1400) {
-                bgImg.src = 'assets/resol-4.png'; // HD
-                console.log('resol-4');
-            } else {
-                bgImg.src = 'assets/resol-5.png'; // FullHD
-                console.log('resol-5');
-            }
-
-            container.style.width = innerWidth + 'px';
-            container.style.height = adjustedHeight + 'px';
+        function adjustFundo2Width() {
+            setTimeout(() => {
+                const container = document.getElementById('gameContainer');
+                const fundo1 = document.getElementById('bgImg');
+                const fundo2 = document.getElementById('bgImgBottom');
+                if (fundo1 && fundo2 && container) {
+                    const containerHeight = container.offsetHeight;
+                    const containerWidth = container.offsetWidth;
+                    const fundo2NaturalHeight = 1506; // Altura natural do fundo2
+                    const fundo2NaturalWidth = 785; // Largura natural do fundo2
+                    // Calcula a altura proporcional com base na largura do container
+                    const proportionalHeight = Math.min(containerHeight, containerWidth * (fundo2NaturalHeight / fundo2NaturalWidth));
+                    fundo2.style.width = `${containerWidth}px`;
+                    fundo2.style.height = `${proportionalHeight}px`;
+                    fundo2.style.left = '50%';
+                    fundo2.style.transform = 'translateX(-50%)';
+                    fundo2.style.opacity = '1';
+                    // Ajusta o top para ancorar a base no bottom
+                    const topOffset = Math.max(0, containerHeight - proportionalHeight);
+                    fundo2.style.top = `${topOffset}px`;
+                }
+            }, 100);
         }
 
-        window.addEventListener('load', adjustBackground);
+        function handleResize() {
+            adjustFundo2Width();
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        function showIntro() {
+            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom"><button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button></div>';
+            adjustFundo2Width();
+        }
+
+        function goToInstruction2() {
+            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem sotaques, sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!</div><button class="btn-custom" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></button></div>';
+            adjustFundo2Width();
+        }
+
+        function goToInstruction1() {
+            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado da existência.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
+            adjustFundo2Width();
+        }
+
+        function startGame() {
+            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
+            // Chamar initPhaserGame do main.js
+            if (window.initPhaserGame) {
+                window.initPhaserGame();
+            }
+        }
+
+        window.onload = showIntro;
     </script>
+</head>
+<body>
+    <div id="gameContainer"></div>
 </body>
 </html>
