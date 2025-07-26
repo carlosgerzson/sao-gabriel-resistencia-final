@@ -68,7 +68,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* Mantido pra espaço vertical */
+            transform: translate(-50%, -60%); /* Mantido pra espaço vertical */
             text-align: center;
             color: #e9bb00;
             font-family: 'VT323';
@@ -91,13 +91,13 @@
         /* Media query refinada pra dispositivos como iPhone SE, XR, Galaxy (350-450px) */
         @media  (min-width: 768px) {
             .text-layer {
-                font-size: 2.5em; 
+                font-size: 2.8em; 
             }
         }
 
         .btn-custom {
             position: absolute;
-            bottom: 8%;
+            bottom: 15%;
             left: 50%;
             transform: translateX(-50%);
             font-size: 85px;
@@ -172,7 +172,7 @@
         }
 
         function goToInstruction1() {
-            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado da existência.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
+            document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
             adjustFundo2Width();
         }
 
