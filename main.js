@@ -81,7 +81,7 @@ class BriefingScene extends Phaser.Scene {
             levelDescriptions[currentLevel - 1],
             {
                 fontFamily: 'VT323',
-                fontSize: '48px',
+                fontSize: '49px',
                 color: '#e9bb00',
                 align: 'center',
                 lineSpacing: 20,
@@ -99,14 +99,14 @@ class BriefingScene extends Phaser.Scene {
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
-        let startButtonY = visibleHeight - 160;
+        let startButtonY = visibleHeight - 120;
         if (isAndroid) {
-            startButtonY -= 300;
+            startButtonY -= 100;
         }
         this.startButton.setPosition(this.scale.width / 2, startButtonY);
         this.startText = this.add.text(this.scale.width / 2, startButtonY, 'INICIAR', {
             fontFamily: 'VT323',
-            fontSize: '30px',
+            fontSize: '31px',
             color: '#000000'
         }).setOrigin(0.5).setDepth(1202);
 
@@ -158,20 +158,20 @@ class BriefingScene extends Phaser.Scene {
                 textY = visibleHeight * 0.4;
             }
             this.briefingText.setPosition(this.scale.width / 2, textY);
-            this.briefingText.setFontSize(Math.max(48 * baseScale, minFontSize) + 'px');
+            this.briefingText.setFontSize(Math.max(49 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
         if (this.startButton) {
-            let buttonY = visibleHeight - 160 * baseScale;
+            let buttonY = visibleHeight - 120 * baseScale;
             if (isAndroid) {
-                buttonY -= 100 * baseScale;
+                buttonY -= 50 * baseScale;
             }
             this.startButton.setPosition(this.scale.width / 2, buttonY);
             this.startButton.setSize(200 * baseScale, 80 * baseScale);
             this.startButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
             this.startButton.setInteractive();
             this.startText.setPosition(this.scale.width / 2, buttonY);
-            this.startText.setFontSize(Math.max(30 * baseScale, minFontSize) + 'px');
+            this.startText.setFontSize(Math.max(31 * baseScale, minFontSize) + 'px');
         }
     }
 }
