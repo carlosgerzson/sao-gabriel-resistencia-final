@@ -22,7 +22,7 @@ window.initPhaserGame = function () {
             autoCenter: Phaser.Scale.CENTER_BOTH,
         },
         scene: [BriefingScene, GameScene],
-        backgroundColor: '#c8f309',
+        backgroundColor: '#000000ff',
         render: {
             pixelArt: false,
             antialias: true
