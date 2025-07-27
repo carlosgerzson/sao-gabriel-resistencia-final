@@ -95,14 +95,16 @@ class BriefingScene extends Phaser.Scene {
             duration: 2000
         });
 
-        this.startButton = this.add.rectangle(this.scale.width / 2, visibleHeight - 160, 200, 80, 0xFFC107)
+        this.startButton = this.add.rectangle(this.scale.width / 2, this.cameras.main.height * 0.78, 200, 80, 0xFFC107)
             .setStrokeStyle(2, 0xFFFFFF)
             .setDepth(1201)
             .setInteractive({ useHandCursor: true });
-        let startButtonY = visibleHeight - 120;
+        let startButtonY = this.cameras.main.height * 0.78;
         if (isAndroid) {
-            startButtonY -= 100;
+            startButtonY -= 20; // Mantém o ajuste leve
         }
+        console.log('startButtonY (create):', startButtonY);
+
         this.startButton.setPosition(this.scale.width / 2, startButtonY);
         this.startText = this.add.text(this.scale.width / 2, startButtonY, 'INICIAR', {
             fontFamily: 'VT323',
@@ -162,10 +164,12 @@ class BriefingScene extends Phaser.Scene {
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
         }
         if (this.startButton) {
-            let buttonY = visibleHeight - 120 * baseScale;
+            let buttonY = this.cameras.main.height * 0.78;
             if (isAndroid) {
-                buttonY -= 50 * baseScale;
+                buttonY -= 20; // Ajuste leve pra Android
             }
+            console.log('startButtonY (resize):', buttonY);
+
             this.startButton.setPosition(this.scale.width / 2, buttonY);
             this.startButton.setSize(200 * baseScale, 80 * baseScale);
             this.startButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
@@ -193,7 +197,7 @@ class GameScene extends Phaser.Scene {
         }
         console.log(`Carregando fundo_${colorPrefix}.png para nível ${currentLevel}`);
 
-        this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`); 
+        this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`);
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
         this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
         this.load.image(`torre_c_${colorPrefix}`, `assets/torre_c_${colorPrefix}.png`);
@@ -662,7 +666,7 @@ class GameScene extends Phaser.Scene {
         this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
-            .setInteractive({ useHandCursor: true});
+            .setInteractive({ useHandCursor: true });
         let continueButtonY = this.scale.height - (160 * baseScale);
         if (isAndroid) {
             continueButtonY -= 100 * baseScale;
@@ -701,7 +705,7 @@ class GameScene extends Phaser.Scene {
             this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
                 .setStrokeStyle(4 * baseScale, 0xFFFFFF)
                 .setDepth(2000)
-                .setInteractive({ useHandCursor: true});
+                .setInteractive({ useHandCursor: true });
             let restartButtonY = this.scale.height - (250 * baseScale);
             if (isAndroid) {
                 restartButtonY -= 100 * baseScale;
