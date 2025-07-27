@@ -68,33 +68,23 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -60%); /* Mantido pra espaço vertical */
+            transform: translate(-50%, -60%);
             text-align: center;
             color: #e9bb00;
             font-family: 'VT323';
-            font-size: 1.5em; /* Padrão para outros dispositivos */
-            /* Removido background-color e padding */
-            /* background-color: rgba(255, 255, 255, 0.8); */
-            /* padding: 20px; */
+            font-size: 1.5em; /* Valor inicial, será ajustado via JS */
             border-radius: 15px;
             z-index: 10;
-            width: 85%; /* Padrão para todos os dispositivos */
+            width: 85%;
             min-height: auto;
             height: auto;
-            max-height: 80vh; /* Limita a altura pra evitar extrapolação */
+            max-height: 80vh;
             display: block;
-            white-space: pre-wrap; /* Preserva quebras de linha */
+            white-space: pre-wrap;
             word-wrap: break-word;
             box-sizing: border-box;
-            overflow-y: auto; /* Adicionado pra rolagem se necessário */
+            overflow-y: auto;
         }
-        /* Media query refinada pra dispositivos como iPhone SE, XR, Galaxy (350-450px) */
-        @media  (min-width: 768px) {
-            .text-layer {
-                font-size: 2.8em; 
-            }
-        }
-
         .btn-custom {
             position: absolute;
             bottom: 15%;
@@ -139,24 +129,42 @@
                 if (fundo1 && fundo2 && container) {
                     const containerHeight = container.offsetHeight;
                     const containerWidth = container.offsetWidth;
-                    const fundo2NaturalHeight = 1506; // Altura natural do fundo2
-                    const fundo2NaturalWidth = 785; // Largura natural do fundo2
-                    // Calcula a altura proporcional com base na largura do container
+                    const fundo2NaturalHeight = 1506;
+                    const fundo2NaturalWidth = 785;
                     const proportionalHeight = Math.min(containerHeight, containerWidth * (fundo2NaturalHeight / fundo2NaturalWidth));
                     fundo2.style.width = `${containerWidth}px`;
                     fundo2.style.height = `${proportionalHeight}px`;
                     fundo2.style.left = '50%';
                     fundo2.style.transform = 'translateX(-50%)';
                     fundo2.style.opacity = '1';
-                    // Ajusta o top para ancorar a base no bottom
                     const topOffset = Math.max(0, containerHeight - proportionalHeight);
                     fundo2.style.top = `${topOffset}px`;
                 }
             }, 100);
         }
 
+        function adjustTextLayerFontSize() {
+            const container = document.getElementById('gameContainer');
+            const textLayers = container ? container.getElementsByClassName('text-layer') : [];
+            if (container && textLayers.length > 0) {
+                const w = container.offsetWidth;
+                let fontSize = '1.5em';
+                if (w >= 785) {
+                    fontSize = '2.8em';
+                } else if (w >= 500) {
+                    fontSize = '2em';
+                } else if (w <= 393) {
+                    fontSize = '1.5em';
+                }
+                for (let i = 0; i < textLayers.length; i++) {
+                    textLayers[i].style.fontSize = fontSize;
+                }
+            }
+        }
+
         function handleResize() {
             adjustFundo2Width();
+            adjustTextLayerFontSize();
         }
 
         window.addEventListener('resize', handleResize);
@@ -164,21 +172,23 @@
         function showIntro() {
             document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom"><button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button></div>';
             adjustFundo2Width();
+            adjustTextLayerFontSize();
         }
 
         function goToInstruction2() {
             document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!</div><button class="btn-custom" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></button></div>';
             adjustFundo2Width();
+            adjustTextLayerFontSize();
         }
 
         function goToInstruction1() {
             document.getElementById('gameContainer').innerHTML = '<div class="bg-image"><img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg"><div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div><button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button></div>';
             adjustFundo2Width();
+            adjustTextLayerFontSize();
         }
 
         function startGame() {
             document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
-            // Chamar initPhaserGame do main.js
             if (window.initPhaserGame) {
                 window.initPhaserGame();
             }
