@@ -101,7 +101,7 @@ class BriefingScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true });
         let startButtonY = visibleHeight - 160;
         if (isAndroid) {
-            startButtonY -= 100;
+            startButtonY -= 300;
         }
         this.startButton.setPosition(this.scale.width / 2, startButtonY);
         this.startText = this.add.text(this.scale.width / 2, startButtonY, 'INICIAR', {
