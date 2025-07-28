@@ -9,6 +9,7 @@ let gameEnded = false;
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
+const VERSION = "1.0 - 2025-07-27";
 
 // Função para inicializar o Phaser
 window.initPhaserGame = function () {
@@ -29,7 +30,7 @@ window.initPhaserGame = function () {
         }
     };
     new Phaser.Game(config);
-    console.log("Jogo Phaser inicializado a partir do main.js");
+    console.log("Jogo Phaser inicializado a partir do main.js - Versão: " + VERSION);
 };
 
 // -------- BriefingScene --------
@@ -66,15 +67,24 @@ class BriefingScene extends Phaser.Scene {
         const levelDescriptions = [
             "ALVO 1: CLUBE COMERCIAL! \n\n" +
             "O calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.",
-            "Nível 2: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-            "Nível 3: Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-            "Nível 4: Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-            "Nível 5: Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
-            "Nível 6: Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.",
-            "Nível 7: At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
-            "Nível 8: Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.",
-            "Nível 9: Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
-            "Nível 10: Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
+            "ALVO 2: CENTRO CULTURAL! \n\n" +
+            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+            "ALVO 3: PRAÇA HISTÓRICA! \n\n" +
+            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            "ALVO 4: MUSEU LOCAL! \n\n" +
+            "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            "ALVO 5: TEATRO ANTIGO! \n\n" +
+            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+            "ALVO 6: IGREJA COLONIAL! \n\n" +
+            "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.",
+            "ALVO 7: MERCADO TRADICIONAL! \n\n" +
+            "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
+            "ALVO 8: PONTE VELHA! \n\n" +
+            "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.",
+            "ALVO 9: ESTAÇÃO FERROVIÁRIA! \n\n" +
+            "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
+            "ALVO 10: CASA HISTÓRICA! \n\n" +
+            "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
         ];
 
         this.briefingText = this.add.text(this.scale.width / 2, visibleHeight / 2,
@@ -94,42 +104,30 @@ class BriefingScene extends Phaser.Scene {
             alpha: { from: 0, to: 1 },
             duration: 2000
         });
+        console.log('briefingText Y (create):', this.briefingText.y);
 
-        this.startButton = this.add.rectangle(this.scale.width / 2, this.cameras.main.height * 0.78, 200, 80, 0xFFC107)
-            .setStrokeStyle(2, 0xFFFFFF)
-            .setDepth(1201)
-            .setInteractive({ useHandCursor: true });
-        let startButtonY = this.cameras.main.height * 0.78;
-        if (isAndroid) {
-            startButtonY -= 20; // Mantém o ajuste leve
-        }
-        console.log('startButtonY (create):', startButtonY);
-
-        this.startButton.setPosition(this.scale.width / 2, startButtonY);
-        this.startText = this.add.text(this.scale.width / 2, startButtonY, 'INICIAR', {
+        // Posicionar "INICIAR" como link abaixo do texto com mais espaço
+        const actionY = this.briefingText.y + (this.briefingText.height / 2) + 60; // Ajuste com offset
+        this.actionText = this.add.text(this.scale.width / 2, actionY, "INICIAR", {
             fontFamily: 'VT323',
-            fontSize: '31px',
-            color: '#000000'
-        }).setOrigin(0.5).setDepth(1202);
+            fontSize: '49px',
+            color: '#00FF00',
+            decoration: 'underline'
+        }).setOrigin(0.5, 0.5).setDepth(1201).setInteractive({ useHandCursor: true });
 
-        const updateButtonState = (button, text, hover) => {
-            button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1);
-            text.setColor(hover ? '#000000' : '#000000');
-        };
-
-        this.startButton.defaultFillColor = 0xFFC107;
-        this.startButton.on('pointerover', () => updateButtonState(this.startButton, this.startText, true), this);
-        this.startButton.on('pointerout', () => updateButtonState(this.startButton, this.startText, false), this);
-        this.startButton.on('pointerdown', () => {
-            this.startButton.setFillStyle(0xFFC107, 1);
-            this.startText.setColor('#000000');
+        this.actionText.on('pointerover', () => {
+            this.actionText.setColor('#FFFF00');
+        });
+        this.actionText.on('pointerout', () => {
+            this.actionText.setColor('#00FF00');
+        });
+        this.actionText.on('pointerdown', () => {
             this.time.delayedCall(100, () => {
                 this.scene.start('GameScene');
             }, [], this);
         });
 
         this.input.on('pointerdown', () => this.game.canvas.focus());
-
         this.scale.on('resize', this.resize, this);
         this.resize();
 
@@ -162,20 +160,13 @@ class BriefingScene extends Phaser.Scene {
             this.briefingText.setPosition(this.scale.width / 2, textY);
             this.briefingText.setFontSize(Math.max(49 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
+            console.log('briefingText Y (resize):', this.briefingText.y);
         }
-        if (this.startButton) {
-            let buttonY = this.cameras.main.height * 0.78;
-            if (isAndroid) {
-                buttonY -= 20; // Ajuste leve pra Android
-            }
-            console.log('startButtonY (resize):', buttonY);
-
-            this.startButton.setPosition(this.scale.width / 2, buttonY);
-            this.startButton.setSize(200 * baseScale, 80 * baseScale);
-            this.startButton.setStrokeStyle(2 * baseScale, 0xFFFFFF);
-            this.startButton.setInteractive();
-            this.startText.setPosition(this.scale.width / 2, buttonY);
-            this.startText.setFontSize(Math.max(31 * baseScale, minFontSize) + 'px');
+        if (this.actionText) {
+            const actionY = this.briefingText.y + (this.briefingText.height / 2) + 60; // Ajuste sincronizado
+            this.actionText.setPosition(this.scale.width / 2, actionY);
+            this.actionText.setFontSize(Math.max(49 * baseScale, minFontSize) + 'px');
+            console.log('actionText Y (resize):', this.actionText.y);
         }
     }
 }
@@ -228,7 +219,7 @@ class GameScene extends Phaser.Scene {
     create() {
         const isAndroid = /Android/.test(navigator.userAgent);
         const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
-        this.cameras.main.setSize(this.scale.width, visibleHeight); // Ajustar altura da câmera
+        this.cameras.main.setSize(this.scale.width, visibleHeight);
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) {
             colorPrefix = 'red';
@@ -270,7 +261,7 @@ class GameScene extends Phaser.Scene {
 
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
+        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale)); // 48px do bottom
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
@@ -282,7 +273,7 @@ class GameScene extends Phaser.Scene {
         this.buildingContainer.add(background);
 
         const chamasSpriteHeight = 375 * baseScale;
-        this.currentChamasSprite = this.add.sprite(0, 550 * baseScale - (chamasSpriteHeight / 2), 'chamas101');
+        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 5), 'chamas101'); // 53px (48 + 5) do bottom
         this.buildingContainer.add(this.currentChamasSprite);
         this.currentChamasSprite.setDepth(910);
         this.currentChamasSprite.setScale(0.3 * baseScale);
@@ -309,7 +300,7 @@ class GameScene extends Phaser.Scene {
                 towerScale: baseScale,
                 cannonAsset: 'canhao_e',
                 cannonX: this.scale.width * 0.144,
-                cannonY: visibleHeight - (this.textures.get(`torre_e_${colorPrefix}`).getSourceImage().height * baseScale * 0.9),
+                cannonY: visibleHeight - (this.textures.get(`torre_e_${colorPrefix}`).getSourceImage().height * baseScale * 0.9) + 11, // Ajuste de +11
                 cannonScale: baseScale
             },
             {
@@ -500,7 +491,7 @@ class GameScene extends Phaser.Scene {
 
             if (this.currentChamasSprite) {
                 const chamasSpriteHeight = 375 * baseScale;
-                this.currentChamasSprite.setPosition(0, 550 * baseScale - (chamasSpriteHeight / 2));
+                this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 5)); // 53px (48 + 5) do bottom
                 this.currentChamasSprite.setScale(0.3 * baseScale);
             }
 
@@ -630,26 +621,26 @@ class GameScene extends Phaser.Scene {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         const minFontSize = 20;
         this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
-            success ? 'SUCESSO!' : 'FALHA!',
+            currentLevel === TOTAL_LEVELS ? 'FIM DE JOGO' : success ? 'SUCESSO!' : 'FALHA!',
             {
                 fontFamily: 'VT323',
-                fontSize: Math.max(60 * baseScale, minFontSize) + 'px',
-                color: success ? '#00FF00' : '#FF0000',
+                fontSize: Math.max(70 * baseScale, minFontSize) + 'px',
+                color: currentLevel === TOTAL_LEVELS ? '#FFFFFF' : success ? '#00FF00' : '#00FF00',
                 align: 'center'
             }
         ).setOrigin(0.5).setDepth(1500);
         this.resultText.setAlpha(0);
         this.tweens.add({
             targets: this.resultText,
-            alpha: { from: 0, to: 1 },
-            duration: 2000
+            alpha: { from: 1, to: 1 },
+            duration: 1000
         });
 
         this.statsText = this.add.text(this.scale.width / 2, this.scale.height * 0.30,
             `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
             {
                 fontFamily: 'VT323',
-                fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
+                fontSize: Math.max(60 * baseScale, minFontSize) + 'px',
                 color: '#FFFFFF',
                 align: 'center',
                 lineSpacing: 20
@@ -659,21 +650,17 @@ class GameScene extends Phaser.Scene {
         this.tweens.add({
             targets: this.statsText,
             alpha: { from: 0, to: 1 },
-            duration: 2000
+            duration: 1000
         });
 
         const isAndroid = /Android/.test(navigator.userAgent);
-        this.continueButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (160 * baseScale), 200 * baseScale, 80 * baseScale, 0xFFC107)
+        const continueButtonY = this.statsText.y + (this.statsText.height / 2) + 60; // Posicionamento dinâmico abaixo de statsText
+        this.continueButton = this.add.rectangle(this.scale.width / 2, continueButtonY, 200 * baseScale, 80 * baseScale, 0xFFC107)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
             .setInteractive({ useHandCursor: true });
-        let continueButtonY = this.scale.height - (160 * baseScale);
-        if (isAndroid) {
-            continueButtonY -= 100 * baseScale;
-        }
-        this.continueButton.setPosition(this.scale.width / 2, continueButtonY);
 
-        this.continueText = this.add.text(this.scale.width / 2, continueButtonY, 'CONTINUAR', {
+        this.continueText = this.add.text(this.scale.width / 2, continueButtonY, currentLevel === TOTAL_LEVELS ? 'REINICIAR' : 'CONTINUAR', {
             fontFamily: 'VT323',
             fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
             color: '#000000'
@@ -681,7 +668,7 @@ class GameScene extends Phaser.Scene {
 
         const updateButtonState = (button, text, hover) => {
             button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1);
-            text.setColor('#000000');
+            text.setColor(hover ? '#000000ff' : '#000000');
         };
 
         this.continueButton.defaultFillColor = 0xFFC107;
@@ -696,48 +683,15 @@ class GameScene extends Phaser.Scene {
                     currentLevel++;
                     gameEnded = false;
                     this.scene.start('BriefingScene');
-                }
-            }, [], this);
-        });
-
-        // Botão "Reiniciar" só aparece se for o último nível
-        if (currentLevel === TOTAL_LEVELS) {
-            this.restartButton = this.add.rectangle(this.scale.width / 2, this.scale.height - (250 * baseScale), 300 * baseScale, 100 * baseScale, 0xFFC107)
-                .setStrokeStyle(4 * baseScale, 0xFFFFFF)
-                .setDepth(2000)
-                .setInteractive({ useHandCursor: true });
-            let restartButtonY = this.scale.height - (250 * baseScale);
-            if (isAndroid) {
-                restartButtonY -= 100 * baseScale;
-            }
-            this.restartButton.setPosition(this.scale.width / 2, restartButtonY);
-
-            this.restartText = this.add.text(this.scale.width / 2, restartButtonY, 'REINICIAR', {
-                fontFamily: 'VT323',
-                fontSize: Math.max(40 * baseScale, minFontSize) + 'px',
-                color: '#000000'
-            }).setOrigin(0.5).setDepth(2001);
-
-            this.restartButton.defaultFillColor = 0xFFC107;
-            this.restartButton.on('pointerover', () => updateButtonState(this.restartButton, this.restartText, true), this);
-            this.restartButton.on('pointerout', () => updateButtonState(this.restartButton, this.restartText, false), this);
-            this.restartButton.on('pointerdown', () => {
-                console.log('Botão REINICIAR - pointerdown');
-                this.restartButton.setFillStyle(0xFFC107, 1);
-                this.restartText.setColor('#000000');
-                this.restartButton.once('pointerup', () => {
-                    console.log('Botão REINICIAR - pointerup');
-                    updateButtonState(this.restartButton, this.restartText, false);
+                } else {
                     destroyedCount = 0;
                     preservedCount = 0;
                     currentLevel = 1;
                     gameEnded = false;
-                    this.time.delayedCall(100, () => {
-                        this.scene.start('BriefingScene');
-                    }, [], this);
-                }, this);
-            });
-        }
+                    this.scene.start('BriefingScene');
+                }
+            }, [], this);
+        });
     }
 
     update() {

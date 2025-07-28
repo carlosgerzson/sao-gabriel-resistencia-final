@@ -14,7 +14,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #000000; /* Temporário, mudar para #000 depois */
+            background-color: #000000;
             min-height: 100vh;
             width: 100%;
             position: relative;
@@ -48,6 +48,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 0;
         }
         .fundo1-layer img, .fundo2-layer img {
             width: 100%;
@@ -58,18 +59,15 @@
         .fundo2-layer {
             z-index: 1;
         }
-        .fundo1-layer {
-            z-index: 0;
-        }
         .text-layer {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -60%);
+            transform: translate(-50%, -50%);
             text-align: center;
             color: #e9bb00;
             font-family: 'VT323';
-            font-size: 1.5em; /* Valor inicial, será ajustado via JS */
+            font-size: 1.5em;
             border-radius: 15px;
             z-index: 10;
             width: 85%;
@@ -81,6 +79,22 @@
             word-wrap: break-word;
             box-sizing: border-box;
             overflow-y: auto;
+        }
+        .text-layer .arrow-link {
+            font-family: 'VT323';
+            font-size: inherit;
+            color: #00FF00;
+            text-decoration: underline;
+            cursor: pointer;
+            display: block;
+            margin-top: 20px;
+        }
+        .text-layer .arrow-link:hover {
+            color: #FFFF00;
+        }
+        .text-layer .arrow-link i {
+            font-size: 1.5em;
+            vertical-align: middle;
         }
         .btn-custom {
             position: absolute;
@@ -106,7 +120,6 @@
         }
         @media (max-height: 1000px) {
             .btn-custom {
-               /* bottom: 1.5%; ¨*/
                 font-size: 40px;
             }
         }
@@ -123,9 +136,11 @@
                 if (w >= 785) {
                     fontSize = '2.8em';
                 } else if (w >= 500) {
-                    fontSize = '2em';
-                } else if (w <= 393) {
+                    fontSize = '1.8em';
+                } else if (w >= 393) {
                     fontSize = '1.5em';
+                } else if (w <= 375) {
+                    fontSize = '1.3em';
                 }
                 for (let i = 0; i < textLayers.length; i++) {
                     textLayers[i].style.fontSize = fontSize;
@@ -160,9 +175,7 @@
                     <div class="fundo1-layer">
                         <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
                     </div>
-                   
-                    <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!</div>
-                    <button class="btn-custom" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></button>
+                    <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!\n<span class="arrow-link" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
             adjustTextLayerFontSize();
@@ -174,9 +187,7 @@
                     <div class="fundo1-layer">
                         <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
                     </div>
-                    
-                    <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa, canhões de memória e antenas de verdade em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!</div>
-                    <button class="btn-custom" onclick="startGame()"><i class="fas fa-arrow-right"></i></button>
+                    <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa e canhões de memória em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!\n<span class="arrow-link" onclick="startGame()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
             adjustTextLayerFontSize();
