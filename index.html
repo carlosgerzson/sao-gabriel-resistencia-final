@@ -14,7 +14,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: #000000;
+            background-color: #000000;
             min-height: 100vh;
             width: 100%;
             position: relative;
@@ -22,7 +22,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
         }
         #gameContainer {
             position: relative;
@@ -31,18 +30,7 @@
             max-width: 900px;
             max-height: 1600px;
             overflow: hidden;
-            margin: 0 auto;
-            background: linear-gradient(to bottom, #ff3103, #000000);
-        }
-        #gameContainerInner {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            position: relative;
-            top: 0;
-            left: 0;
-            box-sizing: border-box;
+            margin: auto;
         }
         .bg-image {
             position: relative;
@@ -53,7 +41,7 @@
             align-items: flex-start;
             justify-content: center;
         }
-        .gradient-layer {
+        .fundo1-layer, .fundo2-layer {
             position: absolute;
             top: 0;
             left: 0;
@@ -62,31 +50,14 @@
             pointer-events: none;
             z-index: 0;
         }
-        .fundo2-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-        }
-        .fundo2-layer img {
+        .fundo1-layer img, .fundo2-layer img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-        .star {
-            position: absolute;
-            background: #FFFFFF;
-            border-radius: 50%;
-            animation: twinkle 2s infinite alternate;
-            z-index: 1; /* Entre gradient-layer e fundo2-layer */
-        }
-        @keyframes twinkle {
-            from { opacity: 0.2; }
-            to { opacity: 1; }
+        .fundo2-layer {
+            z-index: 1;
         }
         .text-layer {
             position: absolute;
@@ -102,7 +73,7 @@
             width: 85%;
             min-height: auto;
             height: auto;
-            max-height: calc(80vh);
+            max-height: 80vh;
             display: block;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -156,33 +127,21 @@
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
     <script src="main.js" defer></script>
     <script>
-        function createStars() {
-            const container = document.getElementById('gameContainer');
-            if (container) {
-                const width = container.offsetWidth;
-                const height = container.offsetHeight;
-                for (let i = 0; i < 50; i++) {
-                    const star = document.createElement('div');
-                    star.className = 'star';
-                    star.style.width = `${Math.random() * 2 + 1}px`;
-                    star.style.height = star.style.width;
-                    star.style.left = `${Math.random() * width}px`;
-                    star.style.top = `${Math.random() * height}px`;
-                    container.appendChild(star);
-                }
-            }
-        }
-
         function adjustTextLayerFontSize() {
             const container = document.getElementById('gameContainer');
             const textLayers = container ? container.getElementsByClassName('text-layer') : [];
             if (container && textLayers.length > 0) {
                 const w = container.offsetWidth;
                 let fontSize = '1.5em';
-                if (w >= 785) fontSize = '2.8em';
-                else if (w >= 500) fontSize = '1.8em';
-                else if (w >= 393) fontSize = '1.5em';
-                else if (w <= 375) fontSize = '1.3em';
+                if (w >= 785) {
+                    fontSize = '2.8em';
+                } else if (w >= 500) {
+                    fontSize = '1.8em';
+                } else if (w >= 393) {
+                    fontSize = '1.5em';
+                } else if (w <= 375) {
+                    fontSize = '1.3em';
+                }
                 for (let i = 0; i < textLayers.length; i++) {
                     textLayers[i].style.fontSize = fontSize;
                 }
@@ -191,77 +150,57 @@
 
         function handleResize() {
             adjustTextLayerFontSize();
-            const container = document.getElementById('gameContainer');
-            if (container) {
-                container.style.width = `calc(100vh * 9 / 16)`;
-                const gameContainerInner = document.getElementById('gameContainerInner');
-                if (gameContainerInner) {
-                    gameContainerInner.style.height = container.style.height;
-                    gameContainerInner.style.width = container.style.width;
-                    gameContainerInner.style.margin = '0';
-                    gameContainerInner.style.padding = '0';
-                    gameContainerInner.style.top = '0';
-                    gameContainerInner.style.left = '0';
-                }
-                // Recria estrelas no resize
-                const stars = document.getElementsByClassName('star');
-                while (stars.length > 0) stars[0].remove();
-                createStars();
-            }
         }
+
+        window.addEventListener('resize', handleResize);
 
         function showIntro() {
             document.getElementById('gameContainer').innerHTML = `
                 <div class="bg-image">
-                    <div class="gradient-layer"></div>
-                    <div class="star"></div> <!-- Placeholder para stars -->
+                    <div class="fundo1-layer">
+                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+                    </div>
                     <div class="fundo2-layer">
                         <img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom">
                     </div>
                     <button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button>
                 </div>
             `;
-            createStars();
             adjustTextLayerFontSize();
-            handleResize();
         }
 
         function goToInstruction2() {
             document.getElementById('gameContainer').innerHTML = `
                 <div class="bg-image">
-                    <div class="gradient-layer"></div>
+                    <div class="fundo1-layer">
+                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+                    </div>
                     <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!\n<span class="arrow-link" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
-            createStars();
             adjustTextLayerFontSize();
-            handleResize();
         }
 
         function goToInstruction1() {
             document.getElementById('gameContainer').innerHTML = `
                 <div class="bg-image">
-                    <div class="gradient-layer"></div>
+                    <div class="fundo1-layer">
+                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+                    </div>
                     <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa e canhões de memória em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!\n<span class="arrow-link" onclick="startGame()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
-            createStars();
             adjustTextLayerFontSize();
-            handleResize();
         }
 
         function startGame() {
-            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%; margin: 0; padding: 0; top: 0; left: 0; box-sizing: border-box;"></div>';
-            console.log("Iniciando Phaser, gameContainerInner:", document.getElementById('gameContainerInner'));
+            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
             if (window.initPhaserGame) {
                 window.initPhaserGame();
             }
-            handleResize();
         }
 
         window.onload = showIntro;
-        window.addEventListener('load', handleResize);
-        window.addEventListener('resize', handleResize);
     </script>
 </head>
 <body>
