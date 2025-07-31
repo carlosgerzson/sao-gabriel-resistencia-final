@@ -14,16 +14,18 @@ const VERSION = "1.0 - 2025-07-27";
 // Função para inicializar o Phaser
 window.initPhaserGame = function () {
     const config = {
-        type: Phaser.AUTO,
-        width: document.getElementById('gameContainer').offsetWidth,
-        height: document.getElementById('gameContainer').offsetHeight,
+        type: Phaser.WEBGL,
+        width: document.getElementById('gameContainer').offsetWidth, // 482px
+        height: document.getElementById('gameContainer').offsetHeight, // 857px
         parent: 'gameContainerInner',
         scale: {
-            mode: Phaser.Scale.FIT,
+            mode: Phaser.Scale.HEIGHT, // Prioriza a altura total
             autoCenter: Phaser.Scale.CENTER_BOTH,
+            width: document.getElementById('gameContainer').offsetWidth,
+            height: document.getElementById('gameContainer').offsetHeight
         },
         scene: [BriefingScene, GameScene],
-        backgroundColor: '#000000ff',
+        transparent: true,
         render: {
             pixelArt: false,
             antialias: true
@@ -40,33 +42,21 @@ class BriefingScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.on('complete', () => {
-            this.cameras.main.setBackgroundColor('#000000');
-        });
+        this.load.image('fundo1', 'assets/fundo1.png'); // Carrega fundo1.png
     }
 
     create() {
         const isAndroid = /Android/.test(navigator.userAgent);
         const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
 
-        // Fundo com gradiente usando imagem branca
-        const bg = this.add.image(this.scale.width / 2, visibleHeight / 2, '__WHITE');
-        bg.setDisplaySize(this.scale.width, visibleHeight);
-        const gradient = bg.preFX.addGradient();
-        gradient.color1 = 0xff3103; // Red
-        gradient.color2 = 0x000000; // Black
+        // Fundo com fundo1.png (substitui gradiente e stars)
+        this.fundo = this.add.image(0, 0, 'fundo1')
+            .setOrigin(0, 0)
+            .setDisplaySize(this.scale.width, this.cameras.main.height);
 
-        // Estrelas
-        this.stars = [];
-        for (let i = 0; i < 50; i++) {
-            const star = this.add.circle(
-                Phaser.Math.Between(0, this.scale.width),
-                Phaser.Math.Between(0, visibleHeight),
-                Phaser.Math.Between(1, 3),
-                0xFFFFFF
-            ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
-            this.stars.push(star);
-        }
+        // Transparência da câmera
+        this.cameras.main.setBackgroundColor(0x00000000);
+        console.log('Câmera fundo no create:', this.cameras.main.backgroundColor.rgba);
 
         const levelDescriptions = [
             "ALVO 1: CLUBE COMERCIAL! \n\n" +
@@ -91,7 +81,7 @@ class BriefingScene extends Phaser.Scene {
             "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
         ];
 
-        // Texto com seta
+        // Texto com seta (restaurado ao original)
         this.briefingText = this.add.text(this.scale.width / 2, visibleHeight / 2,
             levelDescriptions[currentLevel - 1],
             {
@@ -111,7 +101,7 @@ class BriefingScene extends Phaser.Scene {
         });
         console.log('briefingText Y (create):', this.briefingText.y);
 
-        // Posicionar "INICIAR" como link abaixo do texto
+        // Posicionar "INICIAR" como link abaixo do texto (restaurado)
         const actionY = this.briefingText.y + (this.briefingText.height / 2) + 60;
         this.actionText = this.add.text(this.scale.width / 2, actionY, "INICIAR", {
             fontFamily: 'VT323',
@@ -144,21 +134,8 @@ class BriefingScene extends Phaser.Scene {
         const minFontSize = 20;
         const isAndroid = /Android/.test(navigator.userAgent);
         const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
-        if (this.stars) {
-            this.stars.forEach(star => {
-                if (star.active) {
-                    star.x = Phaser.Math.Between(0, this.scale.width);
-                    star.y = Phaser.Math.Between(0, visibleHeight);
-                    star.setScale(baseScale);
-                }
-            });
-        }
         if (this.briefingText) {
-            let textY = visibleHeight / 2;
-            if (isAndroid) {
-                textY = visibleHeight * 0.4;
-            }
-            this.briefingText.setPosition(this.scale.width / 2, textY);
+            this.briefingText.setPosition(this.scale.width / 2, visibleHeight / 2);
             this.briefingText.setFontSize(Math.max(49 * baseScale, minFontSize) + 'px');
             this.briefingText.setWordWrapWidth(this.scale.width * 0.8);
             console.log('briefingText Y (resize):', this.briefingText.y);
@@ -225,12 +202,17 @@ class GameScene extends Phaser.Scene {
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
 
-        // Fundo com gradiente usando imagem branca
-        const bg = this.add.image(this.scale.width / 2, visibleHeight / 2, '__WHITE');
-        bg.setDisplaySize(this.scale.width, visibleHeight);
-        const gradient = bg.preFX.addGradient();
-        gradient.color1 = colorPrefix === 'red' ? 0xff3103 : colorPrefix === 'yellow' ? 0xffff00 : 0x0000ff; // Red, Yellow, ou Blue
-        gradient.color2 = 0x000000; // Black
+        // Três gradientes com colorfix
+        const gradients = {
+            red: [0xff3103, 0x000000],
+            yellow: [0xffff00, 0x000000],
+            blue: [0x0000ff, 0x000000]
+        };
+        const colors = gradients[colorPrefix];
+        const gradient1 = this.add.rectangle(0, 0, this.scale.width, this.cameras.main.height, colors[0]);
+        gradient1.setOrigin(0, 0);
+        const gradient2 = this.add.rectangle(0, this.cameras.main.height / 2, this.scale.width, this.cameras.main.height / 2, colors[1]);
+        gradient2.setOrigin(0, 0);
 
         // Estrelas
         for (let i = 0; i < 50; i++) {
@@ -668,7 +650,7 @@ class GameScene extends Phaser.Scene {
         this.continueButton = this.add.rectangle(this.scale.width / 2, continueButtonY, 200 * baseScale, 80 * baseScale, 0xFFC107)
             .setStrokeStyle(2 * baseScale, 0xFFFFFF)
             .setDepth(2000)
-            .setInteractive({ useHandCursor: true});
+            .setInteractive({ useHandCursor: true });
 
         this.continueText = this.add.text(this.scale.width / 2, continueButtonY, currentLevel === TOTAL_LEVELS ? 'REINICIAR' : 'CONTINUAR', {
             fontFamily: 'VT323',
