@@ -58,7 +58,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Garante 852px */
+            /* Garante 852px no container */
             pointer-events: none;
             z-index: 0;
         }
@@ -78,15 +78,16 @@
 
         .fundo2-layer img {
             width: 100%;
-            height: 100%;
-            /* Força 852px */
-            object-fit: cover;
-            /* Preenche a altura */
+            height: auto;
+            /* Ajusta proporcionalmente à largura */
+            object-fit: contain;
+            /* Preserva proporção sem cortar */
             display: block;
             position: absolute;
             bottom: 0;
             /* Mantém alinhamento ao bottom */
             transform: translateY(0);
+            /* Garante precisão */
         }
 
         .text-layer {
