@@ -156,13 +156,14 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // Removido carregamento de fundo_${colorPrefix}.png
+        // Carrega os fundos PNGs com base no nível
         let colorPrefix;
         if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red';
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
         console.log(`Carregando assets para nível ${currentLevel}`);
 
+        this.load.image(`fundo_${colorPrefix}`, `assets/fundo_${colorPrefix}.png`); // Fundo PNG
         this.load.image(`silhueta_urbana_${colorPrefix}`, `assets/silhueta_urbana_${colorPrefix}.png`);
         this.load.image(`torre_e_${colorPrefix}`, `assets/torre_e_${colorPrefix}.png`);
         this.load.image(`torre_c_${colorPrefix}`, `assets/torre_c_${colorPrefix}.png`);
@@ -191,8 +192,8 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        const isAndroid = /Android/.test(navigator.userAgent);
-        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const visibleHeight = isMobile ? window.innerHeight : this.cameras.main.height; // Usa altura real do celular
         this.cameras.main.setSize(this.scale.width, visibleHeight);
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
 
@@ -202,34 +203,13 @@ class GameScene extends Phaser.Scene {
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
 
-        // Três gradientes com colorfix
-        const gradients = {
-            red: [0xff3103, 0x000000],
-            yellow: [0xffff00, 0x000000],
-            blue: [0x0000ff, 0x000000]
-        };
-        const colors = gradients[colorPrefix];
-        const gradient1 = this.add.rectangle(0, 0, this.scale.width, this.cameras.main.height, colors[0]);
-        gradient1.setOrigin(0, 0);
-        const gradient2 = this.add.rectangle(0, this.cameras.main.height / 2, this.scale.width, this.cameras.main.height / 2, colors[1]);
-        gradient2.setOrigin(0, 0);
+        // Fundo PNG substitui os gradients
+        this.fundo = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
+            .setOrigin(0.5, 0)
+            .setDisplaySize(this.scale.width, visibleHeight);
 
-        // Estrelas
-        for (let i = 0; i < 50; i++) {
-            const star = this.add.circle(
-                Phaser.Math.Between(0, this.scale.width),
-                Phaser.Math.Between(0, visibleHeight),
-                Phaser.Math.Between(1, 3),
-                0xFFFFFF
-            ).setAlpha(Phaser.Math.FloatBetween(0.2, 1));
-            this.tweens.add({
-                targets: star,
-                alpha: 1,
-                duration: 2000,
-                yoyo: true,
-                repeat: -1
-            });
-        }
+        // Remove estrelas (já embutidas no fundo PNG)
+        // ... (outros códigos de estrelas removidos)
 
         this.timerText = this.add.text(20, 20, '00:10', {
             fontFamily: 'VT323',
@@ -283,8 +263,9 @@ class GameScene extends Phaser.Scene {
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
 
+        // Ajuste da silhueta e torres no bottom
         this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
-            .setOrigin(0.5, 1)
+            .setOrigin(0.5, 1) // Alinha ao bottom
             .setScale(baseScale)
             .setDepth(25);
 
@@ -331,7 +312,7 @@ class GameScene extends Phaser.Scene {
         towerAndCannonDefinitions.forEach((def, index) => {
             const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20;
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
-                .setOrigin(0.5, 1)
+                .setOrigin(0.5, 1) // Alinha ao bottom
                 .setScale(def.towerScale)
                 .setDepth(towerDepth);
             this.allTowerSprites.push({ sprite: tower, def: def });
