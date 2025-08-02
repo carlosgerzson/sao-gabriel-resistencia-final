@@ -211,13 +211,13 @@ class GameScene extends Phaser.Scene {
         // Remove estrelas (já embutidas no fundo PNG)
         // ... (outros códigos de estrelas removidos)
 
-        this.timerText = this.add.text(20, 20, '00:10', {
+        this.timerText = this.add.text(20, 20, '00:20', {
             fontFamily: 'VT323',
             fontSize: '40px',
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft = 10;
+        this.timeLeft =20;
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -237,31 +237,33 @@ class GameScene extends Phaser.Scene {
         });
 
         const buildingWidth = 510 * baseScale;
-        const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
-        this.buildingContainer.setSize(buildingWidth, buildingHeight);
-        this.buildingContainer.setDepth(900);
+const buildingHeight = 550 * baseScale;
+this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
+this.buildingContainer.setSize(buildingWidth, buildingHeight);
+this.buildingContainer.setDepth(900);
 
-        const background = this.add.image(0, buildingHeight, `${this.levelPrefix}_fundo`)
-            .setOrigin(0.5, 1)
-            .setScale(baseScale);
-        background.setPosition(0, buildingHeight);
-        background.setDepth(900);
-        this.buildingContainer.add(background);
+// Fundo (sombra) alinhado pelo bottom esquerdo do container
+const fundoWidth = 604 * baseScale;
+const background = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
+    .setOrigin(0, 1)
+    .setScale(baseScale);
+background.setDepth(900);
+this.buildingContainer.add(background);
 
-        const chamasSpriteHeight = 375 * baseScale;
-        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 5), 'chamas101');
-        this.buildingContainer.add(this.currentChamasSprite);
-        this.currentChamasSprite.setDepth(910);
-        this.currentChamasSprite.setScale(0.3 * baseScale);
-        this.currentChamasSprite.setVisible(false);
+// Chamas
+const chamasSpriteHeight = 375 * baseScale;
+this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 10), 'chamas101');
+this.buildingContainer.add(this.currentChamasSprite);
+this.currentChamasSprite.setDepth(910);
+this.currentChamasSprite.setScale(0.3 * baseScale);
+this.currentChamasSprite.setVisible(false);
 
-        this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
-            .setOrigin(0.5, 1)
-            .setScale(baseScale);
-        this.building.setPosition(0, buildingHeight);
-        this.building.setDepth(920);
-        this.buildingContainer.add(this.building);
+// Prédio centralizado
+this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
+    .setOrigin(0.5, 1)
+    .setScale(baseScale);
+this.building.setDepth(920);
+this.buildingContainer.add(this.building);
 
         // Ajuste da silhueta e torres no bottom
         this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
@@ -438,35 +440,35 @@ class GameScene extends Phaser.Scene {
         }.bind(this);
 
         this.resize = () => {
-            const width = this.scale.width;
-            const height = this.cameras.main.height;
-            console.log(`Resize: width=${width}, height=${height}`);
-            console.log('Window Inner Height:', window.innerHeight);
+    const width = this.scale.width;
+    const height = this.cameras.main.height;
+    const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+    const buildingWidth = 510 * baseScale;
+    const buildingHeight = 550 * baseScale;
 
-            const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
-            if (this.silhuetaSprite) {
-                this.silhuetaSprite.setPosition(width / 2, visibleHeight);
-                console.log('Silhueta Y:', this.silhuetaSprite.y);
-            }
+    // Reposiciona o container centralizado
+    let containerY = height - buildingHeight - (48 * baseScale);
+    this.buildingContainer.setPosition(width / 2, containerY);
+    this.buildingContainer.setSize(buildingWidth, buildingHeight);
 
-            if (this.buildingContainer) {
-                const buildingHeight = 550 * baseScale;
-                let containerY = visibleHeight - buildingHeight - (48 * baseScale);
-                this.buildingContainer.setPosition(width / 2, containerY);
-                this.buildingContainer.setSize(buildingWidth, buildingHeight);
-                this.building.setScale(baseScale);
-                this.building.setPosition(0, buildingHeight);
-                const background = this.buildingContainer.getAt(0);
-                if (background) background.setScale(baseScale);
-            }
+    // Fundo (sombra) alinhado pelo bottom esquerdo
+    const background = this.buildingContainer.getAt(0);
+    if (background) {
+        background.setScale(baseScale);
+        background.setPosition(-buildingWidth / 2, buildingHeight);
+    }
 
-            if (this.currentChamasSprite) {
-                const chamasSpriteHeight = 375 * baseScale;
-                this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 5));
-                this.currentChamasSprite.setScale(0.3 * baseScale);
-            }
+    // Prédio centralizado
+    if (this.building) {
+        this.building.setScale(baseScale);
+        this.building.setPosition(0, buildingHeight);
+    }
+
+    // Chamas centralizadas
+    if (this.currentChamasSprite) {
+        this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 10));
+        this.currentChamasSprite.setScale(0.3 * baseScale);
+    }
 
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
