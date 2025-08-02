@@ -61,24 +61,24 @@ class BriefingScene extends Phaser.Scene {
         const levelDescriptions = [
             "ALVO 1: CLUBE COMERCIAL! \n\n" +
             "O calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.",
-            "ALVO 2: CENTRO CULTURAL! \n\n" +
-            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-            "ALVO 3: PRAÇA HISTÓRICA! \n\n" +
-            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            "ALVO 2: MAÇONARIA! \n\n" +
+            "O silêncio sábio da Rocha Negra nr 1, onde segredos e irmandade tecem nossa herança. Defenda-a, pois é o farol da sabedoria que ilumina nossa união.",
+            "ALVO 3: IGREJA DO GALO! \n\n" +
+            "O eco sagrado da Igreja do Galo, onde a fé ressoa entre pedra e história. Defenda-a, pois é o espírito vivo de nossa devoção que não pode silenciar.",
             "ALVO 4: MUSEU LOCAL! \n\n" +
             "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             "ALVO 5: TEATRO ANTIGO! \n\n" +
             "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
-            "ALVO 6: IGREJA COLONIAL! \n\n" +
-            "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.",
-            "ALVO 7: MERCADO TRADICIONAL! \n\n" +
-            "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
-            "ALVO 8: PONTE VELHA! \n\n" +
-            "Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.",
-            "ALVO 9: ESTAÇÃO FERROVIÁRIA! \n\n" +
-            "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
-            "ALVO 10: CASA HISTÓRICA! \n\n" +
-            "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat."
+            "ALVO 6: SOBRADO - BIBLIOTECA! \n\n" +
+            "A alma acolhedora do Sobrado, onde livros e música guardam nossos sonhos. Defenda-o, pois é o coração da cultura que pulsa em nossa memória.",
+            "ALVO 7: IGREJA MATRIZ! \n\n" +
+            "A força serena da Igreja Matriz, onde a fé dos colonizadores ainda ecoa. Defenda-a, pois é o alicerce espiritual que sustenta nossa identidade.",
+            "ALVO 8: PREFEITURA MUNICIPAL! \n\n" +
+            "O orgulho altivo da Prefeitura, onde a gestão abraça o povo das coxilhas. Defenda-a, pois é o batimento do progresso que não pode parar.",
+            "ALVO 9: BANCO DA PROVÍNCIA! \n\n" +
+            "A memória do Banco da Província, onde o passado imperial forjou nossa riqueza. Defenda-o, pois é o eco de um legado que resiste ao tempo.",
+            "ALVO 10: BANRISUL! \n\n" +
+            "A solidez do Banrisul, onde a economia gaúcha encontrou raízes. Defenda-o, pois é o pilar financeiro que fortalece nossa história."
         ];
 
         // Texto com seta (restaurado ao original)
@@ -217,7 +217,7 @@ class GameScene extends Phaser.Scene {
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft =20;
+        this.timeLeft = 20;
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -237,33 +237,33 @@ class GameScene extends Phaser.Scene {
         });
 
         const buildingWidth = 510 * baseScale;
-const buildingHeight = 550 * baseScale;
-this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
-this.buildingContainer.setSize(buildingWidth, buildingHeight);
-this.buildingContainer.setDepth(900);
+        const buildingHeight = 550 * baseScale;
+        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
+        this.buildingContainer.setSize(buildingWidth, buildingHeight);
+        this.buildingContainer.setDepth(900);
 
-// Fundo (sombra) alinhado pelo bottom esquerdo do container
-const fundoWidth = 604 * baseScale;
-const background = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
-    .setOrigin(0, 1)
-    .setScale(baseScale);
-background.setDepth(900);
-this.buildingContainer.add(background);
+        // Fundo (sombra) alinhado pelo bottom esquerdo do container
+        const fundoWidth = 604 * baseScale;
+        const background = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
+            .setOrigin(0, 1)
+            .setScale(baseScale);
+        background.setDepth(900);
+        this.buildingContainer.add(background);
 
-// Chamas
-const chamasSpriteHeight = 375 * baseScale;
-this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 10), 'chamas101');
-this.buildingContainer.add(this.currentChamasSprite);
-this.currentChamasSprite.setDepth(910);
-this.currentChamasSprite.setScale(0.3 * baseScale);
-this.currentChamasSprite.setVisible(false);
+        // Chamas
+        const chamasSpriteHeight = 375 * baseScale;
+        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 10), 'chamas101');
+        this.buildingContainer.add(this.currentChamasSprite);
+        this.currentChamasSprite.setDepth(910);
+        this.currentChamasSprite.setScale(0.3 * baseScale);
+        this.currentChamasSprite.setVisible(false);
 
-// Prédio centralizado
-this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
-    .setOrigin(0.5, 1)
-    .setScale(baseScale);
-this.building.setDepth(920);
-this.buildingContainer.add(this.building);
+        // Prédio centralizado
+        this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
+            .setOrigin(0.5, 1)
+            .setScale(baseScale);
+        this.building.setDepth(920);
+        this.buildingContainer.add(this.building);
 
         // Ajuste da silhueta e torres no bottom
         this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
@@ -440,35 +440,35 @@ this.buildingContainer.add(this.building);
         }.bind(this);
 
         this.resize = () => {
-    const width = this.scale.width;
-    const height = this.cameras.main.height;
-    const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
-    const buildingWidth = 510 * baseScale;
-    const buildingHeight = 550 * baseScale;
+            const width = this.scale.width;
+            const height = this.cameras.main.height;
+            const baseScale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+            const buildingWidth = 510 * baseScale;
+            const buildingHeight = 550 * baseScale;
 
-    // Reposiciona o container centralizado
-    let containerY = height - buildingHeight - (48 * baseScale);
-    this.buildingContainer.setPosition(width / 2, containerY);
-    this.buildingContainer.setSize(buildingWidth, buildingHeight);
+            // Reposiciona o container centralizado
+            let containerY = height - buildingHeight - (48 * baseScale);
+            this.buildingContainer.setPosition(width / 2, containerY);
+            this.buildingContainer.setSize(buildingWidth, buildingHeight);
 
-    // Fundo (sombra) alinhado pelo bottom esquerdo
-    const background = this.buildingContainer.getAt(0);
-    if (background) {
-        background.setScale(baseScale);
-        background.setPosition(-buildingWidth / 2, buildingHeight);
-    }
+            // Fundo (sombra) alinhado pelo bottom esquerdo
+            const background = this.buildingContainer.getAt(0);
+            if (background) {
+                background.setScale(baseScale);
+                background.setPosition(-buildingWidth / 2, buildingHeight);
+            }
 
-    // Prédio centralizado
-    if (this.building) {
-        this.building.setScale(baseScale);
-        this.building.setPosition(0, buildingHeight);
-    }
+            // Prédio centralizado
+            if (this.building) {
+                this.building.setScale(baseScale);
+                this.building.setPosition(0, buildingHeight);
+            }
 
-    // Chamas centralizadas
-    if (this.currentChamasSprite) {
-        this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 10));
-        this.currentChamasSprite.setScale(0.3 * baseScale);
-    }
+            // Chamas centralizadas
+            if (this.currentChamasSprite) {
+                this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 10));
+                this.currentChamasSprite.setScale(0.3 * baseScale);
+            }
 
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
