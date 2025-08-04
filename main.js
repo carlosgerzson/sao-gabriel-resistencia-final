@@ -208,9 +208,6 @@ class GameScene extends Phaser.Scene {
             .setOrigin(0.5, 0)
             .setDisplaySize(this.scale.width, visibleHeight);
 
-        // Remove estrelas (já embutidas no fundo PNG)
-        // ... (outros códigos de estrelas removidos)
-
         this.timerText = this.add.text(20, 20, '00:20', {
             fontFamily: 'VT323',
             fontSize: '40px',
@@ -238,7 +235,7 @@ class GameScene extends Phaser.Scene {
 
         const buildingWidth = 510 * baseScale;
         const buildingHeight = 550 * baseScale;
-        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (48 * baseScale));
+        this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (50 * baseScale)); // Alterado de 48px para 50px
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
 
@@ -250,9 +247,12 @@ class GameScene extends Phaser.Scene {
         background.setDepth(900);
         this.buildingContainer.add(background);
 
+        // Console para inspecionar fundo (shadow)
+        console.log(`Nível ${currentLevel} - Fundo: x=${background.x}, y=${background.y}, width=${fundoWidth}, scale=${background.scaleX}`);
+
         // Chamas
         const chamasSpriteHeight = 375 * baseScale;
-        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (48 * baseScale + 10), 'chamas101');
+        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (50 * baseScale + 10), 'chamas101'); // Alterado de 48px para 50px
         this.buildingContainer.add(this.currentChamasSprite);
         this.currentChamasSprite.setDepth(910);
         this.currentChamasSprite.setScale(0.3 * baseScale);
@@ -264,6 +264,9 @@ class GameScene extends Phaser.Scene {
             .setScale(baseScale);
         this.building.setDepth(920);
         this.buildingContainer.add(this.building);
+
+        // Console para inspecionar prédio
+        console.log(`Nível ${currentLevel} - Prédio: x=${this.building.x}, y=${this.building.y}, width=${buildingWidth}, scale=${this.building.scaleX}`);
 
         // Ajuste da silhueta e torres no bottom
         this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
@@ -417,7 +420,9 @@ class GameScene extends Phaser.Scene {
                     this.buildingState++;
                     this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
                     if (this.buildingState === 3) {
-                        this.endLevel(false);
+                        this.time.delayedCall(3000, () => { // Delay de 1 segundo após "destruído"
+                            this.endLevel(false);
+                        }, [], this);
                     }
                 }
             }, [], this);
@@ -447,7 +452,7 @@ class GameScene extends Phaser.Scene {
             const buildingHeight = 550 * baseScale;
 
             // Reposiciona o container centralizado
-            let containerY = height - buildingHeight - (48 * baseScale);
+            let containerY = height - buildingHeight - (50 * baseScale); // Alterado de 48px para 50px
             this.buildingContainer.setPosition(width / 2, containerY);
             this.buildingContainer.setSize(buildingWidth, buildingHeight);
 
@@ -466,7 +471,7 @@ class GameScene extends Phaser.Scene {
 
             // Chamas centralizadas
             if (this.currentChamasSprite) {
-                this.currentChamasSprite.setPosition(0, buildingHeight - (48 * baseScale + 10));
+                this.currentChamasSprite.setPosition(0, buildingHeight - (50 * baseScale + 10)); // Alterado de 48px para 50px
                 this.currentChamasSprite.setScale(0.3 * baseScale);
             }
 
@@ -600,14 +605,14 @@ class GameScene extends Phaser.Scene {
             {
                 fontFamily: 'VT323',
                 fontSize: Math.max(70 * baseScale, minFontSize) + 'px',
-                color: currentLevel === TOTAL_LEVELS ? '#FFFFFF' : success ? '#00FF00' : '#00FF00',
+                color: currentLevel === TOTAL_LEVELS ? '#FFFFFF' : success ? '#00FF00' : '#FF0000',
                 align: 'center'
             }
         ).setOrigin(0.5).setDepth(1500);
         this.resultText.setAlpha(0);
         this.tweens.add({
             targets: this.resultText,
-            alpha: { from: 1, to: 1 },
+            alpha: { from: 0, to: 1 },
             duration: 1000
         });
 
