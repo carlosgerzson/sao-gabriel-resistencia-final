@@ -420,7 +420,7 @@ class GameScene extends Phaser.Scene {
                     this.buildingState++;
                     this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
                     if (this.buildingState === 3) {
-                        this.time.delayedCall(3000, () => { // Delay de 1 segundo após "destruído"
+                        this.time.delayedCall(1000, () => { // Delay de 1 segundo após "destruído"
                             this.endLevel(false);
                         }, [], this);
                     }
@@ -471,7 +471,7 @@ class GameScene extends Phaser.Scene {
 
             // Chamas centralizadas
             if (this.currentChamasSprite) {
-                this.currentChamasSprite.setPosition(0, buildingHeight - (50 * baseScale + 10)); // Alterado de 48px para 50px
+                this.currentChamasSprite.setPosition(0, buildingHeight - (50 * baseScale + 20)); // Alterado de 48px para 50px
                 this.currentChamasSprite.setScale(0.3 * baseScale);
             }
 
@@ -575,11 +575,14 @@ class GameScene extends Phaser.Scene {
     updateBuildingState(levelPrefix) {
         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
         const buildingWidth = 510 * baseScale;
-        const buildingHeight = 550 * baseScale;
         const key = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
         this.building.setTexture(key).setScale(baseScale);
-        this.building.setPosition(0, buildingHeight);
+        const scaledHeight = this.building.height * baseScale; // Corrige pra altura escalada
+        const containerScaledHeight = this.buildingContainer.height;
+        this.building.setPosition(0, containerScaledHeight);
         this.building.setDepth(920);
+        this.buildingContainer.setSize(buildingWidth, containerScaledHeight);
+        console.log(`Estado ${this.buildingState} (${key}), X: ${this.building.x}, Y: ${this.building.y}, Altura bruta: ${this.building.height}, Altura escalada: ${scaledHeight}, Container altura: ${containerScaledHeight}`);
     }
 
     endLevel(success) {
