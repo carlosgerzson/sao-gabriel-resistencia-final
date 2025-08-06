@@ -14,7 +14,7 @@ const VERSION = "1.0 - 2025-07-27";
 // Função para inicializar o Phaser
 window.initPhaserGame = function () {
     const config = {
-        type: Phaser.WEBGL,
+        type: Phaser.CANVAS,
         width: document.getElementById('gameContainer').offsetWidth, // 482px
         height: document.getElementById('gameContainer').offsetHeight, // 857px
         parent: 'gameContainerInner',
