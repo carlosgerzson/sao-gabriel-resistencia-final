@@ -14,7 +14,7 @@ const VERSION = "1.0 - 2025-07-27";
 // Função para inicializar o Phaser
 window.initPhaserGame = function () {
     const config = {
-        type: Phaser.CANVAS,
+        type: Phaser.WEBGL,
         width: document.getElementById('gameContainer').offsetWidth, // 482px
         height: document.getElementById('gameContainer').offsetHeight, // 857px
         parent: 'gameContainerInner',
@@ -464,10 +464,20 @@ class GameScene extends Phaser.Scene {
             }
 
             // Prédio centralizado
-            if (this.building) {
-                this.building.setScale(baseScale);
-                this.building.setPosition(0, buildingHeight);
-            }
+           if (this.building) {
+    // Pega dimensões reais do PNG atual
+    const texture = this.textures.get(this.building.texture.key);
+    const sourceImage = texture.getSourceImage();
+    const naturalWidth = sourceImage.width;
+    const naturalHeight = sourceImage.height;
+
+    const displayWidth = 510 * baseScale;
+    const displayHeight = (naturalHeight / naturalWidth) * displayWidth;
+
+    this.building.setDisplaySize(displayWidth, displayHeight)
+        .setOrigin(0.5, 1)
+        .setPosition(0, buildingHeight);
+}
 
             // Chamas centralizadas
             if (this.currentChamasSprite) {
@@ -573,17 +583,31 @@ class GameScene extends Phaser.Scene {
     }
 
     updateBuildingState(levelPrefix) {
-        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-        const buildingWidth = 510 * baseScale;
-        const key = this.buildingState === 1 ? `${levelPrefix}_dano1` : this.buildingState === 2 ? `${levelPrefix}_dano2` : `${levelPrefix}_destruido`;
-        this.building.setTexture(key).setScale(baseScale);
-        const scaledHeight = this.building.height * baseScale; // Corrige pra altura escalada
-        const containerScaledHeight = this.buildingContainer.height;
-        this.building.setPosition(0, containerScaledHeight);
-        this.building.setDepth(920);
-        this.buildingContainer.setSize(buildingWidth, containerScaledHeight);
-        console.log(`Estado ${this.buildingState} (${key}), X: ${this.building.x}, Y: ${this.building.y}, Altura bruta: ${this.building.height}, Altura escalada: ${scaledHeight}, Container altura: ${containerScaledHeight}`);
-    }
+    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+    const key = this.buildingState === 1 ? `${levelPrefix}_dano1` :
+                this.buildingState === 2 ? `${levelPrefix}_dano2` :
+                `${levelPrefix}_destruido`;
+
+    // Pega dimensões reais do PNG
+    const texture = this.textures.get(key);
+    const sourceImage = texture.getSourceImage();
+    const naturalWidth = sourceImage.width;
+    const naturalHeight = sourceImage.height;
+
+    // Calcula altura proporcional à largura fixa (510px)
+    const displayWidth = 510 * baseScale;
+    const displayHeight = (naturalHeight / naturalWidth) * displayWidth;
+
+    this.building.setTexture(key)
+        .setDisplaySize(displayWidth, displayHeight)
+        .setOrigin(0.5, 1)
+        .setPosition(0, this.buildingContainer.height)
+        .setDepth(920);
+
+    this.buildingContainer.setSize(displayWidth, this.buildingContainer.height);
+
+    console.log(`Estado ${this.buildingState} (${key}), X: ${this.building.x}, Y: ${this.building.y}, Altura PNG: ${naturalHeight}, Altura display: ${displayHeight}`);
+}
 
     endLevel(success) {
         this.time.removeAllEvents();
