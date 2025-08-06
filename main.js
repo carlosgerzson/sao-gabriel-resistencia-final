@@ -223,7 +223,7 @@ class GameScene extends Phaser.Scene {
                 let seconds = this.timeLeft % 60;
                 this.timerText.setText(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
                 if (this.timeLeft <= 0) {
-                    if (this.buildingState < 3) {
+                    if (this.buildingHealth < 3) {
                         this.endLevel(true);
                     } else {
                         this.endLevel(false);
@@ -241,14 +241,14 @@ class GameScene extends Phaser.Scene {
 
         // Fundo (sombra) alinhado pelo bottom esquerdo do container
         const fundoWidth = 604 * baseScale;
-        const background = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
+        this.buildingFundo = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
             .setOrigin(0, 1)
-            .setScale(baseScale);
-        background.setDepth(900);
-        this.buildingContainer.add(background);
+            .setScale(baseScale)
+            .setDepth(900);
+        this.buildingContainer.add(this.buildingFundo);
 
         // Console para inspecionar fundo (shadow)
-        console.log(`Nível ${currentLevel} - Fundo: x=${background.x}, y=${background.y}, width=${fundoWidth}, scale=${background.scaleX}`);
+        console.log(`Nível ${currentLevel} - Fundo: x=${this.buildingFundo.x}, y=${this.buildingFundo.y}, width=${fundoWidth}, scale=${this.buildingFundo.scaleX}`);
 
         // Chamas
         const chamasSpriteHeight = 375 * baseScale;
@@ -258,15 +258,39 @@ class GameScene extends Phaser.Scene {
         this.currentChamasSprite.setScale(0.3 * baseScale);
         this.currentChamasSprite.setVisible(false);
 
-        // Prédio centralizado
-        this.building = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
+        // Layers dos estágios como objetos separados
+        this.buildingPredio = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
             .setOrigin(0.5, 1)
-            .setScale(baseScale);
-        this.building.setDepth(920);
-        this.buildingContainer.add(this.building);
+            .setScale(baseScale)
+            .setDepth(920)
+            .setVisible(true);
+        this.buildingContainer.add(this.buildingPredio);
 
-        // Console para inspecionar prédio
-        console.log(`Nível ${currentLevel} - Prédio: x=${this.building.x}, y=${this.building.y}, width=${buildingWidth}, scale=${this.building.scaleX}`);
+        this.buildingDano1 = this.add.image(0, buildingHeight, `${this.levelPrefix}_dano1`)
+            .setOrigin(0.5, 1)
+            .setScale(baseScale)
+            .setDepth(920)
+            .setVisible(false);
+        this.buildingContainer.add(this.buildingDano1);
+
+        this.buildingDano2 = this.add.image(0, buildingHeight, `${this.levelPrefix}_dano2`)
+            .setOrigin(0.5, 1)
+            .setScale(baseScale)
+            .setDepth(920)
+            .setVisible(false);
+        this.buildingContainer.add(this.buildingDano2);
+
+        this.buildingDestruido = this.add.image(0, buildingHeight, `${this.levelPrefix}_destruido`)
+            .setOrigin(0.5, 1)
+            .setScale(baseScale)
+            .setDepth(920)
+            .setVisible(false);
+        this.buildingContainer.add(this.buildingDestruido);
+
+        // Console para inspecionar estágios
+        console.log(`Nível ${currentLevel} - Prédio: x=${this.buildingPredio.x}, y=${this.buildingPredio.y}, width=${buildingWidth}, scale=${this.buildingPredio.scaleX}`);
+
+        this.buildingHealth = 3; // Saúde inicial: 3 pra _predio, 2 pra _dano1, 1 pra _dano2, 0 pra _destruido
 
         // Ajuste da silhueta e torres no bottom
         this.silhuetaSprite = this.add.image(this.scale.width / 2, visibleHeight, `silhueta_urbana_${colorPrefix}`)
@@ -332,7 +356,6 @@ class GameScene extends Phaser.Scene {
             this.towers.push(tower);
         });
 
-        this.buildingState = 0;
         this.waveCount = 0;
 
         const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
@@ -416,10 +439,10 @@ class GameScene extends Phaser.Scene {
                     }
                 }
 
-                if (this.buildingState < 3) {
-                    this.buildingState++;
-                    this.updateBuildingState(`nivel${currentLevel}/alvo${currentLevel}`);
-                    if (this.buildingState === 3) {
+                if (this.buildingHealth > 0) {
+                    this.buildingHealth--;
+                    this.updateBuildingVisibility();
+                    if (this.buildingHealth === 0) {
                         this.time.delayedCall(1000, () => { // Delay de 1 segundo após "destruído"
                             this.endLevel(false);
                         }, [], this);
@@ -457,27 +480,25 @@ class GameScene extends Phaser.Scene {
             this.buildingContainer.setSize(buildingWidth, buildingHeight);
 
             // Fundo (sombra) alinhado pelo bottom esquerdo
-            const background = this.buildingContainer.getAt(0);
-            if (background) {
-                background.setScale(baseScale);
-                background.setPosition(-buildingWidth / 2, buildingHeight);
+            if (this.buildingFundo) {
+                this.buildingFundo.setScale(baseScale);
+                this.buildingFundo.setPosition(-buildingWidth / 2, buildingHeight);
             }
 
-            // Prédio centralizado
-           if (this.building) {
-    // Pega dimensões reais do PNG atual
-    const texture = this.textures.get(this.building.texture.key);
-    const sourceImage = texture.getSourceImage();
-    const naturalWidth = sourceImage.width;
-    const naturalHeight = sourceImage.height;
-
-    const displayWidth = 510 * baseScale;
-    const displayHeight = (naturalHeight / naturalWidth) * displayWidth;
-
-    this.building.setDisplaySize(displayWidth, displayHeight)
-        .setOrigin(0.5, 1)
-        .setPosition(0, buildingHeight);
-}
+            // Ajuste dos estágios
+            [this.buildingPredio, this.buildingDano1, this.buildingDano2, this.buildingDestruido].forEach(building => {
+                if (building) {
+                    const texture = this.textures.get(building.texture.key);
+                    const sourceImage = texture.getSourceImage();
+                    const naturalWidth = sourceImage.width;
+                    const naturalHeight = sourceImage.height;
+                    const displayWidth = 510 * baseScale;
+                    const displayHeight = (naturalHeight / naturalWidth) * displayWidth;
+                    building.setDisplaySize(displayWidth, displayHeight)
+                        .setOrigin(0.5, 1)
+                        .setPosition(0, buildingHeight);
+                }
+            });
 
             // Chamas centralizadas
             if (this.currentChamasSprite) {
@@ -554,7 +575,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    fireAntiMissile(cannon, targetGameX, targetGameY) {
+   fireAntiMissile(cannon, targetGameX, targetGameY) {
         if (!gameEnded) {
             const launchX = cannon.sprite.x;
             const launchY = cannon.sprite.y;
@@ -582,32 +603,36 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    updateBuildingState(levelPrefix) {
-    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-    const key = this.buildingState === 1 ? `${levelPrefix}_dano1` :
-                this.buildingState === 2 ? `${levelPrefix}_dano2` :
-                `${levelPrefix}_destruido`;
+    updateBuildingVisibility() {
+        this.buildingPredio.setVisible(this.buildingHealth === 3);
+        this.buildingDano1.setVisible(this.buildingHealth === 2);
+        this.buildingDano2.setVisible(this.buildingHealth === 1);
+        this.buildingDestruido.setVisible(this.buildingHealth === 0);
+    }
 
-    // Pega dimensões reais do PNG
-    const texture = this.textures.get(key);
-    const sourceImage = texture.getSourceImage();
-    const naturalWidth = sourceImage.width;
-    const naturalHeight = sourceImage.height;
-
-    // Calcula altura proporcional à largura fixa (510px)
-    const displayWidth = 510 * baseScale;
-    const displayHeight = (naturalHeight / naturalWidth) * displayWidth;
-
-    this.building.setTexture(key)
-        .setDisplaySize(displayWidth, displayHeight)
-        .setOrigin(0.5, 1)
-        .setPosition(0, this.buildingContainer.height)
-        .setDepth(920);
-
-    this.buildingContainer.setSize(displayWidth, this.buildingContainer.height);
-
-    console.log(`Estado ${this.buildingState} (${key}), X: ${this.building.x}, Y: ${this.building.y}, Altura PNG: ${naturalHeight}, Altura display: ${displayHeight}`);
-}
+    spawnWave() {
+        if (!gameEnded) {
+            this.waveCount++;
+            const baseSpeed = 70;
+            const speedIncrementPerWave = 20;
+            const delayBetweenMissiles = 800;
+            for (let i = 0; i < 2; i++) {
+                this.time.delayedCall(i * delayBetweenMissiles, () => {
+                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                    const spawnX = Phaser.Math.Between(0, this.scale.width);
+                    const spawnY = 0;
+                    const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
+                    missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
+                    missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
+                    missile.targetY = this.scale.height - 315 * baseScale;
+                    missile.setDepth(1000);
+                    missile.setActive(true);
+                    missile.setVisible(true);
+                    missiles.push(missile);
+                }, [], this);
+            }
+        }
+    }
 
     endLevel(success) {
         this.time.removeAllEvents();
