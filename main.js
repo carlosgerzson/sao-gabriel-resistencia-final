@@ -10,7 +10,7 @@ let gameEnded = false;
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 1600;
-const VERSION = "1.0 - 2025-07-27";
+const VERSION = "1.0 - 2025-08-11";
 
 // Carregar progresso salvo no início
 const savedProgress = JSON.parse(localStorage.getItem('gameProgress'));
@@ -342,85 +342,98 @@ class GameScene extends Phaser.Scene {
         if (currentLevel >= 3 && currentLevel <= 10) naveShouldAppear = true; // Aparece da fase 3 em diante
 
         if (naveShouldAppear) {
-            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-            const naveWidth = 209 * baseScale;
-            const naveHeight = 88 * baseScale;
-            const naveY = 130 * baseScale;
-            const naveStartX = -naveWidth;
-            const naveEndX = this.scale.width + naveWidth;
-            const naveSpeed = 6000; // ms para cruzar a tela
+            // Array para armazenar os mísseis da nave
+            this.naveMissiles = [];
 
-            // Cria a nave
-            this.naveSprite = this.add.image(naveStartX, naveY, 'nave')
-                .setOrigin(0, 0.5)
-                .setScale(baseScale)
-                .setDepth(1100);
+            // Aguarda entre 10 e 20 segundos para criar a nave
+            const naveDelay = Phaser.Math.Between(10000, 20000); // entre 10 e 20 segundos
 
-            // Contador de mísseis da nave
-            let naveMissileCount = 0;
-            const maxNaveMissiles = 5;
+            this.time.delayedCall(naveDelay, () => {
+                const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                const naveWidth = 209 * baseScale;
+                const naveHeight = 88 * baseScale;
+                const naveY = 130 * baseScale;
+                const naveStartX = -naveWidth;
+                const naveEndX = this.scale.width + naveWidth;
+                const naveSpeed = 6000; // ms para cruzar a tela
 
-            // Tween para mover a nave
-            this.tweens.add({
-                targets: this.naveSprite,
-                x: naveEndX,
-                duration: naveSpeed,
-                ease: 'Linear',
-                onUpdate: (tween, target) => {
-                    // A cada 800ms, lança um míssil/bomba (até o limite)
-                    if (
-                        naveMissileCount < maxNaveMissiles &&
-                        (!target.lastFire || this.time.now - target.lastFire > 800)
-                    ) {
-                        target.lastFire = this.time.now;
-                        naveMissileCount++;
+                // Cria a nave
+                this.naveSprite = this.add.image(naveStartX, naveY, 'nave')
+                    .setOrigin(0, 0.5)
+                    .setScale(baseScale)
+                    .setDepth(1100);
 
-                        // Origem do míssil: ponta da nave
-                        const missileStartX = target.x + naveWidth * 0.4;
-                        const missileStartY = naveY + naveHeight * 0.45;
-                        // Destino X aleatório em toda a largura da tela
-                        const targetMissileX = Phaser.Math.Between(0, this.scale.width);
-                        const targetMissileY = this.cameras.main.height - 300 * baseScale;
+                // Contador de mísseis da nave
+                let naveMissileCount = 0;
+                const maxNaveMissiles = 5;
 
-                        const missile = this.add.circle(missileStartX, missileStartY, 12 * baseScale, 0xff0000, 0.8)
-                            .setStrokeStyle(4 * baseScale, 0xffffff, 1)
-                            .setDepth(1099);
+                // Tween para mover a nave
+                this.tweens.add({
+                    targets: this.naveSprite,
+                    x: naveEndX,
+                    duration: naveSpeed,
+                    ease: 'Linear',
+                    onUpdate: (tween, target) => {
+                        // A cada 800ms, lança um míssil/bomba (até o limite)
+                        if (
+                            naveMissileCount < maxNaveMissiles &&
+                            (!target.lastFire || this.time.now - target.lastFire > 800)
+                        ) {
+                            target.lastFire = this.time.now;
+                            naveMissileCount++;
 
-                        // Calcula área de colisão do alvo
-                        const collisionTopY = this.cameras.main.height - 315 * baseScale;
-                        const collisionBottomY = collisionTopY + 50 * baseScale;
-                        const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
-                        const collisionRightX = this.scale.width / 2 + 255 * baseScale;
+                            // Origem do míssil: ponta da nave
+                            const missileStartX = target.x + naveWidth * 0.4;
+                            const missileStartY = naveY + naveHeight * 0.45;
+                            // Destino X aleatório em toda a largura da tela
+                            const targetMissileX = Phaser.Math.Between(0, this.scale.width);
+                            const targetMissileY = this.cameras.main.height - 300 * baseScale;
 
-                        this.tweens.add({
-                            targets: missile,
-                            x: targetMissileX,
-                            y: targetMissileY,
-                            duration: 1800,
-                            ease: 'Linear',
-                            onComplete: () => {
-                                // Verifica colisão
-                                if (
-                                    missile.x >= collisionLeftX &&
-                                    missile.x <= collisionRightX &&
-                                    missile.y >= collisionTopY &&
-                                    missile.y <= collisionBottomY
-                                ) {
-                                    this.onBuildingHit(missile.x, missile.y); // Dano ao alvo
-                                } else {
-                                    this.onMissileHit(missile.x, missile.y); // Só explosão visual
+                            const missile = this.add.circle(missileStartX, missileStartY, 12 * baseScale, 0xff0000, 0.8)
+                                .setStrokeStyle(4 * baseScale, 0xffffff, 1)
+                                .setDepth(1099);
+
+                            // Adiciona ao array de mísseis da nave
+                            this.naveMissiles.push(missile);
+
+                            // Calcula área de colisão do alvo
+                            const collisionTopY = this.cameras.main.height - 315 * baseScale;
+                            const collisionBottomY = collisionTopY + 50 * baseScale;
+                            const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
+                            const collisionRightX = this.scale.width / 2 + 255 * baseScale;
+
+                            this.tweens.add({
+                                targets: missile,
+                                x: targetMissileX,
+                                y: targetMissileY,
+                                duration: 5000,
+                                ease: 'Linear',
+                                onComplete: () => {
+                                    if (!missile.active) return; // Só executa se o míssil não foi interceptado
+
+                                    if (
+                                        missile.x >= collisionLeftX &&
+                                        missile.x <= collisionRightX &&
+                                        missile.y >= collisionTopY &&
+                                        missile.y <= collisionBottomY
+                                    ) {
+                                        this.onBuildingHit(missile.x, missile.y);
+                                    } else {
+                                        this.onMissileHit(missile.x, missile.y);
+                                    }
+                                    missile.destroy();
+                                    const idx = this.naveMissiles.indexOf(missile);
+                                    if (idx !== -1) this.naveMissiles.splice(idx, 1);
                                 }
-                                missile.destroy();
-                            }
-                        });
+                            });
+                        }
+                    },
+                    onComplete: () => {
+                        this.naveSprite.destroy();
                     }
-                },
-                onComplete: () => {
-                    this.naveSprite.destroy();
-                }
-            });
+                });
+            }, [], this);
         }
-
 
         this.waveCount = 0;
 
@@ -517,6 +530,7 @@ class GameScene extends Phaser.Scene {
         }.bind(this);
 
         this.handleExplosionCollision = function (explosionX, explosionY, explosionRadius) {
+            // Mísseis normais
             for (let i = missiles.length - 1; i >= 0; i--) {
                 const missile = missiles[i];
                 if (!missile || !missile.active) {
@@ -530,8 +544,39 @@ class GameScene extends Phaser.Scene {
                     this.sound.play('explosion_air');
                 }
             }
-        }.bind(this);
 
+            // Bomba matadora
+            for (let i = killerMissiles.length - 1; i >= 0; i--) {
+                const killer = killerMissiles[i];
+                if (!killer || !killer.active) {
+                    killerMissiles.splice(i, 1);
+                    continue;
+                }
+                const distance = Phaser.Math.Distance.Between(explosionX, explosionY, killer.x, killer.y);
+                if (distance < explosionRadius) {
+                    killer.destroy();
+                    killerMissiles.splice(i, 1);
+                    this.sound.play('explosion_air');
+                }
+            }
+
+            // Mísseis da nave
+            if (this.naveMissiles) {
+                for (let i = this.naveMissiles.length - 1; i >= 0; i--) {
+                    const naveMissile = this.naveMissiles[i];
+                    if (!naveMissile || !naveMissile.active) {
+                        this.naveMissiles.splice(i, 1);
+                        continue;
+                    }
+                    const distance = Phaser.Math.Distance.Between(explosionX, explosionY, naveMissile.x, naveMissile.y);
+                    if (distance < explosionRadius) {
+                        naveMissile.destroy();
+                        this.naveMissiles.splice(i, 1);
+                        this.sound.play('explosion_air');
+                    }
+                }
+            }
+        }.bind(this);
         this.resize = () => {
             const width = this.scale.width;
             const height = this.cameras.main.height;
@@ -613,11 +658,9 @@ class GameScene extends Phaser.Scene {
         this.spawnWave = function () {
             if (!gameEnded && this.timeLeft > 0) {
                 this.waveCount++;
-                const baseSpeed = 70 + (currentLevel * 5);
-                const speedIncrementPerWave = 15;
-                let missilesPerWave = 2 + Math.floor((currentLevel - 1) / 2);
-                if (currentLevel === 2) missilesPerWave = 2;
-                const delayBetweenMissiles = 600;
+                let missilesPerWave = 2 + Math.floor((currentLevel - 1) / 2); // Quantidade de mísseis por wave (aumenta com o nível)
+                if (currentLevel === 2) missilesPerWave = 2; // Exceção para o nível 2
+                const delayBetweenMissiles = 600;          // Intervalo (ms) entre cada míssil da mesma wave
 
                 for (let i = 0; i < missilesPerWave; i++) {
                     this.time.delayedCall(i * delayBetweenMissiles, () => {
@@ -625,7 +668,12 @@ class GameScene extends Phaser.Scene {
                         const spawnX = Phaser.Math.Between(0, this.scale.width);
                         const spawnY = 0;
                         const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
-                        missile.speed = baseSpeed + this.waveCount * speedIncrementPerWave;
+
+                        // Teste diferentes velocidades:
+                        // missile.speed = 70 + (currentLevel * 5) + (this.waveCount * 15); // fase + wave - escolha uma ou outra
+                        missile.speed = 70 + (currentLevel * 5); // só fase
+                        // missile.speed = 70 + (this.waveCount * 15); // só wave
+
                         missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
                         missile.targetY = this.scale.height - 315 * baseScale;
                         missile.setDepth(1000);
@@ -638,7 +686,7 @@ class GameScene extends Phaser.Scene {
         }.bind(this);
 
 
-        this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true });
+        this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true }); // a cada 2 segundos uma nova wave
 
         // Evento de bomba matadora única ao iniciar a fase (dificuldade crescente)
         let killerChance;
@@ -708,58 +756,42 @@ class GameScene extends Phaser.Scene {
                     .setDepth(5);
                 antiMissiles.push(antiMissile);
 
-                const distance = Phaser.Math.Distance.Between(launchX, launchY, targetGameX, targetGameY);
-                const threeQuarterDistance = distance * 0.95; // Mantido em 95%
+                const antiMissileHeight = 76 * baseScale; // base original 76
+                const angle = Phaser.Math.Angle.Between(launchX, launchY, targetGameX, targetGameY);
+                const offsetX = Math.cos(angle) * (antiMissileHeight / 2);
+                const offsetY = Math.sin(angle) * (antiMissileHeight / 2);
+                const finalX = targetGameX - offsetX;
+                const finalY = targetGameY - offsetY;
                 const duration = 650;
 
                 this.tweens.add({
                     targets: antiMissile,
-                    x: targetGameX,
-                    y: targetGameY,
+                    x: finalX,
+                    y: finalY,
                     duration: duration,
                     ease: 'Linear',
                     onUpdate: (tween, target) => {
-                        const currentDistance = Phaser.Math.Distance.Between(launchX, launchY, target.x, target.y);
                         const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
                         target.rotation = currentAngle + Math.PI / 2;
-                        if (currentDistance >= threeQuarterDistance && !antiMissile.destroyed) {
+
+                        // Calcula progresso da distância
+                        const totalDistance = Phaser.Math.Distance.Between(launchX, launchY, finalX, finalY);
+                        const currentDistance = Phaser.Math.Distance.Between(target.x, target.y, finalX, finalY);
+                        const progress = 1 - (currentDistance / totalDistance);
+
+                        // Quando passar de 97%, reduz opacidade
+                        if (progress > 0.90) {
+                            target.setAlpha(0.0); // ou outro valor desejado
+                        } else {
+                            target.setAlpha(1);
+                        }
+
+                        if (!antiMissile.destroyed && currentDistance < 2) {
                             this.onAntiMissileHit(target.x, target.y);
                             antiMissile.destroy();
                             antiMissile.destroyed = true;
+                            tween.stop();
                         }
-                    }
-                });
-            }
-        }.bind(this);
-
-        this.fireKillerMissile = function (cannon, targetGameX, targetGameY) {
-            if (!gameEnded) {
-                const launchX = cannon.sprite.x;
-                const launchY = cannon.sprite.y;
-                const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-                const killerMissile = this.add.rectangle(launchX, launchY, 20 * baseScale, 30 * baseScale, 0xff0000, 0.7)
-                    .setStrokeStyle(4, 0xffffff, 1)
-                    .setDepth(5);
-                antiMissiles.push(killerMissile);
-
-                const sound = this.sound.play('missileFall'); // Toca o assobio
-                this.tweens.add({
-                    targets: killerMissile,
-                    x: targetGameX,
-                    y: targetGameY,
-                    duration: 3000, // 3 segundos como sugerido
-                    ease: 'Linear',
-                    onUpdate: (tween, target) => {
-                        const graphics = this.add.graphics();
-                        graphics.lineStyle(2, 0xffffff, 0.5 * (1 - tween.progress)); // Opacidade decrescente
-                        graphics.moveTo(launchX, launchY);
-                        graphics.lineTo(target.x, target.y);
-                        this.time.delayedCall(50, () => graphics.destroy(), [], this); // Remove após 50ms
-                    },
-                    onComplete: () => {
-                        sound.stop(); // Para o som na explosão
-                        this.onAntiMissileHit(target.x, target.y, 150 * baseScale); // Raio maior pra matadora
-                        killerMissile.destroy();
                     }
                 });
             }
