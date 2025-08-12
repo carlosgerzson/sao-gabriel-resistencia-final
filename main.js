@@ -20,6 +20,10 @@ if (savedProgress) {
     preservedCount = savedProgress.preservedCount || 0;
 }
 
+// Forçar início na fase 10 para testes  - APAGAR O COMENTAR - NÃO ESEQUEÇA
+currentLevel = 10;
+// ...existing code...
+
 window.initPhaserGame = function () {
     const config = {
         type: Phaser.WEBGL,
@@ -690,7 +694,7 @@ class GameScene extends Phaser.Scene {
 
         // Evento de bomba matadora única ao iniciar a fase (dificuldade crescente)
         let killerChance;
-        if (currentLevel <= 3) killerChance = 8;        // Fases 1-3: 1 em 8 (12,5%)
+        if (currentLevel <= 3) killerChance = 2;        // Fases 1-3: 1 em 8 (12,5%)
         else if (currentLevel <= 7) killerChance = 4;   // Fases 4-7: 1 em 4 (25%)
         else killerChance = 2;                          // Fases 8-10: 1 em 2 (50%)
 
@@ -716,7 +720,7 @@ class GameScene extends Phaser.Scene {
                 targets: killerMissile,
                 x: targetX,
                 y: targetY,
-                duration: 3000,
+                duration: 4000,
                 ease: 'Linear',
                 onUpdate: (tween, target) => {
                     trailGraphics.clear();
@@ -730,6 +734,7 @@ class GameScene extends Phaser.Scene {
                     trailGraphics.lineBetween(x1, y1, x2, y2);
                 },
                 onComplete: () => {
+                    if (!killerMissile.active) return; // Só executa se não foi interceptada
                     if (trailGraphics) trailGraphics.destroy();
                     if (sound && sound.isPlaying) sound.stop();
                     this.buildingHealth = 1;
@@ -822,30 +827,44 @@ class GameScene extends Phaser.Scene {
 
             const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
             const minFontSize = 20;
-            this.resultText = this.add.text(this.scale.width / 2, this.scale.height * 0.25,
-                currentLevel === TOTAL_LEVELS ? 'FIM DE JOGO' : success ? 'VITÓRIA!' : 'RECOMEÇAR FASE',
-                {
-                    fontFamily: 'VT323',
-                    fontSize: Math.max(70 * baseScale, minFontSize) + 'px',
-                    color: currentLevel === TOTAL_LEVELS ? '#FFFFFF' : success ? '#00FF00' : '#FF0000',
-                    align: 'center'
-                }
-            ).setOrigin(0.5).setDepth(1500);
-            this.resultText.setAlpha(0);
-            this.tweens.add({
-                targets: this.resultText,
-                alpha: { from: 0, to: 1 },
-                duration: 1000
-            });
 
+            const victoryMessages = [
+                "Parabéns!\nVocê protegeu o patrimônio histórico!",
+                "Excelente defesa!\nA cidade agradece!",
+                "Missão cumprida!\nPrepare-se para o próximo desafio!",
+                "Você é o guardião da história!\nContinue assim!",
+                "Ótimo trabalho!\nVamos para o próximo alvo!"
+            ];
+
+            const defeatMessages = [
+                "Não desista!\nTente novamente e salve o patrimônio!",
+                "A resistência continua!\nVocê consegue!",
+                "O desafio é grande,\nmas sua coragem é maior!",
+                "Reforce sua defesa\nE tente outra vez!",
+                "A cidade conta com você!\nPersista!"
+            ];
+
+            // Mensagem especial para vitória na fase 10
+            const finalVictoryMessage =
+                "Parabéns, Guardião!\nVocê defendeu\ntodos os patrimônios históricos\nde São Gabriel!\nA cidade agradece sua coragem e dedicação!";
+
+            // Escolha a mensagem adequada
+            const resultDetailMessage = (currentLevel === TOTAL_LEVELS && success)
+                ? finalVictoryMessage
+                : (success
+                    ? victoryMessages[Phaser.Math.Between(0, victoryMessages.length - 1)]
+                    : defeatMessages[Phaser.Math.Between(0, defeatMessages.length - 1)]);
+
+            // Exibe a mensagem motivacional ou especial
             this.statsText = this.add.text(this.scale.width / 2, this.scale.height * 0.30,
-                `\nDestruídos: ${destroyedCount}\nPreservados: ${preservedCount}`,
+                resultDetailMessage,
                 {
                     fontFamily: 'VT323',
-                    fontSize: Math.max(60 * baseScale, minFontSize) + 'px',
+                    fontSize: Math.max(50 * baseScale, minFontSize) + 'px',
                     color: '#FFFFFF',
                     align: 'center',
-                    lineSpacing: 20
+                    lineSpacing: 20,
+                    wordWrap: { width: this.scale.width * 0.8 }
                 }
             ).setOrigin(0.5).setDepth(1501);
             this.statsText.setAlpha(0);
@@ -855,122 +874,101 @@ class GameScene extends Phaser.Scene {
                 duration: 1000
             });
 
-            const isAndroid = /Android/.test(navigator.userAgent);
             const continueButtonY = this.statsText.y + (this.statsText.height / 2) + 60;
-            if (currentLevel < TOTAL_LEVELS) {
-                this.continueButton = this.add.rectangle(this.scale.width / 2, continueButtonY, 200 * baseScale, 80 * baseScale, 0xFFC107)
-                    .setStrokeStyle(2 * baseScale, 0xFFFFFF)
-                    .setDepth(2000)
-                    .setInteractive({ useHandCursor: true });
+            const buttonText = (currentLevel === TOTAL_LEVELS) ? 'REINICIAR' : (success ? 'CONTINUAR' : 'RECOMEÇAR');
+            const buttonColor = (currentLevel === TOTAL_LEVELS) ? 0xFF5722 : (success ? 0xFFC107 : 0xFF5722);
 
-                this.continueText = this.add.text(this.scale.width / 2, continueButtonY, 'CONTINUAR', {
-                    fontFamily: 'VT323',
-                    fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-                    color: '#000000'
-                }).setOrigin(0.5).setDepth(2001);
+            this.continueButton = this.add.rectangle(this.scale.width / 2, continueButtonY, 200 * baseScale, 80 * baseScale, buttonColor)
+                .setStrokeStyle(2 * baseScale, 0xFFFFFF)
+                .setDepth(2000)
+                .setInteractive({ useHandCursor: true });
 
-                const updateButtonState = (button, text, hover) => {
-                    button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFFC107, 1);
-                    text.setColor(hover ? '#000000ff' : '#000000');
-                };
+            this.continueText = this.add.text(this.scale.width / 2, continueButtonY, buttonText, {
+                fontFamily: 'VT323',
+                fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
+                color: '#000000'
+            }).setOrigin(0.5).setDepth(2001);
 
-                this.continueButton.defaultFillColor = 0xFFC107;
-                this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
-                this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
-                this.continueButton.on('pointerdown', () => {
-                    this.continueButton.setFillStyle(0xFFC107, 1);
-                    this.continueText.setColor('#000000');
-                    this.time.delayedCall(100, () => {
-                        if (success) {
-                            currentLevel++;
-                        } else {
-                            gameEnded = false;
-                        }
-                        this.scene.start('BriefingScene');
-                    }, [], this);
-                });
+            const updateButtonState = (button, text, hover) => {
+                button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || buttonColor, 1);
+                text.setColor(hover ? '#000000ff' : '#000000');
+            };
 
-                if (success) {
-                    this.saveButton = this.add.rectangle(this.scale.width / 2, continueButtonY + 100 * baseScale, 200 * baseScale, 80 * baseScale, 0x2196F3)
-                        .setStrokeStyle(2 * baseScale, 0xFFFFFF)
-                        .setDepth(2000)
-                        .setInteractive({ useHandCursor: true });
-
-                    this.saveText = this.add.text(this.scale.width / 2, continueButtonY + 100 * baseScale, 'SALVAR', {
-                        fontFamily: 'VT323',
-                        fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-                        color: '#000000'
-                    }).setOrigin(0.5).setDepth(2001);
-
-                    this.saveButton.defaultFillColor = 0x2196F3;
-                    this.saveButton.on('pointerover', () => updateButtonState(this.saveButton, this.saveText, true), this);
-                    this.saveButton.on('pointerout', () => updateButtonState(this.saveButton, this.saveText, false), this);
-                    this.saveButton.on('pointerdown', () => {
-                        localStorage.setItem('gameProgress', JSON.stringify({ currentLevel, destroyedCount, preservedCount }));
-                        this.saveText.setText('SALVO!');
-                        this.time.delayedCall(1000, () => this.saveText.setText('SALVAR'), [], this);
-                    });
-
-                    this.resetButton = this.add.rectangle(this.scale.width / 2, continueButtonY + 200 * baseScale, 200 * baseScale, 80 * baseScale, 0xFF5722)
-                        .setStrokeStyle(2 * baseScale, 0xFFFFFF)
-                        .setDepth(2000)
-                        .setInteractive({ useHandCursor: true });
-
-                    this.resetText = this.add.text(this.scale.width / 2, continueButtonY + 200 * baseScale, 'RESETAR', {
-                        fontFamily: 'VT323',
-                        fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-                        color: '#000000'
-                    }).setOrigin(0.5).setDepth(2001);
-
-                    this.resetButton.defaultFillColor = 0xFF5722;
-                    this.resetButton.on('pointerover', () => updateButtonState(this.resetButton, this.resetText, true), this);
-                    this.resetButton.on('pointerout', () => updateButtonState(this.resetButton, this.resetText, false), this);
-                    this.resetButton.on('pointerdown', () => {
-                        this.resetButton.setFillStyle(0xFF5722, 1);
-                        this.resetText.setColor('#000000');
-                        this.time.delayedCall(100, () => {
-                            destroyedCount = 0;
-                            preservedCount = 0;
-                            currentLevel = 1;
-                            localStorage.removeItem('gameProgress');
-                            gameEnded = false;
-                            this.scene.start('BriefingScene');
-                        }, [], this);
-                    });
-                }
-            } else {
-                this.continueButton = this.add.rectangle(this.scale.width / 2, continueButtonY, 200 * baseScale, 80 * baseScale, 0xFF5722)
-                    .setStrokeStyle(2 * baseScale, 0xFFFFFF)
-                    .setDepth(2000)
-                    .setInteractive({ useHandCursor: true });
-
-                this.continueText = this.add.text(this.scale.width / 2, continueButtonY, 'REINICIAR JOGO', {
-                    fontFamily: 'VT323',
-                    fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
-                    color: '#000000'
-                }).setOrigin(0.5).setDepth(2001);
-
-                const updateButtonState = (button, text, hover) => {
-                    button.setFillStyle(hover ? 0xFFFFFF : button.defaultFillColor || 0xFF5722, 1);
-                    text.setColor(hover ? '#000000ff' : '#000000');
-                };
-
-                this.continueButton.defaultFillColor = 0xFF5722;
-                this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
-                this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
-                this.continueButton.on('pointerdown', () => {
-                    this.continueButton.setFillStyle(0xFF5722, 1);
-                    this.continueText.setColor('#000000');
-                    this.time.delayedCall(100, () => {
+            this.continueButton.defaultFillColor = buttonColor;
+            this.continueButton.on('pointerover', () => updateButtonState(this.continueButton, this.continueText, true), this);
+            this.continueButton.on('pointerout', () => updateButtonState(this.continueButton, this.continueText, false), this);
+            this.continueButton.on('pointerdown', () => {
+                this.continueButton.setFillStyle(buttonColor, 1);
+                this.continueText.setColor('#000000');
+                this.time.delayedCall(100, () => {
+                    if (currentLevel === TOTAL_LEVELS) {
                         destroyedCount = 0;
                         preservedCount = 0;
                         currentLevel = 1;
                         localStorage.removeItem('gameProgress');
                         gameEnded = false;
                         this.scene.start('BriefingScene');
-                    }, [], this);
+                    } else {
+                        if (success) {
+                            currentLevel++;
+                        } else {
+                            gameEnded = false;
+                        }
+                        this.scene.start('BriefingScene');
+                    }
+                }, [], this);
+            });
+
+            // Botão SALVAR só aparece se não for a última fase e houver sucesso
+            if (success && currentLevel < TOTAL_LEVELS) {
+                this.saveButton = this.add.rectangle(this.scale.width / 2, continueButtonY + 100 * baseScale, 200 * baseScale, 80 * baseScale, 0x2196F3)
+                    .setStrokeStyle(2 * baseScale, 0xFFFFFF)
+                    .setDepth(2000)
+                    .setInteractive({ useHandCursor: true });
+
+                this.saveText = this.add.text(this.scale.width / 2, continueButtonY + 100 * baseScale, 'SALVAR', {
+                    fontFamily: 'VT323',
+                    fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
+                    color: '#000000'
+                }).setOrigin(0.5).setDepth(2001);
+
+                this.saveButton.defaultFillColor = 0x2196F3;
+                this.saveButton.on('pointerover', () => updateButtonState(this.saveButton, this.saveText, true), this);
+                this.saveButton.on('pointerout', () => updateButtonState(this.saveButton, this.saveText, false), this);
+                this.saveButton.on('pointerdown', () => {
+                    localStorage.setItem('gameProgress', JSON.stringify({ currentLevel, destroyedCount, preservedCount }));
+                    this.saveText.setText('SALVO!');
+                    this.time.delayedCall(1000, () => this.saveText.setText('SALVAR'), [], this);
                 });
             }
+
+            // RESETAR sempre aparece
+            this.resetButton = this.add.rectangle(this.scale.width / 2, continueButtonY + 200 * baseScale, 200 * baseScale, 80 * baseScale, 0xFF5722)
+                .setStrokeStyle(2 * baseScale, 0xFFFFFF)
+                .setDepth(2000)
+                .setInteractive({ useHandCursor: true });
+
+            this.resetText = this.add.text(this.scale.width / 2, continueButtonY + 200 * baseScale, 'RESETAR', {
+                fontFamily: 'VT323',
+                fontSize: Math.max(30 * baseScale, minFontSize) + 'px',
+                color: '#000000'
+            }).setOrigin(0.5).setDepth(2001);
+
+            this.resetButton.defaultFillColor = 0xFF5722;
+            this.resetButton.on('pointerover', () => updateButtonState(this.resetButton, this.resetText, true), this);
+            this.resetButton.on('pointerout', () => updateButtonState(this.resetButton, this.resetText, false), this);
+            this.resetButton.on('pointerdown', () => {
+                this.resetButton.setFillStyle(0xFF5722, 1);
+                this.resetText.setColor('#000000');
+                this.time.delayedCall(100, () => {
+                    destroyedCount = 0;
+                    preservedCount = 0;
+                    currentLevel = 1;
+                    localStorage.removeItem('gameProgress');
+                    gameEnded = false;
+                    this.scene.start('BriefingScene');
+                }, [], this);
+            });
         }.bind(this);
 
         this.update = function () {
