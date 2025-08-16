@@ -171,6 +171,9 @@ class GameScene extends Phaser.Scene {
         this.load.audio('track_red', 'assets/track_red.mp3');
         this.load.audio('track_yellow', 'assets/track_yellow.mp3');
         this.load.audio('track_blue', 'assets/track_blue.mp3');
+        this.load.image('night_gradient', 'assets/night_gradient.png');
+        this.load.image('icon_daynight', 'assets/icon_daynight.png');
+
 
 
         this.levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
@@ -198,6 +201,43 @@ class GameScene extends Phaser.Scene {
         if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red';
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
+
+
+        ////////////////////////
+        // Overlay gradiente PNG + sun e moon
+
+        this.nightOverlay = this.add.image(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            'night_gradient'
+        ).setDisplaySize(this.scale.width, this.scale.height)
+            .setDepth(30)
+            .setAlpha(0); // começa transparente
+
+        let isNight = false;
+
+        this.dayNightIcon = this.add.image(this.scale.width - 40, 40, 'icon_daynight')
+            .setDepth(2001)
+            .setScale(0.7)
+            .setInteractive({ useHandCursor: true });
+
+        this.dayNightIcon.on('pointerdown', () => {
+            isNight = !isNight;
+            this.tweens.add({
+                targets: this.nightOverlay,
+                alpha: isNight ? 0.65 : 0,
+                duration: 3000,
+                ease: 'Linear'
+            });
+            // Tween para rotacionar o ícone (360 graus)
+            this.tweens.add({
+                targets: this.dayNightIcon,
+                angle: this.dayNightIcon.angle + 180,
+                duration: 3000,
+                ease: 'Linear'
+            });
+        });
+        ////////////////
 
         // Carregar trilha sonora com base na cor
         let trackKey;
@@ -517,7 +557,6 @@ class GameScene extends Phaser.Scene {
             }
 
             // Cria partículas de chamas (substitui o sprite)
-
             const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
 
             // Ajuste de posição para cada fase
@@ -715,6 +754,10 @@ class GameScene extends Phaser.Scene {
                         const spawnX = Phaser.Math.Between(0, this.scale.width);
                         const spawnY = 0;
                         const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
+
+                        // Efeito neon/glow:
+                        missile.setStrokeStyle(2 * baseScale, 0x39ff14, 0.5); // borda neon semi-transparente
+                        //missile.setShadow(0, 0, '#39ff14', 16 * baseScale, true, true); // sombra neon
 
                         // Teste diferentes velocidades:
                         // missile.speed = 70 + (currentLevel * 5) + (this.waveCount * 15); // fase + wave - escolha uma ou outra
