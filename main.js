@@ -21,7 +21,8 @@ if (savedProgress) {
 }
 
 // Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
-// currentLevel = 6;
+currentLevel = 10;
+// apagar acima
 
 window.initPhaserGame = function () {
     const config = {
@@ -565,17 +566,46 @@ class GameScene extends Phaser.Scene {
 
             switch (currentLevel) {
                 case 1:
-                    chamasX = this.buildingContainer.x - 90 * baseScale;
-                    chamasY = this.buildingContainer.y + 400 * baseScale;
+                    chamasX = this.buildingContainer.x - 85 * baseScale;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
                     break;
                 case 2:
-                    chamasX = this.buildingContainer.x + 90 * baseScale;
-                    chamasY = this.buildingContainer.y + 400 * baseScale;
+                    chamasX = this.buildingContainer.x + 45 * baseScale;
+                    chamasY = this.buildingContainer.y + 450 * baseScale;
+                    break;
+                case 3:
+                    chamasX = this.buildingContainer.x - 50;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
+                    break;
+                case 4:
+                    chamasX = this.buildingContainer.x - 50;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
+                    break;
+                case 5:
+                    chamasX = this.buildingContainer.x - 50;
+                    chamasY = this.buildingContainer.y + 450 * baseScale;
                     break;
                 case 6:
-                    chamasX = this.buildingContainer.x - 50;
-                    chamasY = this.buildingContainer.y + 380 * baseScale;
+                    chamasX = this.buildingContainer.x + 60;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
                     break;
+                case 7:
+                    chamasX = this.buildingContainer.x - 55;
+                    chamasY = this.buildingContainer.y + 460 * baseScale;
+                    break;
+                case 8:
+                    chamasX = this.buildingContainer.x - 50;
+                    chamasY = this.buildingContainer.y + 400 * baseScale;
+                    break;
+                case 9:
+                    chamasX = this.buildingContainer.x + 1;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
+                    break;
+                case 10:
+                    chamasX = this.buildingContainer.x + 1;
+                    chamasY = this.buildingContainer.y + 500 * baseScale;
+                    break;
+
                 // ...adicione ajustes para cada fase...
                 default:
                     chamasX = this.buildingContainer.x;
