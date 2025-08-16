@@ -20,9 +20,8 @@ if (savedProgress) {
     preservedCount = savedProgress.preservedCount || 0;
 }
 
-// Forçar início na fase 10 para testes  - APAGAR O COMENTAR - NÃO ESEQUEÇA
-currentLevel = 10;
-// ...existing code...
+// Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
+// currentLevel = 6;
 
 window.initPhaserGame = function () {
     const config = {
@@ -167,11 +166,12 @@ class GameScene extends Phaser.Scene {
         this.load.audio('explosion_target', 'assets/explosion_target.mp3');
         this.load.audio('missileFall', 'assets/assobio.mp3'); // Adicionado o assobio
         this.load.image('nave', 'assets/nave.png'); // nave espacial
+        this.load.image('star_bonus', 'assets/star_bonus.png');
+        this.load.image('bubble', 'assets/bubble.png');
+        this.load.audio('track_red', 'assets/track_red.mp3');
+        this.load.audio('track_yellow', 'assets/track_yellow.mp3');
+        this.load.audio('track_blue', 'assets/track_blue.mp3');
 
-        const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
-        spriteNames.forEach(name => {
-            this.load.image(`chamas${name}`, `assets/chamas1/chamas${name}.png`);
-        });
 
         this.levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
         this.load.image(`${this.levelPrefix}_predio`, `${this.levelPrefix}_predio.png`);
@@ -198,6 +198,22 @@ class GameScene extends Phaser.Scene {
         if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red';
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
+
+        // Carregar trilha sonora com base na cor
+        let trackKey;
+        if (colorPrefix === 'red') trackKey = 'track_red';
+        else if (colorPrefix === 'yellow') trackKey = 'track_yellow';
+        else trackKey = 'track_blue';
+
+        if (this.bgMusic) {
+            this.bgMusic.stop();
+            this.bgMusic.destroy();
+        }
+        this.bgMusic = this.sound.add(trackKey, { loop: true, volume: 0.5 });
+        this.bgMusic.play();
+
+        // star bonus
+        this.starBonusActive = false;
 
         this.fundo = this.add.image(this.scale.width / 2, 0, `fundo_${colorPrefix}`)
             .setOrigin(0.5, 0)
@@ -241,12 +257,6 @@ class GameScene extends Phaser.Scene {
             .setDepth(900);
         this.buildingContainer.add(this.buildingFundo);
 
-        const chamasSpriteHeight = 375 * baseScale;
-        this.currentChamasSprite = this.add.sprite(0, buildingHeight - (50 * baseScale + 10), 'chamas101');
-        this.buildingContainer.add(this.currentChamasSprite);
-        this.currentChamasSprite.setDepth(910);
-        this.currentChamasSprite.setScale(0.3 * baseScale);
-        this.currentChamasSprite.setVisible(false);
 
         this.buildingPredio = this.add.image(0, buildingHeight, `${this.levelPrefix}_predio`)
             .setOrigin(0.5, 1)
@@ -394,7 +404,7 @@ class GameScene extends Phaser.Scene {
                             const targetMissileY = this.cameras.main.height - 300 * baseScale;
 
                             const missile = this.add.circle(missileStartX, missileStartY, 12 * baseScale, 0xff0000, 0.8)
-                                .setStrokeStyle(4 * baseScale, 0xffffff, 1)
+                                .setStrokeStyle(4 * baseScale, 0x000000, 1) // stroke preto
                                 .setDepth(1099);
 
                             // Adiciona ao array de mísseis da nave
@@ -406,7 +416,7 @@ class GameScene extends Phaser.Scene {
                             const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
                             const collisionRightX = this.scale.width / 2 + 255 * baseScale;
 
-                            this.tweens.add({
+                            const missileTween = this.tweens.add({
                                 targets: missile,
                                 x: targetMissileX,
                                 y: targetMissileY,
@@ -430,6 +440,8 @@ class GameScene extends Phaser.Scene {
                                     if (idx !== -1) this.naveMissiles.splice(idx, 1);
                                 }
                             });
+                            // Guarde o tween no objeto
+                            missile.missileTween = missileTween;
                         }
                     },
                     onComplete: () => {
@@ -441,14 +453,6 @@ class GameScene extends Phaser.Scene {
 
         this.waveCount = 0;
 
-        const spriteNames = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114'];
-        const frames = spriteNames.map(name => ({ key: `chamas${name}` }));
-        this.anims.create({
-            key: 'chamasAnim',
-            frames: frames,
-            frameRate: 16,
-            repeat: -1
-        });
 
         this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true });
 
@@ -511,21 +515,60 @@ class GameScene extends Phaser.Scene {
             } catch (e) {
                 console.error('Erro ao tocar explosion_target:', e);
             }
+
+            // Cria partículas de chamas (substitui o sprite)
+
+            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.cameras.main.height / BASE_HEIGHT);
+
+            // Ajuste de posição para cada fase
+            let chamasX = this.buildingContainer.x;
+            let chamasY = this.buildingContainer.y + (50 * baseScale);
+
+            switch (currentLevel) {
+                case 1:
+                    chamasX = this.buildingContainer.x - 90 * baseScale;
+                    chamasY = this.buildingContainer.y + 400 * baseScale;
+                    break;
+                case 2:
+                    chamasX = this.buildingContainer.x + 90 * baseScale;
+                    chamasY = this.buildingContainer.y + 400 * baseScale;
+                    break;
+                case 6:
+                    chamasX = this.buildingContainer.x - 50;
+                    chamasY = this.buildingContainer.y + 380 * baseScale;
+                    break;
+                // ...adicione ajustes para cada fase...
+                default:
+                    chamasX = this.buildingContainer.x;
+                    chamasY = this.buildingContainer.y + (50 * baseScale);
+                    break;
+            }
+
+            if (!this.chamasEmitter) {
+                this.chamasEmitter = this.add.particles(chamasX, chamasY, 'bubble', {
+                    scale: { min: 0.1, max: 0.5 },
+                    speed: { min: 20, max: 40 },
+                    alpha: { start: 1, end: 0 },
+                    tint: [0xffd700, 0x000000], // amarelo e vermelho 0xff3300
+                    lifespan: 2000,
+                    frequency: 50,
+                    gravityY: -90,
+                    particleBringToTop: false
+                });
+                this.chamasEmitter.setDepth(910);
+            }
+
             this.time.delayedCall(500, () => {
-                if (this.currentChamasSprite && this.currentChamasSprite.active) {
-                    if (this.currentChamasSprite.visible) {
-                        this.currentChamasSprite.stop();
-                    }
-                    this.currentChamasSprite.setVisible(true);
-                    if (this.anims.get('chamasAnim')) {
-                        this.currentChamasSprite.play('chamasAnim');
-                    }
-                }
                 if (this.buildingHealth > 0) {
                     this.buildingHealth--;
                     this.updateBuildingVisibility();
                     if (this.buildingHealth === 0) {
                         this.time.delayedCall(1000, () => {
+                            if (this.chamasParticles) {
+                                this.chamasParticles.destroy();
+                                this.chamasParticles = null;
+                                this.chamasEmitter = null;
+                            }
                             this.endLevel(false);
                         }, [], this);
                     }
@@ -558,6 +601,9 @@ class GameScene extends Phaser.Scene {
                 }
                 const distance = Phaser.Math.Distance.Between(explosionX, explosionY, killer.x, killer.y);
                 if (distance < explosionRadius) {
+                    // Se você tiver guardado o tween e o som da bomba matadora:
+                    if (killer.killerTween && killer.killerTween.isPlaying()) killer.killerTween.stop();
+                    if (killer.sound && killer.sound.isPlaying) killer.sound.stop();
                     killer.destroy();
                     killerMissiles.splice(i, 1);
                     this.sound.play('explosion_air');
@@ -611,10 +657,7 @@ class GameScene extends Phaser.Scene {
                 }
             });
 
-            if (this.currentChamasSprite) {
-                this.currentChamasSprite.setPosition(0, buildingHeight - (50 * baseScale + 20));
-                this.currentChamasSprite.setScale(0.3 * baseScale);
-            }
+
 
             if (this.allTowerSprites) {
                 this.allTowerSprites.forEach(tower => {
@@ -675,7 +718,7 @@ class GameScene extends Phaser.Scene {
 
                         // Teste diferentes velocidades:
                         // missile.speed = 70 + (currentLevel * 5) + (this.waveCount * 15); // fase + wave - escolha uma ou outra
-                        missile.speed = 70 + (currentLevel * 5); // só fase
+                        missile.speed = 70 + (currentLevel * 3); // só fase
                         // missile.speed = 70 + (this.waveCount * 15); // só wave
 
                         missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
@@ -686,11 +729,94 @@ class GameScene extends Phaser.Scene {
                         missiles.push(missile);
                     }, [], this);
                 }
+
+
+                // Bloco do bônus especial (estrela) - só a partir do nível 6
+
+                if (!this.starBonusCount) this.starBonusCount = 0;
+
+                if (
+                    currentLevel >= 6 &&
+                    Phaser.Math.Between(1, 2) === 1 && // 50% de chance
+                    !gameEnded &&
+                    this.starBonusCount < 2 &&
+                    !this.starBonusActive // <-- só cria se não houver bônus ativo
+                ) {
+                    this.starBonusCount++;
+                    this.starBonusActive = true; // marca como ativo
+
+                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                    // Posição X aleatória entre 20% e 80% da largura
+                    const bonusX = Phaser.Math.Between(this.scale.width * 0.2, this.scale.width * 0.8);
+                    // Posição Y aleatória entre 15% e 35% da altura (mais acima do meio)
+                    const bonusY = Phaser.Math.Between(this.scale.height * 0.15, this.scale.height * 0.35);
+
+                    const bonusSprite = this.add.image(bonusX, bonusY, 'star_bonus')
+                        .setScale(baseScale * 1)  // alterar scale star bonus - também no yoyo
+                        .setDepth(2002)
+                        .setInteractive({ useHandCursor: true });
+
+                    this.tweens.add({
+                        targets: bonusSprite,
+                        scale: { from: baseScale * 1, to: baseScale * 1.3 }, // alterar scale star bonus também na const acima
+                        alpha: { from: 1, to: 0.7 },
+                        yoyo: true,
+                        repeat: -1,
+                        duration: 400
+                    });
+
+                    this.time.delayedCall(4000, () => {
+                        if (bonusSprite.active) bonusSprite.destroy();
+                        this.starBonusActive = false; // libera para criar outro bonus
+                    }, [], this);
+
+                    bonusSprite.on('pointerdown', () => {
+                        // Cria a onda expansiva
+                        const wave = this.add.circle(this.scale.width / 2, this.scale.height / 2, 0, 0xffffff, 0.4).setDepth(3000);
+                        bonusSprite.destroy();
+                        this.starBonusActive = false; // libera para criar outro
+                        this.sound.play('explosion_air');
+
+                        this.tweens.add({
+                            targets: wave,
+                            radius: { from: 0, to: Math.max(this.scale.width, this.scale.height) },
+                            duration: 1000,
+                            ease: 'Quad.easeOut',
+                            onUpdate: (tween, target) => {
+                                const progress = tween.progress;
+                                const color = Phaser.Display.Color.Interpolate.ColorWithColor(
+                                    { r: 0, g: 180, b: 255 },
+                                    { r: 255, g: 255, b: 0 },
+                                    1,
+                                    progress
+                                );
+                                target.setFillStyle(Phaser.Display.Color.GetColor(color.r, color.g, color.b), 0.4);
+                            },
+                            onComplete: () => {
+                                missiles.forEach(missile => { if (missile.active) missile.destroy(); });
+                                killerMissiles.forEach(killer => { if (killer.active) killer.destroy(); });
+                                if (this.naveMissiles) this.naveMissiles.forEach(missile => { if (missile.active) missile.destroy(); });
+
+                                this.tweens.add({
+                                    targets: wave,
+                                    radius: { from: wave.radius, to: 0 },
+                                    duration: 1000,
+                                    ease: 'Quad.easeIn',
+                                    onComplete: () => wave.destroy()
+                                });
+                            }
+                        });
+
+                        bonusSprite.destroy();
+                        this.sound.play('explosion_air');
+                    });
+                }
             }
         }.bind(this);
 
 
-        this.time.addEvent({ delay: 2000, callback: this.spawnWave, callbackScope: this, loop: true }); // a cada 2 segundos uma nova wave
+
+        this.time.addEvent({ delay: 2500, callback: this.spawnWave, callbackScope: this, loop: true }); // a cada 2,5 segundos uma nova wave
 
         // Evento de bomba matadora única ao iniciar a fase (dificuldade crescente)
         let killerChance;
@@ -716,7 +842,7 @@ class GameScene extends Phaser.Scene {
 
             let trailGraphics = this.add.graphics({ x: 0, y: 0 }).setDepth(999);
 
-            this.tweens.add({
+            let killerTween = this.tweens.add({
                 targets: killerMissile,
                 x: targetX,
                 y: targetY,
@@ -734,7 +860,7 @@ class GameScene extends Phaser.Scene {
                     trailGraphics.lineBetween(x1, y1, x2, y2);
                 },
                 onComplete: () => {
-                    if (!killerMissile.active) return; // Só executa se não foi interceptada
+                    if (!killerMissile.active) return;
                     if (trailGraphics) trailGraphics.destroy();
                     if (sound && sound.isPlaying) sound.stop();
                     this.buildingHealth = 1;
@@ -743,11 +869,22 @@ class GameScene extends Phaser.Scene {
                     if (killerMissile) killerMissile.destroy();
                 },
                 onStop: () => {
-                    if (trailGraphics) trailGraphics.destroy();
+                    if (trailGraphics) {
+                        this.tweens.add({
+                            targets: trailGraphics,
+                            alpha: { from: 1, to: 0 },
+                            duration: 1000,
+                            onComplete: () => trailGraphics.destroy()
+                        });
+                    }
                     if (sound && sound.isPlaying) sound.stop();
                     if (killerMissile) killerMissile.destroy();
                 }
             });
+
+            // ASSOCIE O TWEEN E O SOM AO OBJETO
+            killerMissile.killerTween = killerTween;
+            killerMissile.sound = sound;
         }
 
         this.fireAntiMissile = function (cannon, targetGameX, targetGameY) {
@@ -818,6 +955,40 @@ class GameScene extends Phaser.Scene {
             antiMissiles.forEach(anti => {
                 if (anti.active) anti.setActive(false).setVisible(false);
             });
+
+
+            // Parar e destruir a trilha sonora da fase
+            if (this.bgMusic) {
+                this.bgMusic.stop();
+                this.bgMusic.destroy();
+                this.bgMusic = null;
+            }
+
+            // Destruir a nave se exitir
+            if (this.naveSprite && this.naveSprite.active) {
+                this.naveSprite.destroy();
+            }
+
+            // Destruir os missiles da nave se existirem
+            if (this.naveMissiles && this.naveMissiles.length > 0) {
+                for (let i = this.naveMissiles.length - 1; i >= 0; i--) {
+                    const missile = this.naveMissiles[i];
+                    if (missile) {
+                        if (missile.missileTween && missile.missileTween.isPlaying()) {
+                            missile.missileTween.stop();
+                        }
+                        missile.destroy();
+                    }
+                    this.naveMissiles.splice(i, 1);
+                }
+            }
+
+            // --- Adicione aqui - bubble---
+            if (this.chamasEmitter) {
+                this.chamasEmitter.destroy();
+                this.chamasEmitter = null;
+            }
+            // ---------------------
 
             if (success) {
                 preservedCount++;
@@ -901,19 +1072,18 @@ class GameScene extends Phaser.Scene {
                 this.continueButton.setFillStyle(buttonColor, 1);
                 this.continueText.setColor('#000000');
                 this.time.delayedCall(100, () => {
-                    if (currentLevel === TOTAL_LEVELS) {
-                        destroyedCount = 0;
-                        preservedCount = 0;
-                        currentLevel = 1;
-                        localStorage.removeItem('gameProgress');
+                    if (success) {
+                        // Vitória: avança para próxima fase
+                        currentLevel++;
                         gameEnded = false;
                         this.scene.start('BriefingScene');
                     } else {
-                        if (success) {
-                            currentLevel++;
-                        } else {
-                            gameEnded = false;
-                        }
+                        // Derrota: reinicia a mesma fase
+                        destroyedCount = 0;
+                        preservedCount = 0;
+                        // Mantém currentLevel
+                        localStorage.removeItem('gameProgress');
+                        gameEnded = false;
                         this.scene.start('BriefingScene');
                     }
                 }, [], this);
