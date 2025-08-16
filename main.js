@@ -21,8 +21,8 @@ if (savedProgress) {
 }
 
 // Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
-currentLevel = 10;
-// apagar acima
+// currentLevel = 10;
+// apagar current Levelacima
 
 window.initPhaserGame = function () {
     const config = {
