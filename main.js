@@ -21,8 +21,8 @@ if (savedProgress) {
 }
 
 // Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
-// currentLevel = 10;
-// apagar current Levelacima
+// currentLevel = 1;
+// COMENTAR current Level acima
 
 window.initPhaserGame = function () {
     const config = {
@@ -72,9 +72,9 @@ class BriefingScene extends Phaser.Scene {
             "ALVO 1: CLUBE COMERCIAL! \n\nO calor das tardes no Clube Comercial, onde risos e amizades forjaram nossa história. Defenda-o, pois é o coração pulsante de nossa união que não pode se apagar.",
             "ALVO 2: MAÇONARIA! \n\nO silêncio sábio da Rocha Negra nr 1, onde segredos e irmandade tecem nossa herança. Defenda-a, pois é o farol da sabedoria que ilumina nossa união.",
             "ALVO 3: IGREJA DO GALO! \n\nO eco sagrado da Igreja do Galo, onde a fé ressoa entre pedra e história. Defenda-a, pois é o espírito vivo de nossa devoção que não pode silenciar.",
-            "ALVO 4: MUSEU LOCAL! \n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-            "ALVO 5: TEATRO ANTIGO! \n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
-            "ALVO 6: SOBRADO - BIBLIOTECA! \n\nA alma acolhedora do Sobrado, onde livros e música guardam nossos sonhos. Defenda-o, pois é o coração da cultura que pulsa em nossa memória.",
+            "ALVO 4: O CASARÃO DA MALLET! \n\nConstruído a mando de João Propício de F. Menna Barreto, o 2º Barão de São Gabriel, por isso conhecido por “SOLAR DO BARÕES, não pode ser silenciado.",
+            "ALVO 5: JANELAS REDONDAS! \n\nBela casa particular construída na cidade, incluindo janelas redondas em que Getúlio Vargas discursou em 1950. Defenda-a.",
+            "ALVO 6: SOBRADO - BIBLIOTECA! \n\nA alma acolhedora do Sobrado, onde livros e música guardam nossos sonhos e local onde o imperador Dom Pedro II se hospedou. Defenda-o.",
             "ALVO 7: IGREJA MATRIZ! \n\nA força serena da Igreja Matriz, onde a fé dos colonizadores ainda ecoa. Defenda-a, pois é o alicerce espiritual que sustenta nossa identidade.",
             "ALVO 8: PREFEITURA MUNICIPAL! \n\nO orgulho altivo da Prefeitura, onde a gestão abraça o povo das coxilhas. Defenda-a, pois é o batimento do progresso que não pode parar.",
             "ALVO 9: BANCO DA PROVÍNCIA! \n\nA memória do Banco da Província, onde o passado imperial forjou nossa riqueza. Defenda-o, pois é o eco de um legado que resiste ao tempo.",
@@ -583,7 +583,7 @@ class GameScene extends Phaser.Scene {
                     break;
                 case 5:
                     chamasX = this.buildingContainer.x - 50;
-                    chamasY = this.buildingContainer.y + 450 * baseScale;
+                    chamasY = this.buildingContainer.y + 440 * baseScale;
                     break;
                 case 6:
                     chamasX = this.buildingContainer.x + 60;
@@ -783,11 +783,11 @@ class GameScene extends Phaser.Scene {
                         const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
                         const spawnX = Phaser.Math.Between(0, this.scale.width);
                         const spawnY = 0;
-                        const missile = this.add.rectangle(spawnX, spawnY, 10 * baseScale, 30 * baseScale, 0x00ff00);
+                        const missile = this.add.rectangle(spawnX, spawnY, 7 * baseScale, 30 * baseScale, 0x00ff00); // sem neon - o normal é 10
 
                         // Efeito neon/glow:
-                        missile.setStrokeStyle(2 * baseScale, 0x39ff14, 0.5); // borda neon semi-transparente
-                        //missile.setShadow(0, 0, '#39ff14', 16 * baseScale, true, true); // sombra neon
+                        missile.setStrokeStyle(4 * baseScale, 0x39ff14, 0.5); // borda neon semi-transparente
+                        //missile.setShadow(0, 0, '#041201ff', 16 * baseScale, true, true); // sombra neon
 
                         // Teste diferentes velocidades:
                         // missile.speed = 70 + (currentLevel * 5) + (this.waveCount * 15); // fase + wave - escolha uma ou outra
