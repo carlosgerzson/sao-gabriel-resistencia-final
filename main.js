@@ -21,7 +21,7 @@ if (savedProgress) {
 }
 
 // Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
-currentLevel = 8;
+// currentLevel = 1;
 // COMENTAR current Level acima
 
 window.initPhaserGame = function () {
@@ -293,10 +293,17 @@ class GameScene extends Phaser.Scene {
 
         // Defina quantos botões por fase
         let domeBonusCount = 0, tripleBonusCount = 0;
-        if (currentLevel === 2) domeBonusCount = 1;
-        if (currentLevel === 4) { domeBonusCount = 1; tripleBonusCount = 1; }
-        if (currentLevel === 6) { domeBonusCount = 2; tripleBonusCount = 1; }
-        if (currentLevel >= 8) { domeBonusCount = 2; tripleBonusCount = 2; }
+        if (currentLevel === 2 || currentLevel === 3) domeBonusCount = 1;
+        if (currentLevel === 4 || currentLevel === 5) { domeBonusCount = 1; tripleBonusCount = 1; }
+        if (currentLevel === 6 || currentLevel === 7) { domeBonusCount = 2; tripleBonusCount = 1; }
+        if (currentLevel === 8 || currentLevel === 9 || currentLevel === 10) { domeBonusCount = 2; tripleBonusCount = 2; }
+
+        // Antes de criar novos botões, destrua os antigos se existirem
+        if (this.domeBtns) this.domeBtns.forEach(btn => btn.destroy());
+        if (this.tripleBtns) this.tripleBtns.forEach(btn => btn.destroy());
+        this.domeBtns = [];
+        this.tripleBtns = [];
+
 
         // Crie botões Dome na esquerda
         this.domeBtns = [];
@@ -308,9 +315,27 @@ class GameScene extends Phaser.Scene {
                 .setDepth(2002);
             btn.on('pointerdown', () => {
                 if (!btn.used) {
-                    btn.setAlpha(0.3); // esmaece
+                    btn.setVisible(false); // botão desaparece ao usar
                     btn.used = true;
                     this.activateDomeBonus(5000); // ativa dome por 5s
+
+                    // Texto animado "DOME ATIVADO!"
+                    const domeText = this.add.text(this.scale.width / 2, 80, 'DOME ATIVADO - 5 s', {
+                        fontFamily: 'VT323',
+                        fontSize: '38px',
+                        color: '#00e9ff',
+                        align: 'center',
+                        lineSpacing: 8
+                    }).setOrigin(0.5).setDepth(3000).setAlpha(0);
+
+                    this.tweens.add({
+                        targets: domeText,
+                        alpha: 1,
+                        duration: 300,
+                        yoyo: true,
+                        hold: 800,
+                        onComplete: () => domeText.destroy()
+                    });
                 }
             });
             this.domeBtns.push(btn);
@@ -321,14 +346,32 @@ class GameScene extends Phaser.Scene {
         const tripleBtnYStart = 100; // ajuste conforme o layout
         for (let i = 0; i < tripleBonusCount; i++) {
             const btn = this.add.image(this.scale.width - 40, tripleBtnYStart + i * 80, 'triplo_btn')
-                .setDisplaySize(35, 35)
+                .setDisplaySize(32, 32)
                 .setInteractive({ useHandCursor: true })
                 .setDepth(2002);
             btn.on('pointerdown', () => {
                 if (!btn.used) {
-                    btn.setAlpha(0.3);
+                    btn.setVisible(false); // botão desaparece ao usar
                     btn.used = true;
                     this.activateTripleShot(8000); // ativa tiro triplo por 8s
+
+                    // Texto animado "TIRO TRIPLO!"
+                    const tripleText = this.add.text(this.scale.width / 2, 140, 'TRIPLO ATIVADO - 8 s', {
+                        fontFamily: 'VT323',
+                        fontSize: '38px',
+                        color: '#FFD700',
+                        align: 'center',
+                        lineSpacing: 8
+                    }).setOrigin(0.5).setDepth(3000).setAlpha(0);
+
+                    this.tweens.add({
+                        targets: tripleText,
+                        alpha: 1,
+                        duration: 300,
+                        yoyo: true,
+                        hold: 800,
+                        onComplete: () => tripleText.destroy()
+                    });
                 }
             });
             this.tripleBtns.push(btn);
@@ -959,8 +1002,8 @@ class GameScene extends Phaser.Scene {
                         //missile.setShadow(0, 0, '#041201ff', 16 * baseScale, true, true); // sombra neon
 
                         // Teste diferentes velocidades:
-                        // missile.speed = 70 + (currentLevel * 5) + (this.waveCount * 15); // fase + wave - escolha uma ou outra
-                        missile.speed = 70 + (currentLevel * 3); // só fase
+                        missile.speed = 70 + (currentLevel * 4) + (this.waveCount * 5); // fase + wave - escolha uma ou outra
+                        //missile.speed = 70 + (currentLevel * 5); // só fase
                         // missile.speed = 70 + (this.waveCount * 15); // só wave
 
                         missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
