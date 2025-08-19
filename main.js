@@ -21,7 +21,7 @@ if (savedProgress) {
 }
 
 // Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
-// currentLevel = 1;
+currentLevel = 8;
 // COMENTAR current Level acima
 
 window.initPhaserGame = function () {
@@ -166,6 +166,7 @@ class GameScene extends Phaser.Scene {
         this.load.audio('explosion_air', 'assets/explosion_air.mp3');
         this.load.audio('explosion_target', 'assets/explosion_target.mp3');
         this.load.audio('missileFall', 'assets/assobio.mp3'); // Adicionado o assobio
+        this.load.audio('sirene', 'assets/sirene.mp3'); // sirene matadora
         this.load.image('nave', 'assets/nave.png'); // nave espacial
         this.load.image('star_bonus', 'assets/star_bonus.png');
         this.load.image('bubble', 'assets/bubble.png');
@@ -174,7 +175,10 @@ class GameScene extends Phaser.Scene {
         this.load.audio('track_blue', 'assets/track_blue.mp3');
         this.load.image('night_gradient', 'assets/night_gradient.png');
         this.load.image('icon_daynight', 'assets/icon_daynight.png');
-
+        this.load.image('tela_final', 'assets/tela_final.png');
+        this.load.image('nave_ponta', 'assets/nave_ponta.png');
+        this.load.image('dome_btn', 'assets/dome.png');
+        this.load.image('triplo_btn', 'assets/triplo.png');
 
 
         this.levelPrefix = `nivel${currentLevel}/alvo${currentLevel}`;
@@ -202,6 +206,51 @@ class GameScene extends Phaser.Scene {
         if ([1, 4, 7, 10].includes(currentLevel)) colorPrefix = 'red';
         else if ([3, 6, 9].includes(currentLevel)) colorPrefix = 'yellow';
         else colorPrefix = 'blue';
+
+        // flag do tiro Triplo
+        this.tripleShotActive = false;
+
+        // --- Adicione aqui a função shatterNave ---
+        this.shatterNave = function (x, y, baseScale) {
+            const navePonta = this.add.image(x, y, 'nave_ponta')
+                .setScale(baseScale)
+                .setDepth(20);
+
+            const chamasEmitter = this.add.particles(navePonta.x, navePonta.y + 30 * baseScale, 'bubble', {
+                scale: { min: 0.1, max: 0.5 },
+                speed: { min: 20, max: 40 },
+                alpha: { start: 1, end: 0 },
+                tint: [0xffd700, 0xff3300],
+                lifespan: 1200,
+                frequency: 60,
+                gravityY: -90,
+                particleBringToTop: false
+            });
+            chamasEmitter.setDepth(21);
+
+            this.tweens.add({
+                targets: navePonta,
+                x: this.scale.width - 60 * baseScale,
+                y: this.scale.height - 100 * baseScale,
+                angle: navePonta.angle + 110,
+                scale: { from: baseScale, to: baseScale * 1.25 },
+                duration: 4000,
+                ease: 'Quad.easeIn',
+                onUpdate: () => {
+                    chamasEmitter.setPosition(navePonta.x, navePonta.y + 30 * navePonta.scale);
+                },
+                onComplete: () => {
+                    this.cameras.main.shake(400, 0.015); // camera shake
+                    this.sound.play('explosion_target');
+                    this.time.delayedCall(1500, () => {
+                        chamasEmitter.destroy();
+                        navePonta.destroy();
+                    });
+                }
+            });
+            this.sound.play('explosion_air');
+        };
+        // --- Fim da função shatterNave ---
 
 
         ////////////////////////
@@ -239,6 +288,70 @@ class GameScene extends Phaser.Scene {
             });
         });
         ////////////////
+
+        // === BÔNUS DOME E TRIPLO ===
+
+        // Defina quantos botões por fase
+        let domeBonusCount = 0, tripleBonusCount = 0;
+        if (currentLevel === 2) domeBonusCount = 1;
+        if (currentLevel === 4) { domeBonusCount = 1; tripleBonusCount = 1; }
+        if (currentLevel === 6) { domeBonusCount = 2; tripleBonusCount = 1; }
+        if (currentLevel >= 8) { domeBonusCount = 2; tripleBonusCount = 2; }
+
+        // Crie botões Dome na esquerda
+        this.domeBtns = [];
+        const domeBtnYStart = 100; // ajuste conforme o layout
+        for (let i = 0; i < domeBonusCount; i++) {
+            const btn = this.add.image(40, domeBtnYStart + i * 80, 'dome_btn')
+                .setDisplaySize(35, 35)
+                .setInteractive({ useHandCursor: true })
+                .setDepth(2002);
+            btn.on('pointerdown', () => {
+                if (!btn.used) {
+                    btn.setAlpha(0.3); // esmaece
+                    btn.used = true;
+                    this.activateDomeBonus(5000); // ativa dome por 5s
+                }
+            });
+            this.domeBtns.push(btn);
+        }
+
+        // Crie botões Triplo na direita
+        this.tripleBtns = [];
+        const tripleBtnYStart = 100; // ajuste conforme o layout
+        for (let i = 0; i < tripleBonusCount; i++) {
+            const btn = this.add.image(this.scale.width - 40, tripleBtnYStart + i * 80, 'triplo_btn')
+                .setDisplaySize(35, 35)
+                .setInteractive({ useHandCursor: true })
+                .setDepth(2002);
+            btn.on('pointerdown', () => {
+                if (!btn.used) {
+                    btn.setAlpha(0.3);
+                    btn.used = true;
+                    this.activateTripleShot(8000); // ativa tiro triplo por 8s
+                }
+            });
+            this.tripleBtns.push(btn);
+        }
+        // fim domebtn e triplo
+
+        // Função para ativar o dome como bônus temporário
+        this.activateDomeBonus = function (duration = 5000) {
+            this.domeGraphics.setVisible(true);
+            this.domeActive = true;
+            this.time.delayedCall(duration, () => {
+                this.domeGraphics.setVisible(false);
+                this.domeActive = false;
+            }, [], this);
+        };
+
+        // Função para ativar o tiro triplo por tempo limitado
+        this.activateTripleShot = function (duration = 8000) {
+            this.tripleShotActive = true;
+            this.time.delayedCall(duration, () => {
+                this.tripleShotActive = false;
+            }, [], this);
+        };
 
         // Carregar trilha sonora com base na cor
         let trackKey;
@@ -290,6 +403,36 @@ class GameScene extends Phaser.Scene {
         this.buildingContainer = this.add.container(this.scale.width / 2, visibleHeight - buildingHeight - (50 * baseScale));
         this.buildingContainer.setSize(buildingWidth, buildingHeight);
         this.buildingContainer.setDepth(900);
+
+        // Dome protetor sempre ativo (teste visual)....................
+        const domeX = this.scale.width / 2;
+        const domeY = this.buildingContainer.y + (48 + 500) * baseScale;
+        const domeRadius = (this.scale.width / 2) + 120 * baseScale;
+        const segments = 12; // quanto mais segmentos, mais suave; menos, mais facetado
+
+        this.domeGraphics = this.add.graphics().setDepth(950);
+        this.domeGraphics.lineStyle(6 * baseScale, 0x00e9ff, 0.7);
+        this.domeGraphics.fillStyle(0x00e9ff, 0.18);
+
+        this.domePoints = []; // <-- Adicione esta linha antes do for
+
+        this.domeGraphics.beginPath();
+        for (let i = 0; i <= segments; i++) {
+            const angle = Math.PI + (i / segments) * Math.PI;
+            const x = domeX + Math.cos(angle) * domeRadius;
+            const y = domeY + Math.sin(angle) * domeRadius;
+            this.domePoints.push({ x, y }); // <-- Adicione esta linha dentro do for
+            if (i === 0) {
+                this.domeGraphics.moveTo(x, y);
+            } else {
+                this.domeGraphics.lineTo(x, y);
+            }
+        }
+        this.domeGraphics.strokePath();
+        this.domeGraphics.fillPath();
+        this.domeGraphics.setVisible(false);
+        this.domeActive = false;
+        // fim do dome protetor.........................................
 
         const fundoWidth = 604 * baseScale;
         this.buildingFundo = this.add.image(-buildingWidth / 2, buildingHeight, `${this.levelPrefix}_fundo`)
@@ -375,7 +518,7 @@ class GameScene extends Phaser.Scene {
         this.allTowerSprites = [];
 
         towerAndCannonDefinitions.forEach((def, index) => {
-            const towerDepth = (def.name === 'Torre Esquerda') ? 30 : 20;
+            const towerDepth = (def.name === 'Torre Esquerda') ? 950 : 20; // depth torre E e demais
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
                 .setOrigin(0.5, 1)
                 .setScale(def.towerScale)
@@ -655,6 +798,18 @@ class GameScene extends Phaser.Scene {
                 }
                 const distance = Phaser.Math.Distance.Between(explosionX, explosionY, missile.x, missile.y);
                 if (distance < explosionRadius) {
+                    // Explosão verde (efeito visual)
+                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                    const greenExplosion = this.add.circle(missile.x, missile.y, 0, 0x39ff14, 0.7).setDepth(950);
+                    this.tweens.add({
+                        targets: greenExplosion,
+                        radius: { from: 0, to: 80 * baseScale },
+                        alpha: { from: 1, to: 0.2 },
+                        duration: 400,
+                        ease: 'Quad.easeOut',
+                        onComplete: () => greenExplosion.destroy()
+                    });
+
                     missile.destroy();
                     missiles.splice(i, 1);
                     this.sound.play('explosion_air');
@@ -695,6 +850,17 @@ class GameScene extends Phaser.Scene {
                     }
                 }
             }
+
+            // Adicione este bloco para a nave principal:
+            if (this.naveSprite && this.naveSprite.active) {
+                const naveDistance = Phaser.Math.Distance.Between(explosionX, explosionY, this.naveSprite.x, this.naveSprite.y);
+                if (naveDistance < explosionRadius) {
+                    const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+                    this.shatterNave(this.naveSprite.x, this.naveSprite.y, baseScale);
+                    this.naveSprite.destroy();
+                }
+            }
+
         }.bind(this);
         this.resize = () => {
             const width = this.scale.width;
@@ -771,6 +937,9 @@ class GameScene extends Phaser.Scene {
         this.scale.on('resize', this.resize, this);
         this.resize();
 
+        // Diminui o cooldown do bônus especial a cada wave
+        if (this.starBonusCooldown > 0) this.starBonusCooldown--;
+
         this.spawnWave = function () {
             if (!gameEnded && this.timeLeft > 0) {
                 this.waveCount++;
@@ -809,14 +978,15 @@ class GameScene extends Phaser.Scene {
                 if (!this.starBonusCount) this.starBonusCount = 0;
 
                 if (
-                    currentLevel >= 6 &&
-                    Phaser.Math.Between(1, 2) === 1 && // 50% de chance
+                    Phaser.Math.Between(1, 2) === 1 &&
                     !gameEnded &&
                     this.starBonusCount < 2 &&
-                    !this.starBonusActive // <-- só cria se não houver bônus ativo
+                    !this.starBonusActive &&
+                    this.starBonusCooldown <= 0 // só cria se cooldown zerado
                 ) {
                     this.starBonusCount++;
-                    this.starBonusActive = true; // marca como ativo
+                    this.starBonusActive = true;
+                    this.starBonusCooldown = 5; // espera 5 waves para criar outro
 
                     const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
                     // Posição X aleatória entre 20% e 80% da largura
@@ -825,13 +995,13 @@ class GameScene extends Phaser.Scene {
                     const bonusY = Phaser.Math.Between(this.scale.height * 0.15, this.scale.height * 0.35);
 
                     const bonusSprite = this.add.image(bonusX, bonusY, 'star_bonus')
-                        .setScale(baseScale * 1)  // alterar scale star bonus - também no yoyo
+                        .setScale(baseScale * .8)  // alterar scale star bonus - também no yoyo
                         .setDepth(2002)
                         .setInteractive({ useHandCursor: true });
 
                     this.tweens.add({
                         targets: bonusSprite,
-                        scale: { from: baseScale * 1, to: baseScale * 1.3 }, // alterar scale star bonus também na const acima
+                        scale: { from: baseScale * .8, to: baseScale * .9 }, // alterar scale star bonus também na const acima
                         alpha: { from: 1, to: 0.7 },
                         yoyo: true,
                         repeat: -1,
@@ -887,129 +1057,292 @@ class GameScene extends Phaser.Scene {
             }
         }.bind(this);
 
-
+        // Diminui o cooldown do bônus especial a cada wave
+        if (this.starBonusCooldown > 0) this.starBonusCooldown--;
 
         this.time.addEvent({ delay: 2500, callback: this.spawnWave, callbackScope: this, loop: true }); // a cada 2,5 segundos uma nova wave
 
-        // Evento de bomba matadora única ao iniciar a fase (dificuldade crescente)
-        let killerChance;
-        if (currentLevel <= 3) killerChance = 2;        // Fases 1-3: 1 em 8 (12,5%)
-        else if (currentLevel <= 7) killerChance = 4;   // Fases 4-7: 1 em 4 (25%)
-        else killerChance = 2;                          // Fases 8-10: 1 em 2 (50%)
+        // Cria 3 bombas matadoras por fase, com delays diferentes
 
-        if (!gameEnded && Phaser.Math.Between(1, killerChance) === 1) {
-            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-            const spawnX = Phaser.Math.Between(0, this.scale.width);
-            const spawnY = 0;
-            const killerRadius = 15 * baseScale;
-            const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
-                .setStrokeStyle(4, 0xffffff, 1)
-                .setDepth(1000);
-            killerMissiles.push(killerMissile);
+        const killerRadius = 15 * baseScale;
+        const spawnY = 0;
 
-            const sound = this.sound.add('missileFall', { volume: 0.5 });
-            sound.play();
 
-            const targetX = this.buildingContainer.x;
-            const targetY = this.scale.height - 315 * baseScale;
+        // Primeira bomba matadora: entre 0,5s e 15s
+        this.time.delayedCall(Phaser.Math.Between(500, 15000), () => {
+            this.sound.play('sirene', { volume: 0.7 });
 
-            let trailGraphics = this.add.graphics({ x: 0, y: 0 }).setDepth(999);
+            this.time.delayedCall(2000, () => {
+                const spawnX = Phaser.Math.Between(0, this.scale.width);
+                const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
+                    .setStrokeStyle(4, 0xffffff, 1)
+                    .setDepth(1000);
+                killerMissiles.push(killerMissile);
 
-            let killerTween = this.tweens.add({
-                targets: killerMissile,
-                x: targetX,
-                y: targetY,
-                duration: 4000,
-                ease: 'Linear',
-                onUpdate: (tween, target) => {
-                    trailGraphics.clear();
-                    const trailLength = 580 * baseScale;
-                    const angle = Phaser.Math.Angle.Between(spawnX, spawnY, target.x, target.y);
-                    const x1 = target.x - Math.cos(angle) * trailLength;
-                    const y1 = target.y - Math.sin(angle) * trailLength;
-                    const x2 = target.x;
-                    const y2 = target.y;
-                    trailGraphics.lineStyle(4, 0xffffff, 0.9 * (1 - tween.progress));
-                    trailGraphics.lineBetween(x1, y1, x2, y2);
-                },
-                onComplete: () => {
-                    if (!killerMissile.active) return;
-                    if (trailGraphics) trailGraphics.destroy();
-                    if (sound && sound.isPlaying) sound.stop();
-                    this.buildingHealth = 1;
-                    this.updateBuildingVisibility();
-                    this.onBuildingHit(targetX, targetY);
-                    if (killerMissile) killerMissile.destroy();
-                },
-                onStop: () => {
-                    if (trailGraphics) {
-                        this.tweens.add({
-                            targets: trailGraphics,
-                            alpha: { from: 1, to: 0 },
-                            duration: 1000,
-                            onComplete: () => trailGraphics.destroy()
-                        });
+                const sound = this.sound.add('missileFall', { volume: 1 });
+                sound.play();
+
+                let targetX = this.buildingContainer.x;
+                let targetY = this.scale.height - 315 * baseScale;
+
+                let trailGraphics = this.add.graphics({ x: 0, y: 0 }).setDepth(999);
+
+                let killerTween = this.tweens.add({
+                    targets: killerMissile,
+                    x: targetX,
+                    y: targetY,
+                    duration: 4000,
+                    ease: 'Linear',
+                    onUpdate: (tween, target) => {
+                        trailGraphics.clear();
+                        const trailLength = 580 * baseScale;
+                        const angle = Phaser.Math.Angle.Between(spawnX, spawnY, target.x, target.y);
+                        const x1 = target.x - Math.cos(angle) * trailLength;
+                        const y1 = target.y - Math.sin(angle) * trailLength;
+                        const x2 = target.x;
+                        const y2 = target.y;
+                        trailGraphics.lineStyle(4, 0xffffff, 0.9 * (1 - tween.progress));
+                        trailGraphics.lineBetween(x1, y1, x2, y2);
+                    },
+                    onComplete: () => {
+                        if (!killerMissile.active) return;
+                        if (trailGraphics) trailGraphics.destroy();
+                        if (sound && sound.isPlaying) sound.stop();
+                        this.buildingHealth = 1;
+                        this.updateBuildingVisibility();
+                        this.onBuildingHit(targetX, targetY);
+                        if (killerMissile) killerMissile.destroy();
+                    },
+                    onStop: () => {
+                        if (trailGraphics) {
+                            this.tweens.add({
+                                targets: trailGraphics,
+                                alpha: { from: 1, to: 0 },
+                                duration: 1000,
+                                onComplete: () => trailGraphics.destroy()
+                            });
+                        }
+                        if (sound && sound.isPlaying) sound.stop();
+                        if (killerMissile) killerMissile.destroy();
                     }
-                    if (sound && sound.isPlaying) sound.stop();
-                    if (killerMissile) killerMissile.destroy();
-                }
-            });
+                });
 
-            // ASSOCIE O TWEEN E O SOM AO OBJETO
-            killerMissile.killerTween = killerTween;
-            killerMissile.sound = sound;
-        }
+                killerMissile.killerTween = killerTween;
+                killerMissile.sound = sound;
+            }, [], this);
+        }, [], this);
+
+        // Segunda bomba matadora: entre 20s e 35s
+        this.time.delayedCall(Phaser.Math.Between(20000, 35000), () => {
+            this.sound.play('sirene', { volume: 0.7 });
+
+            this.time.delayedCall(2000, () => {
+                const spawnX = Phaser.Math.Between(0, this.scale.width);
+                const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
+                    .setStrokeStyle(4, 0xffffff, 1)
+                    .setDepth(1000);
+                killerMissiles.push(killerMissile);
+
+                const sound = this.sound.add('missileFall', { volume: 1 });
+                sound.play();
+
+                let targetX = this.buildingContainer.x;
+                let targetY = this.scale.height - 315 * baseScale;
+
+                let trailGraphics = this.add.graphics({ x: 0, y: 0 }).setDepth(999);
+
+                let killerTween = this.tweens.add({
+                    targets: killerMissile,
+                    x: targetX,
+                    y: targetY,
+                    duration: 4000,
+                    ease: 'Linear',
+                    onUpdate: (tween, target) => {
+                        trailGraphics.clear();
+                        const trailLength = 580 * baseScale;
+                        const angle = Phaser.Math.Angle.Between(spawnX, spawnY, target.x, target.y);
+                        const x1 = target.x - Math.cos(angle) * trailLength;
+                        const y1 = target.y - Math.sin(angle) * trailLength;
+                        const x2 = target.x;
+                        const y2 = target.y;
+                        trailGraphics.lineStyle(4, 0xffffff, 0.9 * (1 - tween.progress));
+                        trailGraphics.lineBetween(x1, y1, x2, y2);
+                    },
+                    onComplete: () => {
+                        if (!killerMissile.active) return;
+                        if (trailGraphics) trailGraphics.destroy();
+                        if (sound && sound.isPlaying) sound.stop();
+                        this.buildingHealth = 1;
+                        this.updateBuildingVisibility();
+                        this.onBuildingHit(targetX, targetY);
+                        if (killerMissile) killerMissile.destroy();
+                    },
+                    onStop: () => {
+                        if (trailGraphics) {
+                            this.tweens.add({
+                                targets: trailGraphics,
+                                alpha: { from: 1, to: 0 },
+                                duration: 1000,
+                                onComplete: () => trailGraphics.destroy()
+                            });
+                        }
+                        if (sound && sound.isPlaying) sound.stop();
+                        if (killerMissile) killerMissile.destroy();
+                    }
+                });
+
+                killerMissile.killerTween = killerTween;
+                killerMissile.sound = sound;
+            }, [], this);
+        }, [], this);
+
+        // Terceira bomba matadora: entre 40s e 50s
+        this.time.delayedCall(Phaser.Math.Between(40000, 50000), () => {
+            this.sound.play('sirene', { volume: 0.7 });
+
+            this.time.delayedCall(2000, () => {
+                const spawnX = Phaser.Math.Between(0, this.scale.width);
+                const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
+                    .setStrokeStyle(4, 0xffffff, 1)
+                    .setDepth(1000);
+                killerMissiles.push(killerMissile);
+
+                const sound = this.sound.add('missileFall', { volume: 1 });
+                sound.play();
+
+                let targetX = this.buildingContainer.x;
+                let targetY = this.scale.height - 315 * baseScale;
+
+                let trailGraphics = this.add.graphics({ x: 0, y: 0 }).setDepth(999);
+
+                let killerTween = this.tweens.add({
+                    targets: killerMissile,
+                    x: targetX,
+                    y: targetY,
+                    duration: 4000,
+                    ease: 'Linear',
+                    onUpdate: (tween, target) => {
+                        trailGraphics.clear();
+                        const trailLength = 580 * baseScale;
+                        const angle = Phaser.Math.Angle.Between(spawnX, spawnY, target.x, target.y);
+                        const x1 = target.x - Math.cos(angle) * trailLength;
+                        const y1 = target.y - Math.sin(angle) * trailLength;
+                        const x2 = target.x;
+                        const y2 = target.y;
+                        trailGraphics.lineStyle(4, 0xffffff, 0.9 * (1 - tween.progress));
+                        trailGraphics.lineBetween(x1, y1, x2, y2);
+                    },
+                    onComplete: () => {
+                        if (!killerMissile.active) return;
+                        if (trailGraphics) trailGraphics.destroy();
+                        if (sound && sound.isPlaying) sound.stop();
+                        this.buildingHealth = 1;
+                        this.updateBuildingVisibility();
+                        this.onBuildingHit(targetX, targetY);
+                        if (killerMissile) killerMissile.destroy();
+                    },
+                    onStop: () => {
+                        if (trailGraphics) {
+                            this.tweens.add({
+                                targets: trailGraphics,
+                                alpha: { from: 1, to: 0 },
+                                duration: 1000,
+                                onComplete: () => trailGraphics.destroy()
+                            });
+                        }
+                        if (sound && sound.isPlaying) sound.stop();
+                        if (killerMissile) killerMissile.destroy();
+                    }
+                });
+
+                killerMissile.killerTween = killerTween;
+                killerMissile.sound = sound;
+            }, [], this);
+        }, [], this);
+
 
         this.fireAntiMissile = function (cannon, targetGameX, targetGameY) {
             if (!gameEnded) {
-                const launchX = cannon.sprite.x;
-                const launchY = cannon.sprite.y;
-                const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-                const antiMissile = this.add.image(launchX, launchY, 'antimissile')
-                    .setOrigin(0.5, 1)
-                    .setScale(baseScale)
-                    .setDepth(5);
-                antiMissiles.push(antiMissile);
+                // Se tiro triplo estiver ativo, dispara 3 antimísseis em leque
+                if (this.tripleShotActive) {
+                    const launchX = cannon.sprite.x;
+                    const launchY = cannon.sprite.y;
+                    const angle = Phaser.Math.Angle.Between(launchX, launchY, targetGameX, targetGameY);
+                    const spread = Phaser.Math.DegToRad(18); // ângulo de abertura entre os tiros
+                    const dist = 200; // distância para espalhar os alvos
 
-                const antiMissileHeight = 76 * baseScale; // base original 76
-                const angle = Phaser.Math.Angle.Between(launchX, launchY, targetGameX, targetGameY);
-                const offsetX = Math.cos(angle) * (antiMissileHeight / 2);
-                const offsetY = Math.sin(angle) * (antiMissileHeight / 2);
-                const finalX = targetGameX - offsetX;
-                const finalY = targetGameY - offsetY;
-                const duration = 650;
+                    // Central
+                    this._fireSingleAntiMissile(cannon, targetGameX, targetGameY);
 
-                this.tweens.add({
-                    targets: antiMissile,
-                    x: finalX,
-                    y: finalY,
-                    duration: duration,
-                    ease: 'Linear',
-                    onUpdate: (tween, target) => {
-                        const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
-                        target.rotation = currentAngle + Math.PI / 2;
+                    // Esquerda
+                    this._fireSingleAntiMissile(
+                        cannon,
+                        targetGameX + dist * Math.cos(angle - spread),
+                        targetGameY + dist * Math.sin(angle - spread)
+                    );
 
-                        // Calcula progresso da distância
-                        const totalDistance = Phaser.Math.Distance.Between(launchX, launchY, finalX, finalY);
-                        const currentDistance = Phaser.Math.Distance.Between(target.x, target.y, finalX, finalY);
-                        const progress = 1 - (currentDistance / totalDistance);
-
-                        // Quando passar de 97%, reduz opacidade
-                        if (progress > 0.90) {
-                            target.setAlpha(0.0); // ou outro valor desejado
-                        } else {
-                            target.setAlpha(1);
-                        }
-
-                        if (!antiMissile.destroyed && currentDistance < 2) {
-                            this.onAntiMissileHit(target.x, target.y);
-                            antiMissile.destroy();
-                            antiMissile.destroyed = true;
-                            tween.stop();
-                        }
-                    }
-                });
+                    // Direita
+                    this._fireSingleAntiMissile(
+                        cannon,
+                        targetGameX + dist * Math.cos(angle + spread),
+                        targetGameY + dist * Math.sin(angle + spread)
+                    );
+                } else {
+                    // Tiro normal
+                    this._fireSingleAntiMissile(cannon, targetGameX, targetGameY);
+                }
             }
+        }.bind(this);
+
+        // Função auxiliar para disparar um antimíssil individual
+        this._fireSingleAntiMissile = function (cannon, targetGameX, targetGameY) {
+            const launchX = cannon.sprite.x;
+            const launchY = cannon.sprite.y;
+            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+            const antiMissile = this.add.image(launchX, launchY, 'antimissile')
+                .setOrigin(0.5, 1)
+                .setScale(baseScale)
+                .setDepth(5);
+            antiMissiles.push(antiMissile);
+
+            const antiMissileHeight = 76 * baseScale;
+            const angle = Phaser.Math.Angle.Between(launchX, launchY, targetGameX, targetGameY);
+            const offsetX = Math.cos(angle) * (antiMissileHeight / 2);
+            const offsetY = Math.sin(angle) * (antiMissileHeight / 2);
+            const finalX = targetGameX - offsetX;
+            const finalY = targetGameY - offsetY;
+            const duration = 650;
+
+            this.tweens.add({
+                targets: antiMissile,
+                x: finalX,
+                y: finalY,
+                duration: duration,
+                ease: 'Linear',
+                onUpdate: (tween, target) => {
+                    const currentAngle = Phaser.Math.Angle.Between(target.x, target.y, targetGameX, targetGameY);
+                    target.rotation = currentAngle + Math.PI / 2;
+
+                    // Calcula progresso da distância
+                    const totalDistance = Phaser.Math.Distance.Between(launchX, launchY, finalX, finalY);
+                    const currentDistance = Phaser.Math.Distance.Between(target.x, target.y, finalX, finalY);
+                    const progress = 1 - (currentDistance / totalDistance);
+
+                    // Quando passar de 97%, reduz opacidade
+                    if (progress > 0.90) {
+                        target.setAlpha(0.0);
+                    } else {
+                        target.setAlpha(1);
+                    }
+
+                    if (!antiMissile.destroyed && currentDistance < 2) {
+                        this.onAntiMissileHit(target.x, target.y);
+                        antiMissile.destroy();
+                        antiMissile.destroyed = true;
+                        tween.stop();
+                    }
+                }
+            });
         }.bind(this);
 
         this.updateBuildingVisibility = function () {
@@ -1068,6 +1401,53 @@ class GameScene extends Phaser.Scene {
             } else {
                 destroyedCount++;
             }
+            // ...................
+
+            // Tela final especial se preservou o alvo da fase 10
+            if (success && currentLevel === TOTAL_LEVELS) {
+                this.children.removeAll();
+
+                // Adiciona tela_final.png como fundo
+                this.add.image(this.scale.width / 2, this.scale.height / 2, 'tela_final')
+                    .setDisplaySize(this.scale.width, this.scale.height)
+                    .setDepth(100);
+
+                // Botões/textos no rodapé
+                const btnY = this.scale.height - 120;
+                const btnSpacing = 100; // ajustar espaço entre textos
+
+                // Jogar Novamente
+                const playAgainText = this.add.text(this.scale.width / 2 - btnSpacing, btnY, 'Jogar Novamente', {
+                    fontFamily: 'VT323',
+                    fontSize: '34px',
+                    color: '#00FF00',
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+
+                playAgainText.on('pointerdown', () => {
+                    destroyedCount = 0;
+                    preservedCount = 0;
+                    currentLevel = 1;
+                    localStorage.removeItem('gameProgress');
+                    gameEnded = false;
+                    this.scene.start('BriefingScene');
+                });
+
+                // Fechar
+                const closeText = this.add.text(this.scale.width / 2 + btnSpacing, btnY, 'Fechar', {
+                    fontFamily: 'VT323',
+                    fontSize: '34px',
+                    color: '#FF3300',
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+
+                closeText.on('pointerdown', () => {
+                    window.close(); // ou window.location.reload() se for web
+                });
+
+                return; // Impede que o restante do endLevel rode
+            }
+            //..............................
 
             const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
             const minFontSize = 20;
@@ -1213,41 +1593,138 @@ class GameScene extends Phaser.Scene {
                 }, [], this);
             });
         }.bind(this);
+    }
 
-        this.update = function () {
-            if (gameEnded) return;
-            const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
-            const collisionTopY = visibleHeight - 315 * baseScale;
-            const collisionBottomY = collisionTopY + 50 * baseScale;
-            const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
-            const collisionRightX = this.scale.width / 2 + 255 * baseScale;
+    update() {
 
+        if (gameEnded) return;
+        const baseScale = Math.min(this.scale.width / BASE_WIDTH, this.scale.height / BASE_HEIGHT);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const visibleHeight = isAndroid ? window.innerHeight : this.cameras.main.height;
+        const collisionTopY = visibleHeight - 315 * baseScale;
+        const collisionBottomY = collisionTopY + 50 * baseScale;
+        const collisionLeftX = this.scale.width / 2 - 255 * baseScale;
+        const collisionRightX = this.scale.width / 2 + 255 * baseScale;
+
+
+        // --- Colisão dos mísseis normais com o dome ---
+        if (this.domeActive && this.domePoints && this.domePoints.length > 1) {
+            // Mísseis normais
             for (let i = missiles.length - 1; i >= 0; i--) {
                 const missile = missiles[i];
-                if (!missile || !missile.active) {
-                    missiles.splice(i, 1);
-                    continue;
+                if (!missile || !missile.active) continue;
+                let domeYatX = null;
+                for (let j = 0; j < this.domePoints.length - 1; j++) {
+                    const p1 = this.domePoints[j];
+                    const p2 = this.domePoints[j + 1];
+                    if ((missile.x >= p1.x && missile.x <= p2.x) || (missile.x >= p2.x && missile.x <= p1.x)) {
+                        const t = (missile.x - p1.x) / (p2.x - p1.x);
+                        domeYatX = p1.y + t * (p2.y - p1.y);
+                        break;
+                    }
                 }
-                const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY);
-                missile.x += Math.cos(angle) * missile.speed * (1 / 60);
-                missile.y += Math.sin(angle) * missile.speed * (1 / 60);
-                missile.rotation = angle + Math.PI / 2;
-
-                if (missile.y >= collisionTopY && missile.y <= collisionBottomY && missile.x >= collisionLeftX && missile.x <= collisionRightX) {
-                    this.onBuildingHit(missile.x, missile.y);
+                if (domeYatX !== null && missile.y >= domeYatX) {
+                    // Efeito visual de impacto
+                    const impact = this.add.circle(missile.x, missile.y, 20, 0x00e9ff, 0.5).setDepth(951);
+                    this.tweens.add({
+                        targets: impact,
+                        alpha: 0,
+                        scale: 2,
+                        duration: 400,
+                        onComplete: () => impact.destroy()
+                    });
                     missile.destroy();
                     missiles.splice(i, 1);
-                } else if (missile.y > this.scale.height) {
-                    missile.destroy();
-                    missiles.splice(i, 1);
+                    this.sound.play('explosion_air');
                 }
             }
-
-            if (missiles.length === 0 && this.timeLeft > 0) {
-                this.spawnWave();
+            // KillerMissiles
+            for (let i = killerMissiles.length - 1; i >= 0; i--) {
+                const killer = killerMissiles[i];
+                if (!killer || !killer.active) continue;
+                let domeYatX = null;
+                for (let j = 0; j < this.domePoints.length - 1; j++) {
+                    const p1 = this.domePoints[j];
+                    const p2 = this.domePoints[j + 1];
+                    if ((killer.x >= p1.x && killer.x <= p2.x) || (killer.x >= p2.x && killer.x <= p1.x)) {
+                        const t = (killer.x - p1.x) / (p2.x - p1.x);
+                        domeYatX = p1.y + t * (p2.y - p1.y);
+                        break;
+                    }
+                }
+                if (domeYatX !== null && killer.y >= domeYatX) {
+                    const impact = this.add.circle(killer.x, killer.y, 24, 0xff0000, 0.5).setDepth(951);
+                    this.tweens.add({
+                        targets: impact,
+                        alpha: 0,
+                        scale: 2,
+                        duration: 400,
+                        onComplete: () => impact.destroy()
+                    });
+                    if (killer.killerTween && killer.killerTween.isPlaying()) killer.killerTween.stop();
+                    if (killer.sound && killer.sound.isPlaying) killer.sound.stop();
+                    killer.destroy();
+                    killerMissiles.splice(i, 1);
+                    this.sound.play('explosion_air');
+                }
             }
-        }.bind(this);
+            // Mísseis da nave
+            if (this.naveMissiles) {
+                for (let i = this.naveMissiles.length - 1; i >= 0; i--) {
+                    const naveMissile = this.naveMissiles[i];
+                    if (!naveMissile || !naveMissile.active) continue;
+                    let domeYatX = null;
+                    for (let j = 0; j < this.domePoints.length - 1; j++) {
+                        const p1 = this.domePoints[j];
+                        const p2 = this.domePoints[j + 1];
+                        if ((naveMissile.x >= p1.x && naveMissile.x <= p2.x) || (naveMissile.x >= p2.x && naveMissile.x <= p1.x)) {
+                            const t = (naveMissile.x - p1.x) / (p2.x - p1.x);
+                            domeYatX = p1.y + t * (p2.y - p1.y);
+                            break;
+                        }
+                    }
+                    if (domeYatX !== null && naveMissile.y >= domeYatX) {
+                        const impact = this.add.circle(naveMissile.x, naveMissile.y, 20, 0x00e9ff, 0.5).setDepth(951);
+                        this.tweens.add({
+                            targets: impact,
+                            alpha: 0,
+                            scale: 2,
+                            duration: 400,
+                            onComplete: () => impact.destroy()
+                        });
+                        naveMissile.destroy();
+                        this.naveMissiles.splice(i, 1);
+                        this.sound.play('explosion_air');
+                    }
+                }
+            }
+        }
+
+
+        // --- Movimentação e colisão dos mísseis normais com o prédio ---
+        for (let i = missiles.length - 1; i >= 0; i--) {
+            const missile = missiles[i];
+            if (!missile || !missile.active) {
+                missiles.splice(i, 1);
+                continue;
+            }
+            const angle = Phaser.Math.Angle.Between(missile.x, missile.y, missile.targetX, missile.targetY);
+            missile.x += Math.cos(angle) * missile.speed * (1 / 60);
+            missile.y += Math.sin(angle) * missile.speed * (1 / 60);
+            missile.rotation = angle + Math.PI / 2;
+
+            if (missile.y >= collisionTopY && missile.y <= collisionBottomY && missile.x >= collisionLeftX && missile.x <= collisionRightX) {
+                this.onBuildingHit(missile.x, missile.y);
+                missile.destroy();
+                missiles.splice(i, 1);
+            } else if (missile.y > this.scale.height) {
+                missile.destroy();
+                missiles.splice(i, 1);
+            }
+        }
+
+        if (missiles.length === 0 && this.timeLeft > 0) {
+            this.spawnWave();
+        }
     }
 }

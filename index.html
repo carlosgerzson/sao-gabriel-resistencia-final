@@ -213,6 +213,30 @@
                 font-size: 40px;
             }
         }
+
+        .audio-center-btn {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            background: none;
+            border: none;
+            color: #39ff14;
+            cursor: pointer;
+            z-index: 100;
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
     <script src="main.js" defer></script>
@@ -274,16 +298,7 @@
             </div>
             <button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button>
 
-           <button id="audioPlayBtn" style="
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                font-size: 1.3em;
-                background: none;
-                border: none;
-                color: #39ff14;
-                cursor: pointer;
-                z-index: 100;">
+           <button id="audioPlayBtn" class="audio-center-btn">
                 <i class="fas fa-volume-mute"></i>
             </button>
             
@@ -316,8 +331,8 @@
             }, 100);
         }
 
-            function goToInstruction2() {
-                document.getElementById('gameContainer').innerHTML = `
+        function goToInstruction2() {
+            document.getElementById('gameContainer').innerHTML = `
                 <div class="bg-image">
                     <div class="fundo1-layer">
                         <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
@@ -325,12 +340,12 @@
                     <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!\n<span class="arrow-link" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
-                adjustTextLayerFontSize();
-                playIntroAudio();
-            }
+            adjustTextLayerFontSize();
+            playIntroAudio();
+        }
 
-            function goToInstruction1() {
-                document.getElementById('gameContainer').innerHTML = `
+        function goToInstruction1() {
+            document.getElementById('gameContainer').innerHTML = `
                 <div class="bg-image">
                     <div class="fundo1-layer">
                         <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
@@ -338,12 +353,12 @@
                     <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa e canhões de memória em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!\n<span class="arrow-link" onclick="goToInstruction0()"><i class="fas fa-arrow-right"></i></span></div>
                 </div>
             `;
-                adjustTextLayerFontSize();
-                playIntroAudio(); // Adicione aqui
-            }
+            adjustTextLayerFontSize();
+            playIntroAudio(); // Adicione aqui
+        }
 
-            function goToInstruction0() {
-                document.getElementById('gameContainer').innerHTML = `
+        function goToInstruction0() {
+            document.getElementById('gameContainer').innerHTML = `
         <div class="bg-image">
             <div class="fundo1-layer">
                 <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
@@ -359,22 +374,22 @@
             </div>
         </div>
     `;
-                adjustTextLayerFontSize();
-                playIntroAudio(); // Adicione aqui
-            }
+            adjustTextLayerFontSize();
+            playIntroAudio(); // Adicione aqui
+        }
 
-            function startGame() {
-                stopIntroAudio();
-                document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
-                if (window.initPhaserGame) {
-                    window.initPhaserGame();
-                }
+        function startGame() {
+            stopIntroAudio();
+            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
+            if (window.initPhaserGame) {
+                window.initPhaserGame();
             }
+        }
 
-            window.onload = function () {
-                showIntro();
-                playIntroAudio();
-            };
+        window.onload = function () {
+            showIntro();
+            playIntroAudio();
+        };
     </script>
 </head>
 
