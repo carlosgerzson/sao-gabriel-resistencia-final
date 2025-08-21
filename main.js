@@ -1115,7 +1115,7 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(Phaser.Math.Between(500, 15000), () => {
             this.sound.play('sirene', { volume: 0.7 });
 
-            this.time.delayedCall(2000, () => {
+            this.time.delayedCall(3000, () => {
                 const spawnX = Phaser.Math.Between(0, this.scale.width);
                 const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
                     .setStrokeStyle(4, 0xffffff, 1)
@@ -1179,7 +1179,7 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(Phaser.Math.Between(20000, 35000), () => {
             this.sound.play('sirene', { volume: 0.7 });
 
-            this.time.delayedCall(2000, () => {
+            this.time.delayedCall(3000, () => {
                 const spawnX = Phaser.Math.Between(0, this.scale.width);
                 const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
                     .setStrokeStyle(4, 0xffffff, 1)
@@ -1243,7 +1243,7 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(Phaser.Math.Between(40000, 50000), () => {
             this.sound.play('sirene', { volume: 0.7 });
 
-            this.time.delayedCall(2000, () => {
+            this.time.delayedCall(3000, () => {
                 const spawnX = Phaser.Math.Between(0, this.scale.width);
                 const killerMissile = this.add.circle(spawnX, spawnY, killerRadius, 0xff0000, 0.7)
                     .setStrokeStyle(4, 0xffffff, 1)
