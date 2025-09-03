@@ -1,403 +1,522 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
-    <title>São Gabriel: Resistência Final</title>
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, height=device-height">
-    <link rel="icon" href="data:,">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Deslizante 3x3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
     <style>
-        .vt323-regular {
-            font-family: "VT323", monospace;
-            font-weight: 400;
-            font-style: normal;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #000000;
-            min-height: 100vh;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-        }
-
-        #gameContainer {
-            position: relative;
+            justify-content: center;
             height: 100vh;
-            width: calc(100vh * 9 / 16);
-            max-width: 900px;
-            max-height: 1600px;
-            overflow: hidden;
-            margin: auto;
+            margin: 0;
+            background-color: #8B5A2B;
+            font-family: 'Arial', sans-serif;
         }
 
-        .bg-image {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
+        h1 {
+            font-family: 'Rye', cursive;
+            color: #3C2005;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 1.8em;
+            margin-bottom: 10px;
         }
 
-        .fundo1-layer,
-        .fundo2-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Garante 852px */
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .fundo1-layer img {
-            width: 100%;
-            height: 100%;
-            /* Força 852px */
-            object-fit: cover;
-            /* Preenche a altura, pode cortar laterais */
-            display: block;
-        }
-
-        .fundo2-layer {
-            z-index: 1;
-        }
-
-        .fundo2-layer img {
-            width: 100%;
-            height: 100%;
-            /* Força 852px */
-            object-fit: cover;
-            /* Preenche a altura */
-            display: block;
-            position: absolute;
-            bottom: 0;
-            /* Mantém alinhamento ao bottom */
-            transform: translateY(0);
-        }
-
-        .text-layer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #e9bb00;
-            font-family: 'VT323';
-            font-size: 1.5em;
-            border-radius: 15px;
-            z-index: 10;
-            width: 85%;
-            min-height: auto;
-            height: auto;
-            max-height: 80vh;
-            display: block;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .instructions-layer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: left;
-            color: #e9bb00;
-            font-family: 'VT323';
+        #high-score {
+            font-family: 'Rye', cursive;
+            color: #3C2005;
             font-size: 1.2em;
-            border-radius: 15px;
-            z-index: 10;
-            width: 85%;
-            max-width: 900px;
-            max-height: 80vh;
-            display: block;
-            white-space: normal;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-            box-sizing: border-box;
-            overflow-y: auto;
+            margin-bottom: 10px;
+            opacity: 0.7;
+            transition: opacity 0.5s;
         }
 
-        .highlight-green {
-            color: #39ff14;
-            font-weight: bold;
-        }
-
-        .instructions-layer .arrow-link {
-            font-family: 'VT323';
-            font-size: inherit;
-            color: #39ff14;
-            /* verde */
-            /*text-decoration: underline; */
-            cursor: pointer;
-            display: flex;
-            /* Flexbox para centralizar */
-            align-items: center;
-            /* Centraliza verticalmente */
-            justify-content: center;
-            /* Centraliza horizontalmente */
-            margin-top: 20px;
-        }
-
-        .instructions-layer .arrow-link:hover {
-            color: #ffc107;
-            /* amarelo */
-        }
-
-        .instructions-layer .arrow-link i {
-            font-size: 1.6em;
-            vertical-align: middle;
-        }
-
-
-        .text-layer .arrow-link {
-            font-family: 'VT323';
-            font-size: inherit;
-            color: #00FF00;
-            text-decoration: underline;
-            cursor: pointer;
-            display: block;
-            margin-top: 20px;
-        }
-
-        .text-layer .arrow-link:hover {
-            color: #FFFF00;
-        }
-
-        .text-layer .arrow-link i {
+        #high-score.highlight {
+            opacity: 1;
             font-size: 1.5em;
-            vertical-align: middle;
+            color: #FFD700;
+            /* Dourado para destacar */
         }
 
-        .btn-custom {
-            position: absolute;
-            bottom: 13%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 85px;
-            padding: 20px 30px;
-            min-width: 110px;
-            min-height: 85px;
-            z-index: 50;
-            background: none;
-            border: none;
-            color: #39ff14;
+        .puzzle-wrapper {
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            max-width: 70%;
+            margin: 0 auto;
+            /* Centraliza horizontalmente */           
+        }
+
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: min(2px, 0.5%);
+            background-color: #3C2005;
+            width: min(60vw, 450px);
+            aspect-ratio: 1 / 1;
+            max-height: 90vh;            
+        }
+
+        .tile {
+            width: 100%;
+            height: 100%;
+            background-color: #D2B48C;
+            background-size: inherit;
+            border: 2px solid #4A2F1A;
+            border-radius: 5px;
             cursor: pointer;
-            transition: color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: transform 0.2s;
+            box-sizing: border-box;          
         }
 
-        .btn-custom:hover {
-            color: #ffc107;
+        .tile:hover {
+            transform: scale(1.05);
         }
 
-        @media (max-height: 1000px) {
-            .btn-custom {
-                font-size: 40px;
+        .empty {
+            background: transparent;
+            border: none;          
+        }
+
+        .briefing {
+            display: none;
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            max-width: 320px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .briefing-image {
+            background-color: #3C2005;
+            border: 5px solid #4A2F1A;
+            border-radius: 5px;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 10px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .briefing-inner {
+            background-color: #3C2005;
+            border: 5px solid #4A2F1A;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 120px;
+            color: #D2B48C;
+            font-family: 'Arial', sans-serif;
+            font-size: 1em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .briefing h1 {
+            font-family: 'Rye', cursive;
+            color: #D2B48C;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 1.8em;
+            margin: 0 0 10px;
+        }
+
+        #restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-family: 'Rye', cursive;
+            color: #3C2005;
+            background-color: #D2B48C;
+            border: 2px solid #4A2F1A;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.2s;
+        }
+
+        #restart:hover {
+            background-color: #E6C9A2;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+                margin-top: 5vh;
+            }
+
+            #high-score {
+                font-size: 1em;
+            }
+
+            .puzzle-wrapper {
+                max-width: 90%;
+                padding: 5px;
+            }
+
+            .puzzle-container {
+                width: min(90vw, 240px);
+                grid-gap: min(1px, 0.5%);
+            }
+
+            .tile {
+                background-size: 240px 240px;
+            }
+
+            .briefing {
+                max-width: 90%;
+            }
+
+            .briefing-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .briefing-inner {
+                min-height: 100px;
+                font-size: 0.9em;
+            }
+
+            .briefing h1 {
+                font-size: 1.5em;
             }
         }
 
-        .audio-center-btn {
-            position: absolute;
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2em;
-            background: none;
-            border: none;
-            color: #39ff14;
-            cursor: pointer;
-            z-index: 100;
-            animation: blink 1s infinite alternate;
-        }
-
-        @keyframes blink {
-            0% {
-                opacity: 1;
+        @media (min-width: 601px) and (max-width: 1200px) {
+            h1 {
+                font-size: 2em;
+                margin-top: 3vh;
             }
 
-            100% {
-                opacity: 0.3;
+            #high-score {
+                font-size: 1.3em;
+            }
+
+            .puzzle-wrapper {
+                max-width: 80%;
+                padding: 10px;
+            }
+
+            .puzzle-container {
+                width: min(70vw, 400px);
+                grid-gap: min(2px, 0.5%);
+            }
+
+            .tile {
+                background-size: 400px 400px;
+            }
+
+            .briefing {
+                max-width: 80%;
+            }
+
+            .briefing-image {
+                width: 150px;
+                height: 150px;
+            }
+
+            .briefing-inner {
+                min-height: 120px;
+                font-size: 1em;
+            }
+
+            .briefing h1 {
+                font-size: 2em;
+            }
+        }
+
+        @media (min-width: 1201px) {
+            h1 {
+                font-size: 2.5em;
+                margin-top: 2vh;
+            }
+
+            #high-score {
+                font-size: 1.5em;
+            }
+
+            .puzzle-wrapper {
+                max-width: 70%;
+                padding: 15px;
+            }
+
+            .puzzle-container {
+                width: min(60vw, 450px);
+                grid-gap: min(2px, 0.5%);
+            }
+
+            .tile {
+                background-size: 450px 450px;
+            }
+
+            .briefing {
+                max-width: 70%;
+            }
+
+            .briefing-image {
+                width: 200px;
+                height: 200px;
+            }
+
+            .briefing-inner {
+                min-height: 150px;
+                font-size: 1.2em;
+            }
+
+            .briefing h1 {
+                font-size: 2.5em;
             }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
-    <script src="main.js" defer></script>
-    <script>
-        function adjustTextLayerFontSize() {
-            const container = document.getElementById('gameContainer');
-            const textLayers = container ? container.getElementsByClassName('text-layer') : [];
-            if (container && textLayers.length > 0) {
-                const w = container.offsetWidth;
-                let fontSize = '1.5em';
-                if (w >= 785) {
-                    fontSize = '2.8em';
-                } else if (w >= 500) {
-                    fontSize = '1.8em';
-                } else if (w >= 393) {
-                    fontSize = '1.5em';
-                } else if (w <= 375) {
-                    fontSize = '1.3em';
-                }
-                for (let i = 0; i < textLayers.length; i++) {
-                    textLayers[i].style.fontSize = fontSize;
-                }
-            }
-        }
-
-        function handleResize() {
-            adjustTextLayerFontSize();
-        }
-
-        window.addEventListener('resize', handleResize);
-
-        function playIntroAudio() {
-            const audio = document.getElementById('introAudio');
-            if (audio && audio.paused) {
-                audio.currentTime = 0;
-                audio.play().catch(() => { });
-            }
-        }
-
-        function stopIntroAudio() {
-            const audio = document.getElementById('introAudio');
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.muted = true; // Garante que não volta a tocar
-            }
-        }
-
-
-
-        function showIntro() {
-            document.getElementById('gameContainer').innerHTML = `
-        <div class="bg-image">
-            <div class="fundo1-layer">
-                <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
-            </div>
-            <div class="fundo2-layer">
-                <img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom">
-            </div>
-            <button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button>
-
-           <button id="audioPlayBtn" class="audio-center-btn">
-                <i class="fas fa-volume-mute"></i>
-            </button>
-            
-        </div>
-    `;
-            adjustTextLayerFontSize();
-
-            // Adiciona evento ao botão de áudio
-            setTimeout(() => {
-                const btn = document.getElementById('audioPlayBtn');
-                const audio = document.getElementById('introAudio');
-                if (btn && audio) {
-                    // Garante que o áudio começa mutado e ícone mute
-                    audio.muted = true;
-                    btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-
-                    btn.onclick = function () {
-                        if (audio.muted || audio.paused) {
-                            audio.muted = false;
-                            audio.currentTime = 0;
-                            audio.play();
-                            btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                        } else {
-                            audio.muted = true;
-                            audio.pause();
-                            btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                        }
-                    };
-                }
-            }, 100);
-        }
-
-        function goToInstruction2() {
-            document.getElementById('gameContainer').innerHTML = `
-                <div class="bg-image">
-                    <div class="fundo1-layer">
-                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
-                    </div>
-                    <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!\n<span class="arrow-link" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></span></div>
-                </div>
-            `;
-            adjustTextLayerFontSize();
-            playIntroAudio();
-        }
-
-        function goToInstruction1() {
-            document.getElementById('gameContainer').innerHTML = `
-                <div class="bg-image">
-                    <div class="fundo1-layer">
-                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
-                    </div>
-                    <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa e canhões de memória em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!\n<span class="arrow-link" onclick="goToInstruction0()"><i class="fas fa-arrow-right"></i></span></div>
-                </div>
-            `;
-            adjustTextLayerFontSize();
-            playIntroAudio(); // Adicione aqui
-        }
-
-        function goToInstruction0() {
-            document.getElementById('gameContainer').innerHTML = `
-        <div class="bg-image">
-            <div class="fundo1-layer">
-                <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
-            </div>
-            <div class="instructions-layer">
-                <span style="font-size:1.3em; color:#e9bb00;">Instruções do Jogo</span>
-                <br><br>
-                - <span class="highlight-green">Defesas:</span> Antimísseis e os bônus (domes – tiro triplo – star clear) para destruir os mísseis inimigos.<br><br>
-                - <span class="highlight-green">Ameaças:</span> Mísseis, naves e bombas matadoras podem aparecer aleatoriamente; destrua-os.<br><br>
-                - <span class="highlight-green">Salvar:</span> Use o botão 'SALVAR' no fim da fase para salvar seu progresso no navegador.<br><br>
-                - <span class="highlight-green">Resetar:</span> Use o botão 'RESETAR' para reiniciar o jogo e apagar o progresso.<br><br>
-                <span class="arrow-link" onclick="startGame()"><i class="fas fa-arrow-right"></i></span>
-            </div>
-        </div>
-    `;
-            adjustTextLayerFontSize();
-            playIntroAudio(); // Adicione aqui
-        }
-
-        function startGame() {
-            stopIntroAudio();
-            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
-            if (window.initPhaserGame) {
-                window.initPhaserGame();
-            }
-        }
-
-        window.onload = function () {
-            showIntro();
-            playIntroAudio();
-        };
-    </script>
 </head>
 
 <body>
-    <div id="gameContainer"></div>
+    <h1 id="main-title">MARECHAIS</h1>
+    <div id="high-score">High Score: --</div>
+    <div class="puzzle-wrapper" id="puzzle-wrapper">
+        <div class="puzzle-container" id="puzzle"></div>
+    </div>
+    <div class="briefing" id="briefing">
+        <div class="briefing-image" id="briefing-image"></div>
+        <div class="briefing-inner">
+            <h1 id="briefing-title"></h1>
+            <p id="briefing-text"></p>
+        </div>
+    </div>
+    <button id="restart">Jogar Novamente</button>
+    <audio id="tap-sound" src="tap.mp3"></audio>
+    <audio id="finish-sound" src="finish.mp3"></audio>
 
-    <audio id="introAudio" src="assets/intro_track.mp3" loop></audio>
+    <script>
+    // Variáveis globais únicas
+    const puzzle = document.querySelector('.puzzle-container'); // Alinha com o CSS recente
+    const puzzleWrapper = document.getElementById('puzzle-wrapper');
+    const mainTitle = document.getElementById('main-title');
+    const briefing = document.getElementById('briefing');
+    const briefingImage = document.getElementById('briefing-image');
+    const briefingTitle = document.getElementById('briefing-title');
+    const briefingText = document.getElementById('briefing-text');
+    const restartBtn = document.getElementById('restart');
+    const tapSound = document.getElementById('tap-sound');
+    const finishSound = document.getElementById('finish-sound');
+    const highScoreDisplay = document.getElementById('high-score');
+    const size = 3; // Tamanho padrão do grid
+    let board = []; // Inicializa como array vazio
+    let emptyPos = { row: size - 1, col: size - 1 }; // Posição inicial do tile vazio
+    let currentImage = ''; // Será definido por selectRandomImage
+    let currentBriefing = {};
+    let previousImageIndex = -1;
+    let startTime, endTime;
 
+    const images = [
+        { file: 'foto1.png', title: 'João Propício M. Barreto', text: 'Barão de São Gabriel: Combateu nas guerras do sul do Brasil (1825-1865).' },
+        { file: 'foto2.png', title: 'Hermes R. da Fonseca', text: 'Presidente do Brasil (1910-1914), com forte influência militar.' },
+        { file: 'foto3.png', title: 'Fábio Azambuja', text: 'Marcante na história militar brasileira.' },
+        { file: 'foto4.png', title: 'João N. de Medeiros Mallet', text: 'Ministro da Guerra no governo Campos Sales.' },
+        { file: 'foto5.png', title: 'João B. Mascarenhas de Moraes', text: 'Liderou a FEB nas montanhas da Europa.' }
+    ];
+
+    function selectRandomImage() {
+        let index = Math.floor(Math.random() * images.length);
+        while (index === previousImageIndex) {
+            index = Math.floor(Math.random() * images.length);
+        }
+        previousImageIndex = index;
+        const selected = images[index];
+        console.log('Imagem selecionada:', selected.file);
+        return selected;
+    }
+
+    function createBoard() {
+        const selectedImage = selectRandomImage();
+        currentImage = selectedImage.file;
+        currentBriefing = { title: selectedImage.title, text: selectedImage.text };
+        board = Array(size).fill().map(() => Array(size).fill(0));
+        let numbers = Array.from({ length: size * size }, (_, i) => i);
+        numbers = shuffleWithParity(numbers);
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const index = i * size + j;
+                board[i][j] = numbers[index];
+                if (board[i][j] === size * size - 1) {
+                    emptyPos = { row: i, col: j };
+                    console.log(`Espaço vazio definido em: [${i}, ${j}] com valor ${board[i][j]}`);
+                }
+            }
+        }
+        startTime = Date.now();
+        puzzleWrapper.style.display = 'block';
+        mainTitle.style.display = 'block';
+        briefing.style.display = 'none';
+        renderBoard();
+        updateHighScore();
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function getInversions(arr) {
+        let inversions = 0;
+        for (let i = 0; i < arr.length - 1; i++) {
+            for (let j = i + 1; j < arr.length; j++) {
+                if (arr[i] > arr[j] && arr[i] !== size * size - 1 && arr[j] !== size * size - 1) {
+                    inversions++;
+                }
+            }
+        }
+        return inversions;
+    }
+
+    function shuffleWithParity(array) {
+        let shuffled = shuffle([...array]);
+        let inversions = getInversions(shuffled);
+        while (inversions % 2 !== 0) {
+            shuffled = shuffle([...array]);
+            inversions = getInversions(shuffled);
+        }
+        return shuffled;
+    }
+
+    function getTileSize() {
+        const width = window.innerWidth;
+        const containerWidth = Math.min(
+            width * (width < 600 ? 0.9 : width < 1200 ? 0.7 : 0.6),
+            width < 600 ? 240 : width < 1200 ? 400 : 450
+        );
+        const gap = width < 600 ? 1 : 2;
+        const tileSize = (containerWidth - (size - 1) * gap) / size;
+        console.log(`Viewport: ${width}px, Container: ${containerWidth}px, TileSize: ${tileSize}px, Gap: ${gap}px`);
+        return tileSize;
+    }
+
+    function renderBoard() {
+        if (!board || board.length === 0 || !board[0] || board[0].length !== size) {
+            console.error('Board não inicializado ou com tamanho incorreto. Inicializando novamente...');
+            createBoard(); // Usa createBoard para reiniciar
+            return;
+        }
+        puzzle.innerHTML = '';
+        const tileSize = getTileSize();
+        const totalSize = tileSize * size + (size - 1) * (window.innerWidth < 600 ? 1 : 2);
+        console.log(`Rendering with tileSize: ${tileSize}px, totalSize: ${totalSize}px, Board: ${JSON.stringify(board)}`);
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (!board[i] || board[i][j] === undefined) {
+                    console.error(`Erro na posição [${i}][${j}]:`, board[i]);
+                    continue;
+                }
+                const tile = document.createElement('div');
+                const value = board[i][j];
+                tile.className = value === size * size - 1 ? 'tile empty' : 'tile';
+                if (value !== size * size - 1) {
+                    const originalRow = Math.floor(value / size);
+                    const originalCol = value % size;
+                    tile.style.backgroundImage = `url('${currentImage}')`;
+                    tile.style.backgroundSize = `${totalSize}px ${totalSize}px`;
+                    tile.style.backgroundPosition = `-${(originalCol * tileSize)}px -${(originalRow * tileSize)}px`;
+                    const img = new Image();
+                    img.src = currentImage;
+                    img.onload = () => console.log('Imagem carregada:', currentImage);
+                    img.onerror = () => console.error(`Erro ao carregar a imagem: ${currentImage}`);
+                }
+                tile.style.width = `${tileSize}px`;
+                tile.style.height = `${tileSize}px`;
+                tile.addEventListener('click', () => {
+                    moveTile(i, j);
+                    if (tile.className !== 'tile empty') {
+                        try {
+                            tapSound.play().catch(e => console.error('Erro ao tocar som de tap:', e));
+                        } catch (e) {
+                            console.error('Erro ao acessar som de tap:', e);
+                        }
+                    }
+                });
+                puzzle.appendChild(tile);
+            }
+        }
+        checkWin();
+        console.log('Board após render:', board.map(row => [...row]), 'Empty pos:', emptyPos);
+    }
+
+    function moveTile(row, col) {
+        if (Math.abs(row - emptyPos.row) + Math.abs(col - emptyPos.col) === 1) {
+            [board[row][col], board[emptyPos.row][emptyPos.col]] = [board[emptyPos.row][emptyPos.col], board[row][col]];
+            emptyPos = { row, col };
+            renderBoard();
+        }
+    }
+
+    function checkWin() {
+        let isWin = true;
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const expected = i * size + j;
+                if (board[i][j] !== expected) {
+                    isWin = false;
+                    break;
+                }
+            }
+        }
+        if (isWin) {
+            endTime = Date.now();
+            const timeTaken = (endTime - startTime) / 1000;
+            updateHighScore(timeTaken);
+            try {
+                finishSound.play().catch(e => console.error('Erro ao tocar som de finish:', e));
+            } catch (e) {
+                console.error('Erro ao acessar som de finish:', e);
+            }
+            setTimeout(() => {
+                puzzleWrapper.style.display = 'none';
+                mainTitle.style.display = 'none';
+                briefing.style.display = 'block';
+                briefingImage.style.backgroundImage = `url('${currentImage}')`;
+                briefingTitle.textContent = currentBriefing.title;
+                briefingText.textContent = currentBriefing.text;
+                highScoreDisplay.classList.add('highlight');
+                setTimeout(() => highScoreDisplay.classList.remove('highlight'), 3000);
+            }, 1500);
+        }
+    }
+
+    function updateHighScore(timeTaken) {
+        let highScore = localStorage.getItem('highScore');
+        if (highScore === null) highScore = Infinity;
+        else highScore = parseFloat(highScore);
+        if (timeTaken && timeTaken < highScore) {
+            highScore = timeTaken;
+            localStorage.setItem('highScore', highScore);
+        }
+        highScoreDisplay.textContent = `High Score: ${highScore === Infinity ? '--' : highScore.toFixed(2)}s`;
+    }
+
+    function initializeAudio() {
+        const playSilent = () => {
+            tapSound.play().then(() => tapSound.pause()).catch(e => console.error('Erro ao inicializar som:', e));
+            finishSound.play().then(() => finishSound.pause()).catch(e => console.error('Erro ao inicializar som:', e));
+        };
+        document.addEventListener('touchstart', playSilent, { once: true });
+        document.addEventListener('click', playSilent, { once: true });
+    }
+
+    window.onresize = function() {
+        renderBoard();
+    };
+
+    restartBtn.addEventListener('click', createBoard);
+    initializeAudio();
+    createBoard();
+</script>
 </body>
 
 </html>
