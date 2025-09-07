@@ -20,7 +20,7 @@ if (savedProgress) {
     preservedCount = savedProgress.preservedCount || 0;
 }
 
-// Forçar início na fase para testes  - APAGAR OU COMENTAR - NÃO ESEQUEÇA
+// Forçar início na fase para testes  - APAGAR OU COMENTAR - 
 // currentLevel = 1;
 // COMENTAR current Level acima
 
@@ -210,7 +210,7 @@ class GameScene extends Phaser.Scene {
         // flag do tiro Triplo
         this.tripleShotActive = false;
 
-        // --- Adicione aqui a função shatterNave ---
+        // função shatterNave ---
         this.shatterNave = function (x, y, baseScale) {
             const navePonta = this.add.image(x, y, 'nave_ponta')
                 .setScale(baseScale)
@@ -279,7 +279,7 @@ class GameScene extends Phaser.Scene {
                 duration: 3000,
                 ease: 'Linear'
             });
-            // Tween para rotacionar o ícone (360 graus)
+            // Tween para rotacionar o ícone (180 graus)
             this.tweens.add({
                 targets: this.dayNightIcon,
                 angle: this.dayNightIcon.angle + 180,
@@ -289,23 +289,23 @@ class GameScene extends Phaser.Scene {
         });
         ////////////////
 
-        // === BÔNUS DOME E TRIPLO ===
+        // === BÔNUS DOME E tiro TRIPLO ===
 
-        // Defina quantos botões por fase
+        // Quantos botões por fase
         let domeBonusCount = 0, tripleBonusCount = 0;
         if (currentLevel === 2 || currentLevel === 3) domeBonusCount = 1;
         if (currentLevel === 4 || currentLevel === 5) { domeBonusCount = 1; tripleBonusCount = 1; }
         if (currentLevel === 6 || currentLevel === 7) { domeBonusCount = 2; tripleBonusCount = 1; }
         if (currentLevel === 8 || currentLevel === 9 || currentLevel === 10) { domeBonusCount = 2; tripleBonusCount = 2; }
 
-        // Antes de criar novos botões, destrua os antigos se existirem
+        // Antes de criar novos botões, destruir os antigos se existirem
         if (this.domeBtns) this.domeBtns.forEach(btn => btn.destroy());
         if (this.tripleBtns) this.tripleBtns.forEach(btn => btn.destroy());
         this.domeBtns = [];
         this.tripleBtns = [];
 
 
-        // Crie botões Dome na esquerda
+        // Criar botões Dome na esquerda
         this.domeBtns = [];
         const domeBtnYStart = 100; // ajuste conforme o layout
         for (let i = 0; i < domeBonusCount; i++) {
@@ -320,7 +320,7 @@ class GameScene extends Phaser.Scene {
                     this.activateDomeBonus(5000); // ativa dome por 5s
 
                     // Texto animado "DOME ATIVADO!"
-                    const domeText = this.add.text(this.scale.width / 2, 80, 'DOME ATIVADO - 5 s', {
+                    const domeText = this.add.text(this.scale.width / 2, 80, 'DOME ATIVADO - 5s', {
                         fontFamily: 'VT323',
                         fontSize: '38px',
                         color: '#00e9ff',
@@ -341,9 +341,9 @@ class GameScene extends Phaser.Scene {
             this.domeBtns.push(btn);
         }
 
-        // Crie botões Triplo na direita
+        // Criar botões Triplo na direita
         this.tripleBtns = [];
-        const tripleBtnYStart = 100; // ajuste conforme o layout
+        const tripleBtnYStart = 100; // ajustar conforme o layout
         for (let i = 0; i < tripleBonusCount; i++) {
             const btn = this.add.image(this.scale.width - 40, tripleBtnYStart + i * 80, 'triplo_btn')
                 .setDisplaySize(32, 32)
@@ -356,7 +356,7 @@ class GameScene extends Phaser.Scene {
                     this.activateTripleShot(8000); // ativa tiro triplo por 8s
 
                     // Texto animado "TIRO TRIPLO!"
-                    const tripleText = this.add.text(this.scale.width / 2, 140, 'TRIPLO ATIVADO - 8 s', {
+                    const tripleText = this.add.text(this.scale.width / 2, 140, 'TRIPLO ATIVADO - 8s', {
                         fontFamily: 'VT323',
                         fontSize: '38px',
                         color: '#FFD700',
@@ -416,13 +416,13 @@ class GameScene extends Phaser.Scene {
             .setOrigin(0.5, 0)
             .setDisplaySize(this.scale.width, visibleHeight);
 
-        this.timerText = this.add.text(20, 20, '01:00', {
+        this.timerText = this.add.text(20, 20, '01:00', { // ajustar tempo do jogo
             fontFamily: 'VT323',
             fontSize: '40px',
             color: '#FFFFFF'
         }).setOrigin(0, 0).setDepth(100);
 
-        this.timeLeft = 60; // Ou 20 se você ajustou
+        this.timeLeft = 60; // Ajustar o tempo do jogo
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -457,14 +457,14 @@ class GameScene extends Phaser.Scene {
         this.domeGraphics.lineStyle(6 * baseScale, 0x00e9ff, 0.7);
         this.domeGraphics.fillStyle(0x00e9ff, 0.18);
 
-        this.domePoints = []; // <-- Adicione esta linha antes do for
+        this.domePoints = []; // <-- Adicionar esta linha antes do for
 
         this.domeGraphics.beginPath();
         for (let i = 0; i <= segments; i++) {
             const angle = Math.PI + (i / segments) * Math.PI;
             const x = domeX + Math.cos(angle) * domeRadius;
             const y = domeY + Math.sin(angle) * domeRadius;
-            this.domePoints.push({ x, y }); // <-- Adicione esta linha dentro do for
+            this.domePoints.push({ x, y }); // <-- Adicionar esta linha dentro do for
             if (i === 0) {
                 this.domeGraphics.moveTo(x, y);
             } else {
@@ -561,7 +561,7 @@ class GameScene extends Phaser.Scene {
         this.allTowerSprites = [];
 
         towerAndCannonDefinitions.forEach((def, index) => {
-            const towerDepth = (def.name === 'Torre Esquerda') ? 950 : 20; // depth torre E e demais
+            const towerDepth = (def.name === 'Torre Esquerda') ? 950 : 20; // depth torre E - e demais
             const tower = this.add.image(def.towerBaseX, def.towerBaseY, def.towerAsset)
                 .setOrigin(0.5, 1)
                 .setScale(def.towerScale)
@@ -868,7 +868,7 @@ class GameScene extends Phaser.Scene {
                 }
                 const distance = Phaser.Math.Distance.Between(explosionX, explosionY, killer.x, killer.y);
                 if (distance < explosionRadius) {
-                    // Se você tiver guardado o tween e o som da bomba matadora:
+                    // Se tiver guardado o tween e o som da bomba matadora:
                     if (killer.killerTween && killer.killerTween.isPlaying()) killer.killerTween.stop();
                     if (killer.sound && killer.sound.isPlaying) killer.sound.stop();
                     killer.destroy();
@@ -894,7 +894,7 @@ class GameScene extends Phaser.Scene {
                 }
             }
 
-            // Adicione este bloco para a nave principal:
+            // Bloco para a nave principal:
             if (this.naveSprite && this.naveSprite.active) {
                 const naveDistance = Phaser.Math.Distance.Between(explosionX, explosionY, this.naveSprite.x, this.naveSprite.y);
                 if (naveDistance < explosionRadius) {
@@ -999,10 +999,10 @@ class GameScene extends Phaser.Scene {
 
                         // Efeito neon/glow:
                         missile.setStrokeStyle(4 * baseScale, 0x39ff14, 0.5); // borda neon semi-transparente
-                        //missile.setShadow(0, 0, '#041201ff', 16 * baseScale, true, true); // sombra neon
+                        //missile.setShadow(0, 0, '#9cf289ff', 16 * baseScale, true, true); // sombra neon
 
-                        // Teste diferentes velocidades:
-                        missile.speed = 70 + (currentLevel * 4) + (this.waveCount * 5); // fase + wave - escolha uma ou outra
+                        // Testar diferentes velocidades e waves:
+                        missile.speed = 70 + (currentLevel * 4) + (this.waveCount * 3); // fase + wave - escolher uma ou outra
                         //missile.speed = 70 + (currentLevel * 5); // só fase
                         // missile.speed = 70 + (this.waveCount * 15); // só wave
 
@@ -1371,7 +1371,7 @@ class GameScene extends Phaser.Scene {
                     const currentDistance = Phaser.Math.Distance.Between(target.x, target.y, finalX, finalY);
                     const progress = 1 - (currentDistance / totalDistance);
 
-                    // Quando passar de 97%, reduz opacidade
+                    // Quando passar de 97%, reduz opacidade para sumir
                     if (progress > 0.90) {
                         target.setAlpha(0.0);
                     } else {
@@ -1510,11 +1510,7 @@ class GameScene extends Phaser.Scene {
                 "Reforce sua defesa\nE tente outra vez!",
                 "A cidade conta com você!\nPersista!"
             ];
-
-            // Mensagem especial para vitória na fase 10
-            const finalVictoryMessage =
-                "Parabéns, Guardião!\nVocê defendeu\ntodos os patrimônios históricos\nde São Gabriel!\nA cidade agradece sua coragem e dedicação!";
-
+   
             // Escolha a mensagem adequada
             const resultDetailMessage = (currentLevel === TOTAL_LEVELS && success)
                 ? finalVictoryMessage
