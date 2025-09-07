@@ -1002,8 +1002,8 @@ class GameScene extends Phaser.Scene {
                         //missile.setShadow(0, 0, '#9cf289ff', 16 * baseScale, true, true); // sombra neon
 
                         // Testar diferentes velocidades e waves:
-                        missile.speed = 70 + (currentLevel * 3) + (this.waveCount * 3); // fase + wave - escolher uma ou outra
-                        //missile.speed = 70 + (currentLevel * 5); // só fase
+                       missile.speed = 70 + (currentLevel * 3) + (this.waveCount * 2); // fase + wave - escolher uma ou outra
+                       // missile.speed = 70 + (currentLevel * 5); // só fase
                         // missile.speed = 70 + (this.waveCount * 15); // só wave
 
                         missile.targetX = Phaser.Math.Between(this.scale.width / 2 - 255 * baseScale, this.scale.width / 2 + 255 * baseScale);
