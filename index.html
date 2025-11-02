@@ -1,1697 +1,403 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <title>São Gabriel — OSM Variante (completo)</title>
-    <style type="text/css">
-        body,
-        html {
-            width: 100%;
-            height: 100%;
+    <title>São Gabriel: Resistência Final</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, height=device-height">
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        .vt323-regular {
+            font-family: "VT323", monospace;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        body {
             margin: 0;
             padding: 0;
+            background-color: #000000;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        #cesiumContainer {
-            width: 100% !important;
-            height: 100% !important;
+        #gameContainer {
+            position: relative;
+            height: 100vh;
+            width: calc(100vh * 9 / 16);
+            max-width: 900px;
+            max-height: 1600px;
+            overflow: hidden;
+            margin: auto;
         }
 
-        .img-prefeito {
-            width: 300px;
-            height: 400px;
+        .bg-image {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .fundo1-layer,
+        .fundo2-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Garante 852px */
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .fundo1-layer img {
+            width: 100%;
+            height: 100%;
+            /* Força 852px */
             object-fit: cover;
-            border-radius: 6px;
+            /* Preenche a altura, pode cortar laterais */
             display: block;
-            margin: 0 auto;
         }
 
-        .img-lenda {
-            width: 300px;
-            height: 200px;
+        .fundo2-layer {
+            z-index: 1;
+        }
+
+        .fundo2-layer img {
+            width: 100%;
+            height: 100%;
+            /* Força 852px */
             object-fit: cover;
-            border-radius: 6px;
+            /* Preenche a altura */
             display: block;
-            margin: 0 auto;
+            position: absolute;
+            bottom: 0;
+            /* Mantém alinhamento ao bottom */
+            transform: translateY(0);
         }
 
-        .img-building {
-            width: 300px;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 6px;
+        .text-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #e9bb00;
+            font-family: 'VT323';
+            font-size: 1.5em;
+            border-radius: 15px;
+            z-index: 10;
+            width: 85%;
+            min-height: auto;
+            height: auto;
+            max-height: 80vh;
             display: block;
-            margin: 0 auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
 
-        /* Esconder o rodapé/credit do Cesium em telas pequenas (mobile) para evitar quebra de layout */
-        @media (max-width: 600px) {
+        .instructions-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: left;
+            color: #e9bb00;
+            font-family: 'VT323';
+            font-size: 1.2em;
+            border-radius: 15px;
+            z-index: 10;
+            width: 85%;
+            max-width: 900px;
+            max-height: 80vh;
+            display: block;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
 
-            /* O widget de crédito do Cesium contém links; selecionamos por seletor genérico e por href */
-            .cesium-viewer-bottom,
-            .cesium-viewer .cesium-credit {
-                display: none !important;
+        .highlight-green {
+            color: #39ff14;
+            font-weight: bold;
+        }
+
+        .instructions-layer .arrow-link {
+            font-family: 'VT323';
+            font-size: inherit;
+            color: #39ff14;
+            /* verde */
+            /*text-decoration: underline; */
+            cursor: pointer;
+            display: flex;
+            /* Flexbox para centralizar */
+            align-items: center;
+            /* Centraliza verticalmente */
+            justify-content: center;
+            /* Centraliza horizontalmente */
+            margin-top: 20px;
+        }
+
+        .instructions-layer .arrow-link:hover {
+            color: #ffc107;
+            /* amarelo */
+        }
+
+        .instructions-layer .arrow-link i {
+            font-size: 1.6em;
+            vertical-align: middle;
+        }
+
+
+        .text-layer .arrow-link {
+            font-family: 'VT323';
+            font-size: inherit;
+            color: #00FF00;
+            text-decoration: underline;
+            cursor: pointer;
+            display: block;
+            margin-top: 20px;
+        }
+
+        .text-layer .arrow-link:hover {
+            color: #FFFF00;
+        }
+
+        .text-layer .arrow-link i {
+            font-size: 1.5em;
+            vertical-align: middle;
+        }
+
+        .btn-custom {
+            position: absolute;
+            bottom: 13%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 85px;
+            padding: 20px 30px;
+            min-width: 110px;
+            min-height: 85px;
+            z-index: 50;
+            background: none;
+            border: none;
+            color: #39ff14;
+            cursor: pointer;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-custom:hover {
+            color: #ffc107;
+        }
+
+        @media (max-height: 1000px) {
+            .btn-custom {
+                font-size: 40px;
+            }
+        }
+
+        .audio-center-btn {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            background: none;
+            border: none;
+            color: #39ff14;
+            cursor: pointer;
+            z-index: 100;
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
             }
 
-            /* alternativa mais específica: esconder apenas links para cesium.com, se existirem */
-            a[href*="cesium.com"] {
-                display: none !important;
+            100% {
+                opacity: 0.3;
             }
-        }
-
-        /* Esconder botões / widgets no topo direito do Cesium (desktop e mobile) */
-        /* Isto remove: pesquisa (geocoder), Home, SceneMode (plane/curve), e botão de ajuda (interrogação) */
-        .cesium-viewer .cesium-viewer-toolbar,
-        .cesium-geocoder-container,
-        .cesium-geocoder,
-        .cesium-viewer .cesium-sceneModePicker,
-        .cesium-sceneModePicker,
-        .cesium-viewer .cesium-navigationHelpButton,
-        .cesium-navigationHelpButton,
-        .cesium-viewer .cesium-homeButton,
-        .cesium-homeButton,
-        /* seletores alternativos por atributo/title (fallback) */
-        .cesium-viewer .cesium-button[title*="Home"],
-        .cesium-viewer .cesium-button[title*="Search"],
-        .cesium-viewer .cesium-button[title*="Help"] {
-            display: none !important;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
+    <script src="main.js" defer></script>
+    <script>
+        function adjustTextLayerFontSize() {
+            const container = document.getElementById('gameContainer');
+            const textLayers = container ? container.getElementsByClassName('text-layer') : [];
+            if (container && textLayers.length > 0) {
+                const w = container.offsetWidth;
+                let fontSize = '1.5em';
+                if (w >= 785) {
+                    fontSize = '2.8em';
+                } else if (w >= 500) {
+                    fontSize = '1.8em';
+                } else if (w >= 393) {
+                    fontSize = '1.5em';
+                } else if (w <= 375) {
+                    fontSize = '1.3em';
+                }
+                for (let i = 0; i < textLayers.length; i++) {
+                    textLayers[i].style.fontSize = fontSize;
+                }
+            }
+        }
+
+        function handleResize() {
+            adjustTextLayerFontSize();
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        function playIntroAudio() {
+            const audio = document.getElementById('introAudio');
+            if (audio && audio.paused) {
+                audio.currentTime = 0;
+                audio.play().catch(() => { });
+            }
+        }
+
+        function stopIntroAudio() {
+            const audio = document.getElementById('introAudio');
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.muted = true; // Garante que não volta a tocar
+            }
+        }
+
+
+
+        function showIntro() {
+            document.getElementById('gameContainer').innerHTML = `
+        <div class="bg-image">
+            <div class="fundo1-layer">
+                <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+            </div>
+            <div class="fundo2-layer">
+                <img src="assets/fundo2.png" alt="Fundo Bottom" class="bg-img-bottom img-fluid" id="bgImgBottom">
+            </div>
+            <button class="btn-custom" onclick="goToInstruction2()"><i class="fas fa-arrow-right"></i></button>
+
+           <button id="audioPlayBtn" class="audio-center-btn">
+                <i class="fas fa-volume-mute"></i>
+            </button>
+            
+        </div>
+    `;
+            adjustTextLayerFontSize();
+
+            // Adiciona evento ao botão de áudio
+            setTimeout(() => {
+                const btn = document.getElementById('audioPlayBtn');
+                const audio = document.getElementById('introAudio');
+                if (btn && audio) {
+                    // Garante que o áudio começa mutado e ícone mute
+                    audio.muted = true;
+                    btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+
+                    btn.onclick = function () {
+                        if (audio.muted || audio.paused) {
+                            audio.muted = false;
+                            audio.currentTime = 0;
+                            audio.play();
+                            btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                        } else {
+                            audio.muted = true;
+                            audio.pause();
+                            btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                        }
+                    };
+                }
+            }, 100);
+        }
+
+        function goToInstruction2() {
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="bg-image">
+                    <div class="fundo1-layer">
+                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+                    </div>
+                    <div class="text-layer">BEM-VINDO AO JOGO!\nEm um futuro próximo, o Império da Unidade Suprema impôs um plano global de padronização cultural.\nEles acreditam que todas as cidades devem ser “niveladas” – sem tradições, sem identidade.\nE para isso, começaram a invadir locais históricos, símbolo da cultura popular, apagando suas raízes.\nBoa sorte, DEFENSOR!\n<span class="arrow-link" onclick="goToInstruction1()"><i class="fas fa-arrow-right"></i></span></div>
+                </div>
+            `;
+            adjustTextLayerFontSize();
+            playIntroAudio();
+        }
+
+        function goToInstruction1() {
+            document.getElementById('gameContainer').innerHTML = `
+                <div class="bg-image">
+                    <div class="fundo1-layer">
+                        <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+                    </div>
+                    <div class="text-layer">Mas uma cidade resiste.!\nSÃO GABRIEL, com suas raízes profundas, memória viva e orgulho de sua história, se recusa a tombar.\nUm grupo de resistência ativa torres de defesa e canhões de memória em pontos estratégicos da cidade.\nA cada fase, um prédio histórico corre risco de ser apagado.\nVocê é o último guardião.\nE a cultura… não vai cair sem lutar!\n<span class="arrow-link" onclick="goToInstruction0()"><i class="fas fa-arrow-right"></i></span></div>
+                </div>
+            `;
+            adjustTextLayerFontSize();
+            playIntroAudio(); // Adicione aqui
+        }
+
+        function goToInstruction0() {
+            document.getElementById('gameContainer').innerHTML = `
+        <div class="bg-image">
+            <div class="fundo1-layer">
+                <img src="assets/fundo1.png" alt="Fundo" class="bg-img img-fluid" id="bgImg">
+            </div>
+            <div class="instructions-layer">
+                <span style="font-size:1.3em; color:#e9bb00;">Instruções do Jogo</span>
+                <br><br>
+                - <span class="highlight-green">Defesas:</span> Antimísseis e os bônus (domes – tiro triplo – star clear) para destruir os mísseis inimigos.<br><br>
+                - <span class="highlight-green">Ameaças:</span> Mísseis, naves e bombas matadoras podem aparecer aleatoriamente; destrua-os.<br><br>
+                - <span class="highlight-green">Salvar:</span> Use o botão 'SALVAR' no fim da fase para salvar seu progresso no navegador.<br><br>
+                - <span class="highlight-green">Resetar:</span> Use o botão 'RESETAR' para reiniciar o jogo e apagar o progresso.<br><br>
+                <span class="arrow-link" onclick="startGame()"><i class="fas fa-arrow-right"></i></span>
+            </div>
+        </div>
+    `;
+            adjustTextLayerFontSize();
+            playIntroAudio(); // Adicione aqui
+        }
+
+        function startGame() {
+            stopIntroAudio();
+            document.getElementById('gameContainer').innerHTML = '<div id="gameContainerInner" style="width: 100%; height: 100%;"></div>';
+            if (window.initPhaserGame) {
+                window.initPhaserGame();
+            }
+        }
+
+        window.onload = function () {
+            showIntro();
+            playIntroAudio();
+        };
+    </script>
 </head>
 
 <body>
-    <div id="cesiumContainer"></div>
+    <div id="gameContainer"></div>
 
+    <audio id="introAudio" src="assets/intro_track.mp3" loop></audio>
 
-    <!-- Painel lateral agrupando os botões de controle -->
-    <div id="left-panel" style="position:fixed;top:45px;left:5px;z-index:2;display:flex;flex-direction:column;gap:8px;">
-        <!-- Botão 'Todos' controla a visibilidade dos controles abaixo -->
-        <button id="todos-btn" aria-expanded="true"
-            style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;font-weight:600;">Todos ▾</button>
-        <div id="left-controls" style="display:flex;flex-direction:column;gap:8px;overflow:hidden;transition:max-height 0.28s ease;">
-            <button id="toggle-osm-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Ocultar OSM</button>
-            <button id="toggle-base-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa Urbano</button>
-            <!-- Controles visuais para o Mapa Urbano: escolha do basemap + ajustes -->
-            <div id="urban-style-panel" style="background:rgba(0,0,0,0.45);padding:8px;border-radius:6px;border:1px solid rgba(200,200,200,0.06);display:flex;flex-direction:column;gap:6px;">
-                <div style="font-size:12px;color:#ddd;font-weight:600;">Ajuste visual (Mapa Urbano)</div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
-                    <label for="urban-basemap" style="min-width:64px;">Base</label>
-                    <select id="urban-basemap" style="flex:1;padding:4px;border-radius:4px;background:#222;color:#fff;border:1px solid #444;">
-                        <option value="osm">OpenStreetMap (padrão)</option>
-                        <option value="maptiler">MapTiler (streets)</option>
-                    </select>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
-                    <label for="urban-alpha" style="min-width:64px;">Opacidade</label>
-                    <input id="urban-alpha" type="range" min="0" max="1" step="0.01" value="1" style="flex:1;" />
-                    <span id="urban-alpha-val" style="width:34px;text-align:right;">1.00</span>
-                </div>
-                <!-- Brilho e Contraste removidos para simplificar painel em dispositivos pequenos -->
-                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
-                    <label for="urban-sat" style="min-width:64px;">Saturação</label>
-                    <input id="urban-sat" type="range" min="0" max="2.0" step="0.01" value="0.88" style="flex:1;" />
-                    <span id="urban-sat-val" style="width:34px;text-align:right;">0.88</span>
-                </div>
-                <!-- Presets removidos: UI simplificada (apenas sliders e seleção de basemap) -->
-            </div>
-            <button id="mapa-tratados-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_tratados</button>
-            <button id="mapa-1930-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_1930</button>
-            <button id="tourism-toggle-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Turismo (8)</button>
-            <button id="marechais-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Marechais</button>
-            <button id="lendas-toggle-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Lendas (5)</button>
-            <button id="monuments-toggle-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Monumentos (3)</button>
-            <button id="ilustres-btn" style="background: #292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Homens Ilustres</button>
-            <button id="reset-zoom-btn" title="Centralizar Praça" aria-label="Centralizar Praça" style="background:#5d0606;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Centralizar Praça</button>
-        </div>
-    </div>
-    <!-- Botão fixo de boas-vindas -->
-    <button id="welcome-btn" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:100;background:#333;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">Bem Vindo</button>
-
-
-    <script type="module">
-
-        console.log('Script carregado - index-osm-full');
-
-        import { buildingsMap } from './buildingsData.js';
-        import { lendas } from './lendasData.js';
-        import { prefeitos } from './prefeitosData.js';
-        import { marechaisData } from './marechaisData.js';
-        import { tourismPoints } from './tourismData.js';
-        import { ilustres } from './ilustresData.js';
-
-
-        // Função para adicionar um mapa histórico como plano
-        function addMapaHistorico(viewer, url, largura_m = 300) {
-            const proporcao = 2048 / 1380;
-            const altura_m = largura_m / proporcao;
-            // Conversão metros para graus
-            const largura_graus = largura_m / 92000;
-            const altura_graus = altura_m / 111000;
-            const centerLon = -54.316974;
-            const centerLat = -30.340808;
-            const rectangle = Cesium.Rectangle.fromDegrees(
-                centerLon - largura_graus / 2,
-                centerLat - altura_graus / 2,
-                centerLon + largura_graus / 2,
-                centerLat + altura_graus / 2
-            );
-            return viewer.entities.add({
-                name: url,
-                rectangle: {
-                    coordinates: rectangle,
-                    material: url,
-                    height: 35, // elevação acima das OSM/GLB
-                    heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-                    outline: true,
-                    outlineColor: Cesium.Color.YELLOW.withAlpha(0.5),
-                    fill: true,
-                    alpha: 0.85
-                }
-            });
-        }
-        let mapaHistoricoAtual = null;
-        let mapaHistoricoNome = null;
-        function mostrarOuOcultarMapaHistorico(nomeArquivo) {
-            // Se já está visível este mapa, oculta
-            if (mapaHistoricoAtual && mapaHistoricoNome === nomeArquivo) {
-                viewer.entities.remove(mapaHistoricoAtual);
-                mapaHistoricoAtual = null;
-                mapaHistoricoNome = null;
-                return;
-            }
-            // Se outro mapa está visível, remove
-            if (mapaHistoricoAtual) viewer.entities.remove(mapaHistoricoAtual);
-            mapaHistoricoAtual = addMapaHistorico(viewer, nomeArquivo);
-            mapaHistoricoNome = nomeArquivo;
-        }
-
-        let viewer;
-        async function init() {
-            // cores padrão para caixas (padronizar facilmente aqui)
-            const BOX_BG = '#333';
-            const BOX_FG = '#f5f5f5';
-            const BOX_ALT = '#292929';
-            const BTN_BG = '#444';
-            // ...existing code...
-            try {
-                // Inicializa o visualizador com Cesium World Terrain
-                viewer = new Cesium.Viewer('cesiumContainer', {
-                    terrain: Cesium.Terrain.fromWorldTerrain(),
-                    infoBox: false,
-                    selectionIndicator: false,
-                    animation: false,
-                    timelcnine: false,
-                    baseLayerPicker: false,
-                });
-
-                // Referência para camada urbana adicionada (se alguma)
-                let urbanImageryLayer = null;
-                // Se não houver nenhuma imagery layer por padrão, criaremos um fallback OSM
-                function ensureFallbackImagery() {
-                    try {
-                        if (viewer.imageryLayers.length === 0) {
-                            const osmFallback = new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
-                            viewer.imageryLayers.addImageryProvider(osmFallback);
-                        }
-                    } catch (e) {
-                        console.warn('Falha ao adicionar fallback OSM:', e);
-                    }
-                }
-
-
-                // Controles da câmera
-                viewer.scene.screenSpaceCameraController.rotateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
-                viewer.scene.screenSpaceCameraController.zoomEventTypes = [Cesium.CameraEventType.MIDDLE_DRAG, Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
-                viewer.scene.screenSpaceCameraController.panEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];
-
-                // Visão global e depois área de interesse (centro da praça)
-                const pracaCentro = { lon: -54.316822, lat: -30.344800, altura: 600 };
-                viewer.camera.setView({
-                    destination: Cesium.Cartesian3.fromDegrees(pracaCentro.lon, pracaCentro.lat, 20000000),
-                });
-                viewer.camera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(pracaCentro.lon, pracaCentro.lat, pracaCentro.altura),
-                    orientation: {
-                        heading: Cesium.Math.toRadians(0.0),
-                        pitch: Cesium.Math.toRadians(-45.0),
-                        roll: 0.0
-                    },
-                    duration: 3.5,
-                    easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
-                    complete: function () {
-                        // Depois do flyTo inicial, mostra a caixa de boas-vindas
-                        try { showWelcomeBox(); } catch (e) { console.warn('Erro ao mostrar welcome box', e); }
-                    }
-                });
-
-                // Garante que as sombras estejam ativas
-                viewer.shadows = true;
-
-                // (Sem alterações forçadas ao relógio ou iluminação do globo)
-
-                // --- Base imagery switch (Satélite <-> Mapa Urbano - Carto Positron) ---
-                // Inicial: Mapa Urbano ativo por padrão. Permitimos apenas alternar ON/OFF do mapa urbano
-                let urbanBaseActive = true;
-                function setUrbanBase() {
-                    try {
-                        // adiciona camada urbana por cima das existentes (não remove outras)
-                        // remove apenas a camada urbana anterior, se existir
-                        if (urbanImageryLayer) {
-                            try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
-                            urbanImageryLayer = null;
-                        }
-                        const carto = new Cesium.UrlTemplateImageryProvider({
-                            url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-                            subdomains: ['a', 'b', 'c', 'd'],
-                            credit: 'Carto Positron'
-                        });
-                        urbanImageryLayer = viewer.imageryLayers.addImageryProvider(carto);
-                        urbanBaseActive = true;
-                        const btn = document.getElementById('toggle-base-btn');
-                        if (btn) {
-                            btn.innerText = 'Ocultar Mapa Urbano';
-                            btn.disabled = false;
-                        }
-                    } catch (e) {
-                        console.warn('Erro ao aplicar Carto Positron:', e);
-                    }
-                }
-
-                function hideUrbanBase() {
-                    try {
-                        // remove apenas a camada urbana adicionada
-                        if (urbanImageryLayer) {
-                            try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
-                            urbanImageryLayer = null;
-                        }
-                        // se não houver nenhuma outra camada, garante um fallback (OSM)
-                        ensureFallbackImagery();
-                        urbanBaseActive = false;
-                        const btn = document.getElementById('toggle-base-btn');
-                        if (btn) {
-                            btn.innerText = 'Mostrar Mapa Urbano';
-                            btn.disabled = false;
-                        }
-                    } catch (e) {
-                        console.warn('Erro ao ocultar Mapa Urbano:', e);
-                    }
-                }
-
-                // Inicializa explicitamente a base urbana (Carto Positron)
-                setUrbanBase();
-
-                // Botões para alternar mapas históricos
-                document.getElementById('mapa-tratados-btn').onclick = () => {
-                    mostrarOuOcultarMapaHistorico('SG_tratados.jpg');
-                };
-                // Ativa handler do botão para alternar Mapa Urbano ON/OFF
-                const toggleBaseBtn = document.getElementById('toggle-base-btn');
-                if (toggleBaseBtn) {
-                    toggleBaseBtn.onclick = () => {
-                        if (urbanBaseActive) {
-                            hideUrbanBase();
-                        } else {
-                            setUrbanBase();
-                        }
-                    };
-                    // texto inicial já ajustado por setUrbanBase()
-                }
-                // Estado e estilos atuais para o layer urbano (padrões leves para reduzir branco)
-                let urbanProviderStyle = 'osm'; // pode ser: osm | maptiler
-                const urbanStyle = {
-                    alpha: 1.0,
-                    saturation: 0.88,
-                    hue: 0.0
-                };
-
-                // Cria um ImageryProvider conforme o estilo solicitado
-                function createUrbanProvider(styleName) {
-                    try {
-                        switch (styleName) {
-                            case 'carto-dark':
-                                return new Cesium.UrlTemplateImageryProvider({
-                                    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                                    subdomains: ['a', 'b', 'c', 'd'],
-                                    credit: 'Carto Dark'
-                                });
-                            case 'stamen-toner-lite':
-                                return new Cesium.UrlTemplateImageryProvider({
-                                    url: 'https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png',
-                                    credit: 'Stamen Toner Lite'
-                                });
-                            case 'osm':
-                                return new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
-                            case 'maptiler':
-                                // MapTiler raster tiles (requere token). Token fornecido pelo usuário.
-                                return new Cesium.UrlTemplateImageryProvider({
-                                    url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=UPIhGua21q5Oraty8VhJ',
-                                    credit: 'MapTiler'
-                                });
-                            case 'carto-light':
-                            default:
-                                return new Cesium.UrlTemplateImageryProvider({
-                                    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-                                    subdomains: ['a', 'b', 'c', 'd'],
-                                    credit: 'Carto Positron'
-                                });
-                        }
-                    } catch (e) {
-                        console.warn('Erro ao criar imagery provider:', e);
-                        return new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
-                    }
-                }
-
-                // Aplica as propriedades ao imagery layer (se existir)
-                function applyUrbanStyleToLayer(layer, style) {
-                    if (!layer) return;
-                    try {
-                        if (typeof style.alpha === 'number') layer.alpha = Number(style.alpha);
-                        if (typeof style.saturation === 'number') layer.saturation = Number(style.saturation);
-                        if (typeof style.hue === 'number') layer.hue = Number(style.hue);
-                    } catch (e) {
-                        console.warn('Falha ao aplicar estilo urbano:', e);
-                    }
-                }
-
-                // Atualiza os controles UI para refletir valores atuais
-                function updateUrbanControlsUI() {
-                    const a = document.getElementById('urban-alpha');
-                    const s = document.getElementById('urban-sat');
-                    const h = document.getElementById('urban-hue');
-                    if (a) { a.value = String(urbanStyle.alpha); }
-                    if (s) { s.value = String(urbanStyle.saturation); }
-                    if (h) { h.value = String(urbanStyle.hue); }
-                    const av = document.getElementById('urban-alpha-val'); if (av) av.textContent = Number(urbanStyle.alpha).toFixed(2);
-                    const sv = document.getElementById('urban-sat-val'); if (sv) sv.textContent = Number(urbanStyle.saturation).toFixed(2);
-                    const hv = document.getElementById('urban-hue-val'); if (hv) hv.textContent = Number(urbanStyle.hue).toFixed(2);
-                }
-
-                // Liga os eventos dos sliders e botões de preset
-                function bindUrbanStyleControls() {
-                    const a = document.getElementById('urban-alpha');
-                    const s = document.getElementById('urban-sat');
-                    const h = document.getElementById('urban-hue');
-                    if (a) a.oninput = function () { urbanStyle.alpha = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
-                    if (s) s.oninput = function () { urbanStyle.saturation = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
-                    if (h) h.oninput = function () { urbanStyle.hue = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
-
-                    // Presets e botão Restaurar removidos — mantemos apenas sliders.
-                }
-
-                // Quando criamos a camada urbana, aplicamos estilos e respeitamos o estilo selecionado
-                const originalSetUrbanBase = setUrbanBase;
-                setUrbanBase = function(selectedStyle) {
-                    // permitimos setUrbanBase() sem argumento para manter compatibilidade
-                    if (typeof selectedStyle === 'string') urbanProviderStyle = selectedStyle;
-                    // remove camada antiga se existir
-                    if (urbanImageryLayer) {
-                        try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
-                        urbanImageryLayer = null;
-                    }
-                    try {
-                        const provider = createUrbanProvider(urbanProviderStyle);
-                        urbanImageryLayer = viewer.imageryLayers.addImageryProvider(provider);
-                        urbanBaseActive = true;
-                        const btn = document.getElementById('toggle-base-btn');
-                        if (btn) btn.innerText = 'Ocultar Mapa Urbano';
-                        // aplica estilo atual ao novo layer
-                        applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle);
-                        updateUrbanControlsUI();
-                    } catch (e) {
-                        console.warn('Erro ao setar base urbana:', e);
-                        ensureFallbackImagery();
-                    }
-                };
-
-                // Ligação do seletor de basemap no UI
-                const basemapSelect = document.getElementById('urban-basemap');
-                if (basemapSelect) {
-                    // inicializa valor
-                    basemapSelect.value = urbanProviderStyle;
-                    basemapSelect.onchange = function() {
-                        urbanProviderStyle = this.value;
-                        // re-cria a camada urbana com o novo provider e reaplica estilos
-                        if (urbanBaseActive) setUrbanBase(urbanProviderStyle);
-                    };
-                }
-
-                // Garantir que a camada urbana inicial use o provider desejado (padrão: 'osm')
-                // Isso substitui a camada Carto criada anteriormente no carregamento, sem remover
-                // o código Carto do projeto — apenas recria o layer usando o provider selecionado.
-                try {
-                    setUrbanBase(urbanProviderStyle);
-                } catch (e) {
-                    console.warn('Falha ao aplicar base urbana inicial:', e);
-                }
-
-                // Se o controle de hue não estiver presente no HTML, criá-lo dinamicamente
-                function ensureHueControlExists() {
-                    try {
-                        if (document.getElementById('urban-hue')) return; // já existe
-                        const container = document.getElementById('urban-controls') || document.getElementById('left-controls') || document.body;
-                        const wrapper = document.createElement('div');
-                        wrapper.style.marginTop = '6px';
-                        wrapper.innerHTML = `
-                            <label style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#ddd;">
-                                <span>Hue</span>
-                                <span id="urban-hue-val">${Number(urbanStyle.hue).toFixed(2)}</span>
-                            </label>
-                            <input id="urban-hue" type="range" min="-1.0" max="1.0" step="0.01" value="${urbanStyle.hue}" style="width:100%;">
-                        `;
-                        // Tenta inserir próximo ao controle de alpha se existir
-                        const alphaEl = document.getElementById('urban-alpha');
-                        if (alphaEl && alphaEl.parentNode) {
-                            alphaEl.parentNode.insertAdjacentElement('afterend', wrapper);
-                        } else {
-                            container.appendChild(wrapper);
-                        }
-                    } catch (e) {
-                        console.warn('Falha ao criar controle de Hue dinamicamente:', e);
-                    }
-                }
-
-                ensureHueControlExists();
-
-                // Bind initial
-                bindUrbanStyleControls();
-                document.getElementById('mapa-1930-btn').onclick = () => {
-                    mostrarOuOcultarMapaHistorico('SG_1930.jpg');
-                };
-                // Botão 'Todos' que expande/colapsa os controles do painel esquerdo
-                const todosBtn = document.getElementById('todos-btn');
-                const leftControls = document.getElementById('left-controls');
-                // Inicializa max-height para permitir transição (expandido por padrão)
-                if (leftControls) {
-                    leftControls.style.maxHeight = leftControls.scrollHeight + 'px';
-                }
-                if (todosBtn && leftControls) {
-                    todosBtn.onclick = () => {
-                        // Implementação simples: alterna display dos botões filhos dentro de #left-controls
-                        const children = Array.from(leftControls.children).filter(ch => ch !== todosBtn);
-                        if (!children.length) return;
-                        // verifica visibilidade do primeiro filho
-                        const firstVisible = getComputedStyle(children[0]).display !== 'none';
-                        children.forEach(ch => {
-                            ch.style.display = firstVisible ? 'none' : '';
-                        });
-                        todosBtn.setAttribute('aria-expanded', (!firstVisible).toString());
-                        todosBtn.innerText = firstVisible ? 'Todos ▸' : 'Todos ▾';
-                    };
-                }
-                // Botão para refazer o zoom/voo inicial para a praça
-                const resetZoomBtn = document.getElementById('reset-zoom-btn');
-                if (resetZoomBtn) {
-                    resetZoomBtn.onclick = () => {
-                        try {
-                            // Evita cliques repetidos enquanto a animação acontece
-                            resetZoomBtn.disabled = true;
-                            resetZoomBtn.style.opacity = '0.6';
-                            viewer.camera.flyTo({
-                                destination: Cesium.Cartesian3.fromDegrees(pracaCentro.lon, pracaCentro.lat, pracaCentro.altura),
-                                orientation: {
-                                    heading: Cesium.Math.toRadians(0.0),
-                                    pitch: Cesium.Math.toRadians(-45.0),
-                                    roll: 0.0
-                                },
-                                duration: 3.5,
-                                easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
-                                complete: function () {
-                                    resetZoomBtn.disabled = false;
-                                    resetZoomBtn.style.opacity = '';
-                                }
-                            });
-                        } catch (e) {
-                            console.warn('Erro ao refazer zoom:', e);
-                            resetZoomBtn.disabled = false;
-                            resetZoomBtn.style.opacity = '';
-                        }
-                    };
-                }
-                // Tourism UI (simplified)
-                // Nota: o botão de "Lista Turismo" e seu modal foram removidos —
-                // mantemos apenas o toggle de marcadores (tourism-toggle-btn).
-
-                // Função que cria a caixa de boas-vindas centralizada com conteúdo da prefeitura
-                function showWelcomeBox() {
-                    const existing = document.getElementById('welcome-box');
-                    if (existing) return; // já visível
-                    const box = document.createElement('div');
-                    box.id = 'welcome-box';
-                    box.style.position = 'fixed';
-                    box.style.left = '50%';
-                    box.style.top = '50%';
-                    box.style.transform = 'translate(-50%,-50%)';
-                    box.style.zIndex = 200;
-                    box.style.width = '520px';
-                    box.style.maxWidth = '95vw';
-                    box.style.maxHeight = '70vh';
-                    box.style.overflowY = 'auto';
-                    box.style.background = BOX_BG;
-                    box.style.color = BOX_FG;
-                    box.style.padding = '16px';
-                    box.style.borderRadius = '10px';
-                    box.style.boxShadow = '0 4px 30px rgba(0,0,0,0.4)';
-                    box.style.fontFamily = 'sans-serif';
-                    box.innerHTML = `
-                        <div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;'>
-                            <div style='font-size:18px;font-weight:700;color:#f5f5f5;'>Bem-vindo a São Gabriel</div>
-                            <div style='display:flex;gap:8px;align-items:center;'>
-                                <a href='https://www.saogabriel.rs.gov.br/pagina/historia' target='_blank' style='font-size:12px;color:#9fd;text-decoration:underline;'>Fonte: Prefeitura</a>
-                                <button id='welcome-close' style='background:transparent;color:#f5f5f5;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;'>Fechar</button>
-                            </div>
-                        </div>
-                        <div style='font-size:14px;color:#f5f5f5;line-height:1.4;'>
-                            <div style='margin-bottom:12px;'>
-                                <b>1) Origem do nome da cidade</b>
-                                <p style='margin-top:6px;'>Quando se pronuncia o nome “São Gabriel” naturalmente atenta-se somente sobre o nome do município. O nome é uma homenagem ao Vice-Rei do Rio da Prata em 1800, Dom Gabriel. A primeira povoação foi fundada no Cerro do Batovi por Félix de Azara, e em 4 de abril de 1846 foi elevada a vila — data considerada a de emancipação.</p>
-                            </div>
-                            <div>
-                                <b>2) Conheça melhor São Gabriel</b>
-                                <p style='margin-top:6px;'>A região combina paisagens de coxilhas e várzeas, com forte vocação pecuária e arrozicultura, e possui atrativos naturais como o conjunto de formações rochosas na Palma e pontos hidrográficos singulares no distrito do Batovi. A cidade tem tradição militar — 'Terra dos Marechais' — e forte relevância histórica e cultural.</p>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(box);
-                    document.getElementById('welcome-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
-                }
-
-                // Injetar CSS responsivo para mobile (aplica-se especialmente à caixa de boas-vindas e infoboxes)
-                (function injectMobileStyles() {
-                    const styleId = 'mobile-responsive-styles';
-                    if (document.getElementById(styleId)) return;
-                    const css = `
-                            /* Regras específicas para telefones modernos (iPhone/Android) */
-                            @media (max-width: 420px) {
-                                /* Caixa de boas-vindas - ocupa maior altura e largura reduzida */
-                                #welcome-box {
-                                    left: 50% !important;
-                                    top: 6% !important;
-                                    transform: translateX(-50%) !important;
-                                    width: 94vw !important;
-                                    max-width: 94vw !important;
-                                    height: 84vh !important;
-                                    max-height: 84vh !important;
-                                    overflow: auto !important;
-                                    padding: 14px !important;
-                                    border-radius: 10px !important;
-                                    box-shadow: 0 6px 40px rgba(0,0,0,0.6) !important;
-                                    z-index: 200 !important;
-                                }
-                                /* Tornar botões e textos maiores para touch */
-                                #welcome-box button, #welcome-box a {
-                                    padding: 12px 14px !important;
-                                    font-size: 16px !important;
-                                    border-radius: 8px !important;
-                                }
-
-                                /* Ajuste geral dos infoboxes para layout em coluna e conteúdo rolável */
-                                #infobox, #prefeitos-box, #marechais-box, #ilustres-box, #infobox-lenda, #tourism-infobox {
-                                    left: 50% !important;
-                                    right: auto !important;
-                                    top: 6% !important;
-                                    transform: translateX(-50%) !important;
-                                    width: 94vw !important;
-                                    max-width: 94vw !important;
-                                    /* Aumenta a altura no mobile para garantir conteúdo legível */
-                                    height: 86vh !important;
-                                    max-height: 86vh !important;
-                                    overflow: hidden !important; /* container principal não rola; conteúdo interno rola */
-                                    border-radius: 10px !important;
-                                    padding: 14px !important;
-                                    box-sizing: border-box !important;
-                                    z-index: 200 !important;
-                                    display: flex !important;
-                                    flex-direction: column !important;
-                                }
-
-                                /* Conteúdo interno (primeiro filho) fica rolável; botão de fechar fica fixo na base do container */
-                                #infobox > div, #prefeitos-box > div, #marechais-box > div, #ilustres-box > div, #infobox-lenda > div, #tourism-infobox > div {
-                                    overflow: auto !important;
-                                    flex: 1 1 auto !important;
-                                    display: flex !important;
-                                    flex-direction: column !important;
-                                }
-
-                                /* Garante que as imagens não ocupem espaço excessivo e empurrem o botão para fora */
-                                .img-building, .img-prefeito, .img-lenda {
-                                    /* aumenta a reserva para imagem, mas limita para não ultrapassar o viewport */
-                                    max-height: 40vh !important;
-                                    width: auto !important;
-                                    object-fit: contain !important;
-                                    display: block !important;
-                                    margin: 0 auto !important;
-                                }
-
-                                /* Botões de ação/fechar ficam visíveis e centralizados na base */
-                                #marechais-box button#marechais-close,
-                                #ilustres-box button#ilustres-close,
-                                #prefeitos-box button#prefeitos-close,
-                                #infobox button#close-infobox,
-                                #infobox-lenda button#close-infobox-lenda {
-                                    align-self: center !important;
-                                    margin-top: 12px !important;
-                                    flex-shrink: 0 !important;
-                                }
-
-                                /* Left-panel stays at top-left on most phones; make controls scrollable vertically
-                                   Botões maiores, área limitada para evitar cobrir todo o mapa (rolagem interna) */
-                                #left-panel {
-                                    left: 8px !important;
-                                    right: auto !important;
-                                    top: 12px !important;
-                                    bottom: auto !important;
-                                    display: flex !important;
-                                    flex-direction: column !important;
-                                    gap: 8px !important;
-                                    align-items: flex-start !important;
-                                    /* reduzir z-index para ficar atrás das infoboxes (infoboxes usam z ~200) */
-                                    z-index: 40 !important;
-                                    max-width: 46vw !important; /* ocupa até metade da largura para mobile */
-                                }
-                                #left-controls {
-                                    display: flex !important;
-                                    flex-direction: column !important;
-                                    gap: 8px !important;
-                                    overflow-x: hidden !important;
-                                    overflow-y: auto !important;
-                                    max-height: 64vh !important; /* limita a área e permite rolagem */
-                                    width: 100% !important;
-                                    padding: 6px 4px !important;
-                                    -webkit-overflow-scrolling: touch !important;
-                                }
-                                /* botões do painel: largura mínima e padding fixo para evitar compressão/resize ao colapsar */
-                                #left-panel button, #left-controls button {
-                                    padding: 10px 12px !important;
-                                    font-size: 15px !important;
-                                    border-radius: 8px !important;
-                                    white-space: normal !important; /* permite quebra de linha em labels longas */
-                                    text-align: left !important;
-                                    min-width: 84px !important;
-                                    box-sizing: border-box !important;
-                                }
-                                /* garantir que o botão 'Todos' mantenha estilo previsível (não encolha) */
-                                #todos-btn {
-                                    padding: 8px 10px !important;
-                                    font-size: 14px !important;
-                                    min-width: 88px !important;
-                                    box-sizing: border-box !important;
-                                }
-
-                                /* transição consistente para expand/collapse */
-                                #left-controls {
-                                    transition: max-height 0.28s ease !important;
-                                }
-                            }
-
-                            /* Reforço para telas ainda menores (ex: telefones compactos) */
-                            @media (max-width: 420px) {
-                                #infobox, #prefeitos-box, #marechais-box, #ilustres-box, #infobox-lenda, #tourism-infobox {
-                                    width: 96vw !important;
-                                    height: 88vh !important;
-                                    padding: 12px !important;
-                                }
-                                .img-building, .img-prefeito, .img-lenda { max-height: 42vh !important; }
-                            }
-                        `;
-                    const st = document.createElement('style');
-                    st.id = styleId;
-                    st.appendChild(document.createTextNode(css));
-                    document.head.appendChild(st);
-                })();
-
-                // Handler do botão fixo 'Bem Vindo'
-                const wb = document.getElementById('welcome-btn');
-                if (wb) wb.onclick = () => { showWelcomeBox(); };
-
-                // Atacha handler ao botão estático 'Homens Ilustres'
-                const ilustresBtn = document.getElementById('ilustres-btn');
-                if (ilustresBtn) ilustresBtn.onclick = () => { showIlustresCarousel(); };
-
-                let tourismMarkersVisible = false;
-                let tourismEntities = [];
-                document.getElementById('tourism-toggle-btn').onclick = () => {
-                    tourismMarkersVisible = !tourismMarkersVisible;
-                    if (tourismMarkersVisible) addTourismMarkers();
-                    else removeTourismMarkers();
-                };
-
-                function addTourismMarkers() {
-                    if (!viewer) return;
-                    removeTourismMarkers();
-                    tourismPoints.forEach(p => {
-                        // billboard principal (maior)
-                        const ent = viewer.entities.add({
-                            id: p.id,
-                            position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, 5),
-                            billboard: {
-                                image: p.icon || 'https://cdn-icons-png.flaticon.com/512/149/149060.png',
-                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                                width: 48,
-                                height: 48
-                            },
-                            tourismId: p.id
-                        });
-                        // sombra (ellipse) ligeiramente abaixo do solo
-                        const shadow = viewer.entities.add({
-                            id: p.id + '_shadow',
-                            position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, 0.5),
-                            ellipse: {
-                                semiMajorAxis: 6.0,
-                                semiMinorAxis: 3.5,
-                                material: Cesium.Color.BLACK.withAlpha(0.25),
-                                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                            }
-                        });
-                        tourismEntities.push(ent);
-                        tourismEntities.push(shadow);
-                    });
-                }
-
-                function removeTourismMarkers() {
-                    tourismEntities.forEach(e => viewer.entities.remove(e));
-                    tourismEntities = [];
-                }
-
-                // showTourismListModal removed — lista de turismo foi eliminada do menu
-
-
-
-                // Adiciona marcadores das lendas
-                const lendaEntities = [];
-                // Estado do toggle de Lendas (botão no menu 'Todos')
-                let lendasMarkersVisible = false;
-                // Handler do botão de Lendas (adicionado ao menu 'Todos')
-                const lendasToggleBtn = document.getElementById('lendas-toggle-btn');
-                if (lendasToggleBtn) {
-                    lendasToggleBtn.onclick = () => {
-                        lendasMarkersVisible = !lendasMarkersVisible;
-                        // Alterna visibilidade das entidades já criadas
-                        lendaEntities.forEach(ent => {
-                            try { ent.show = lendasMarkersVisible; } catch (e) { /* ent pode ser indefinido */ }
-                        });
-                        // manter o texto fixo em 'Lendas (5)'
-                        lendasToggleBtn.innerText = 'Lendas (5)';
-                        // Se marcadores devem aparecer, cria-los caso ainda não existam
-                        if (lendasMarkersVisible && lendaEntities.length === 0 && typeof lendas !== 'undefined') {
-                            lendas.forEach((lenda, idx) => {
-                                const entity = viewer.entities.add({
-                                    position: Cesium.Cartesian3.fromDegrees(lenda.position.lon, lenda.position.lat, 5),
-                                    billboard: {
-                                        image: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-                                        width: 40,
-                                        height: 40,
-                                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                                    },
-                                    lendaId: idx
-                                });
-                                lendaEntities.push(entity);
-                            });
-                        }
-                    };
-                }
-                // Marcador para carrossel de prefeitos (sobre a prefeitura)
-                const prefeituraData = buildingsMap['494741651'];
-                let prefeitosMarker = null;
-                if (prefeituraData) {
-                    prefeitosMarker = viewer.entities.add({
-                        id: 'prefeitura_prefeitos_marker',
-                        position: prefeituraData.position,
-                        billboard: {
-                            image: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png', // ícone diferente
-                            width: 42,
-                            height: 42,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                        }
-                    });
-                }
-
-                // Monumentos (IDs finais no buildingsMap) - toggle para destacar/mostrar marcadores
-                let monumentsVisible = false;
-                const monumentIds = ['111111111', '222222222', '333333333'];
-                const monumentEntities = [];
-                const monumentsToggleBtn = document.getElementById('monuments-toggle-btn');
-                if (monumentsToggleBtn) {
-                    monumentsToggleBtn.onclick = () => {
-                        monumentsVisible = !monumentsVisible;
-                        if (monumentsVisible) {
-                            // cria elipses (halo) no solo para cada monumento — mais legível contra o terreno
-                            monumentIds.forEach(id => {
-                                const data = buildingsMap[id];
-                                if (!data || !data.position) return;
-                                // elipse principal: halo semi-transparente
-                                const halo = viewer.entities.add({
-                                    id: 'monument_halo_' + id,
-                                    position: data.position,
-                                    ellipse: {
-                                        semiMajorAxis: 12.0,
-                                        semiMinorAxis: 8.0,
-                                        material: Cesium.Color.fromBytes(255, 200, 0, 160), // amarelo/laranja translúcido
-                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                                        classificationType: Cesium.ClassificationType.BOTH
-                                    }
-                                });
-                                // sombra/outline: elipse menor e mais escura
-                                const edge = viewer.entities.add({
-                                    id: 'monument_edge_' + id,
-                                    position: data.position,
-                                    ellipse: {
-                                        semiMajorAxis: 9.0,
-                                        semiMinorAxis: 6.0,
-                                        material: Cesium.Color.BLACK.withAlpha(0.25),
-                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                                        classificationType: Cesium.ClassificationType.BOTH
-                                    }
-                                });
-                                monumentEntities.push(halo, edge);
-                            });
-                            monumentsToggleBtn.innerText = 'Monumentos (3) ✓';
-                        } else {
-                            // remove halos
-                            monumentEntities.forEach(e => viewer.entities.remove(e));
-                            monumentEntities.length = 0;
-                            monumentsToggleBtn.innerText = 'Monumentos (3)';
-                        }
-                    };
-                }
-
-                // Botão para Marechais (abre carrossel)
-                const marechaisBtn = document.createElement('button');
-                marechaisBtn.id = 'marechais-btn';
-                marechaisBtn.textContent = 'Marechais';
-                marechaisBtn.style.position = 'fixed';
-                marechaisBtn.style.top = '290px';
-                marechaisBtn.style.left = '5px';
-                marechaisBtn.style.zIndex = '2';
-                marechaisBtn.style.background = '#efe';
-                marechaisBtn.style.border = '1px solid #888';
-                marechaisBtn.style.padding = '4px 8px';
-                marechaisBtn.style.borderRadius = '6px';
-                // Atacha handler ao botão estático 'Marechais'
-                const marechaisBtnStatic = document.getElementById('marechais-btn');
-                if (marechaisBtnStatic) marechaisBtnStatic.onclick = () => { showMarechaisCarousel(); };
-                
-                // Inversão de sombras removida — sem alterações programáticas na luz da cena.
-                // Função para mostrar carrossel/infobox dos Marechais
-                function showMarechaisCarousel(startIndex = 0) {
-                    if (!marechaisData || !marechaisData.length) return;
-                    let idx = Math.min(Math.max(startIndex, 0), marechaisData.length - 1);
-                    let oldBox = document.getElementById('marechais-box');
-                    if (oldBox) oldBox.parentNode.removeChild(oldBox);
-                    let box = document.createElement('div');
-                    box.id = 'marechais-box';
-                    box.style.position = 'fixed';
-                    box.style.top = '10px';
-                    box.style.right = '20px';
-                    box.style.setProperty('background', BOX_BG, 'important');
-                    box.style.setProperty('color', BOX_FG, 'important');
-                    box.style.border = '1.5px solid #aaa';
-                    box.style.padding = '14px';
-                    box.style.zIndex = 30;
-                    box.style.width = '320px';
-                    box.style.boxShadow = '0 2px 16px #000a';
-                    box.style.borderRadius = '10px';
-                    box.style.fontFamily = 'sans-serif';
-                    box.style.transform = 'translateX(380px)';
-                    box.style.opacity = '0';
-                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                    document.body.appendChild(box);
-                    window.addEventListener('keydown', keyHandler);
-                    function keyHandler(e) {
-                        if (box.style.display !== 'block') return;
-                        if (e.key === 'ArrowRight') { idx = (idx + 1) % marechaisData.length; render(); }
-                        if (e.key === 'ArrowLeft') { idx = (idx - 1 + marechaisData.length) % marechaisData.length; render(); }
-                    }
-                    function render() {
-                        const m = marechaisData[idx];
-                        const foto = m.foto ? m.foto : 'placeholder_prefeito.jpg';
-                        let zebra = '';
-                        if (m.resumo) {
-                            let descParts = m.resumo.split(/<br\s*\/?/);
-                            zebra = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
-                        }
-                        if (m.observacao) {
-                            zebra += `<div style='margin-top:6px;'><b>Obs.:</b></div>`;
-                            zebra += `<div style='background:${BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${m.observacao}</div>`;
-                        }
-                        box.innerHTML = `
-                            <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Marechais de São Gabriel</div>
-                                <b style='font-size:17px;'>${m.nome}</b><br><br>
-                                <img src='${foto}' alt='${m.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
-                                <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebra}</div>
-                                <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='marechais-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#fff;'>${idx + 1} / ${marechaisData.length}</span>
-                                    <button id='marechais-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
-                                </div>
-                                <button id='marechais-close' style='margin-top:14px;background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
-                            </div>`;
-                        document.getElementById('marechais-prev').onclick = () => { idx = (idx - 1 + marechaisData.length) % marechaisData.length; render(); };
-                        document.getElementById('marechais-next').onclick = () => { idx = (idx + 1) % marechaisData.length; render(); };
-                        document.getElementById('marechais-close').onclick = () => {
-                            if (box.parentNode) box.parentNode.removeChild(box);
-                            window.removeEventListener('keydown', keyHandler);
-                        };
-                        setTimeout(() => {
-                            box.style.transform = 'translateX(0)';
-                            box.style.opacity = '1';
-                            box.style.display = 'block';
-                        }, 10);
-                    }
-                    render();
-                }
-
-                function showPrefeitosCarousel(startIndex = 0) {
-                    if (!prefeitos || !prefeitos.length) return;
-                    let idx = Math.min(Math.max(startIndex, 0), prefeitos.length - 1);
-                    // Sempre remove o box anterior, se existir, para garantir animação
-                    let oldBox = document.getElementById('prefeitos-box');
-                    if (oldBox) {
-                        oldBox.parentNode.removeChild(oldBox);
-                    }
-                    let box = document.createElement('div');
-                    box.id = 'prefeitos-box';
-                    box.style.position = 'fixed';
-                    box.style.top = '10px';
-                    box.style.right = '20px';
-                    box.style.setProperty('background', BOX_BG, 'important');
-                    box.style.setProperty('color', BOX_FG, 'important');
-                    box.style.border = '1.5px solid #aaa';
-                    box.style.padding = '14px';
-                    box.style.zIndex = 30;
-                    box.style.width = '320px';
-                    box.style.boxShadow = '0 2px 16px #000a';
-                    box.style.borderRadius = '10px';
-                    box.style.fontFamily = 'sans-serif';
-                    box.style.transform = 'translateX(380px)';
-                    box.style.opacity = '0';
-                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                    document.body.appendChild(box);
-                    // Navegação por teclado
-                    window.addEventListener('keydown', keyHandler);
-                    function keyHandler(e) {
-                        if (box.style.display !== 'block') return;
-                        if (e.key === 'ArrowRight') { idx = (idx + 1) % prefeitos.length; render(); }
-                        if (e.key === 'ArrowLeft') { idx = (idx - 1 + prefeitos.length) % prefeitos.length; render(); }
-                    }
-                    function render() {
-                        const p = prefeitos[idx];
-                        const foto = p.foto ? p.foto : 'placeholder_prefeito.jpg';
-                        const periodos = (p.periodos && p.periodos.length) ? p.periodos.join('<br>') : '<i>Períodos não informados</i>';
-                        // Linhas zebra para períodos e observação
-                        let zebra = '';
-                        if (p.periodos && p.periodos.length) {
-                            zebra += `<div style='margin-bottom:2px;'><b>Período(s):</b></div>`;
-                            p.periodos.forEach((per, i) => {
-                                zebra += `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${per}</div>`;
-                            });
-                        }
-                        if (p.observacao) {
-                            zebra += `<div style='margin-top:6px;'><b>Obs.:</b></div>`;
-                            zebra += `<div style='background:${BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${p.observacao}</div>`;
-                        }
-                        box.innerHTML = `
-                            <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Prefeitos de São Gabriel</div>
-                                <b style='font-size:17px;'>${p.nome}</b><br><br>
-                                <img src='${foto}' alt='${p.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
-                                <div style='margin-top:12px;text-align:left;font-size:15px;'>
-                                    ${zebra}
-                                </div>
-                                <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='prefeitos-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#fff;'>${idx + 1} / ${prefeitos.length}</span>
-                                    <button id='prefeitos-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
-                                </div>
-                                <button id='prefeitos-close' style='margin-top:14px;background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
-                            </div>`;
-                        document.getElementById('prefeitos-prev').onclick = () => { idx = (idx - 1 + prefeitos.length) % prefeitos.length; render(); };
-                        document.getElementById('prefeitos-next').onclick = () => { idx = (idx + 1) % prefeitos.length; render(); };
-                        document.getElementById('prefeitos-close').onclick = () => {
-                            // Remove o box do DOM ao fechar
-                            if (box.parentNode) box.parentNode.removeChild(box);
-                            window.removeEventListener('keydown', keyHandler);
-                        };
-                        // Trigger animação de entrada
-                        setTimeout(() => {
-                            box.style.transform = 'translateX(0)';
-                            box.style.opacity = '1';
-                            box.style.display = 'block';
-                        }, 10);
-                    }
-                    render();
-                }
-
-                // Carrossel para Homens Ilustres (foto + resumo + fonte)
-                function showIlustresCarousel(startIndex = 0) {
-                    if (!ilustres || !ilustres.length) return;
-                    let idx = Math.min(Math.max(startIndex, 0), ilustres.length - 1);
-                    let oldBox = document.getElementById('ilustres-box');
-                    if (oldBox) oldBox.parentNode.removeChild(oldBox);
-                    let box = document.createElement('div');
-                    box.id = 'ilustres-box';
-                    box.style.position = 'fixed';
-                    box.style.top = '10px';
-                    box.style.right = '20px';
-                    box.style.setProperty('background', BOX_BG, 'important');
-                    box.style.setProperty('color', BOX_FG, 'important');
-                    box.style.border = '1.5px solid #aaa';
-                    box.style.padding = '14px';
-                    box.style.zIndex = 30;
-                    box.style.width = '320px';
-                    box.style.boxShadow = '0 2px 16px #000a';
-                    box.style.borderRadius = '10px';
-                    box.style.fontFamily = 'sans-serif';
-                    box.style.transform = 'translateX(380px)';
-                    box.style.opacity = '0';
-                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                    document.body.appendChild(box);
-
-                    function render() {
-                        const it = ilustres[idx];
-                        const foto = it.foto ? it.foto : 'placeholder_prefeito.jpg';
-                        box.innerHTML = `
-                            <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Homens Ilustres</div>
-                                <b style='font-size:17px;'>${it.nome}</b><br><br>
-                                <img src='${foto}' alt='${it.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
-                                <div style='margin-top:12px;text-align:left;font-size:14px;color:#ddd;'>${it.resumo}</div>
-                                <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='ilustres-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#fff;'>${idx + 1} / ${ilustres.length}</span>
-                                    <button id='ilustres-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
-                                </div>
-                                <div style='margin-top:10px;display:flex;gap:8px;justify-content:center;'>
-                                    <button id='ilustres-close' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 12px;cursor:pointer;'>Fechar</button>
-                                </div>
-                            </div>`;
-                        document.getElementById('ilustres-prev').onclick = () => { idx = (idx - 1 + ilustres.length) % ilustres.length; render(); };
-                        document.getElementById('ilustres-next').onclick = () => { idx = (idx + 1) % ilustres.length; render(); };
-                        document.getElementById('ilustres-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
-                        setTimeout(() => {
-                            box.style.transform = 'translateX(0)';
-                            box.style.opacity = '1';
-                            box.style.display = 'block';
-                        }, 10);
-                    }
-                    render();
-                }
-                lendas.forEach((lenda, idx) => {
-                    const entity = viewer.entities.add({
-                        position: Cesium.Cartesian3.fromDegrees(lenda.position.lon, lenda.position.lat, 5), // 5 metros acima do solo
-                        billboard: {
-                            image: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-                            width: 40,
-                            height: 40,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-                        },
-                        lendaId: idx
-                    });
-                    lendaEntities.push(entity);
-                });
-
-                // Função para mostrar infobox de lenda com carrossel
-                function showLendaInfobox(idx) {
-                    const lenda = lendas[idx];
-                    if (!lenda) return;
-                    let oldBox = document.getElementById('infobox-lenda');
-                    if (oldBox) oldBox.parentNode.removeChild(oldBox);
-                    let box = document.createElement('div');
-                    box.id = 'infobox-lenda';
-                    box.style.position = 'fixed';
-                    box.style.top = '10px';
-                    box.style.right = '20px';
-                    box.style.setProperty('background', BOX_BG, 'important');
-                    box.style.setProperty('color', BOX_FG, 'important');
-                    box.style.border = '1.5px solid #aaa';
-                    box.style.padding = '14px';
-                    box.style.zIndex = 30;
-                    box.style.width = '340px';
-                    box.style.boxShadow = '0 2px 16px #000a';
-                    box.style.borderRadius = '10px';
-                    box.style.fontFamily = 'sans-serif';
-                    box.style.transform = 'translateX(380px)';
-                    box.style.opacity = '0';
-                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                    box.style.overflowY = 'auto';
-                    document.body.appendChild(box);
-
-                    // Zebra para descrição longa
-                    let zebraDesc = '';
-                    if (lenda.description) {
-                        let descParts = lenda.description.split(/<br\s*\/?><br\s*\/?/);
-                        zebraDesc = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
-                    }
-
-                    let carousel = '';
-                    if (lenda.images && lenda.images.length > 0) {
-                        if (lenda.images.length === 1) {
-                            carousel = `<div style="text-align:center;"><img id="carousel-img" src="${lenda.images[0]}" class="img-lenda" /></div>`;
-                        } else {
-                            carousel = `
-                            <div id="carousel-lenda" style="text-align:center;">
-                                <img id="carousel-img" src="${lenda.images[0]}" class="img-lenda" />
-                                <br>
-                                <button id="prev-img" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                <span id="img-indicator" style='color:${BOX_FG};'>1/${lenda.images.length}</span>
-                                <button id="next-img" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
-                            </div>`;
-                        }
-                    }
-                    box.innerHTML = `
-                        <div style='text-align:center;color:#fff;'>
-                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>${lenda.title}</div>
-                            ${carousel}
-                            <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebraDesc}</div>
-                            <div style='margin-top:12px;'><button id='close-infobox-lenda' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button></div>
-                        </div>
-                    `;
-                    document.getElementById('close-infobox-lenda').onclick = () => {
-                        if (box.parentNode) box.parentNode.removeChild(box);
-                    };
-                    // Carrossel de imagens
-                    if (lenda.images && lenda.images.length > 1) {
-                        let idxImg = 0;
-                        const imgEl = document.getElementById('carousel-img');
-                        const indicator = document.getElementById('img-indicator');
-                        document.getElementById('prev-img').onclick = () => {
-                            idxImg = (idxImg - 1 + lenda.images.length) % lenda.images.length;
-                            imgEl.src = lenda.images[idxImg];
-                            indicator.textContent = `${idxImg + 1}/${lenda.images.length}`;
-                        };
-                        document.getElementById('next-img').onclick = () => {
-                            idxImg = (idxImg + 1) % lenda.images.length;
-                            imgEl.src = lenda.images[idxImg];
-                            indicator.textContent = `${idxImg + 1}/${lenda.images.length}`;
-                        };
-                    }
-                    // Animação de entrada
-                    setTimeout(() => {
-                        box.style.transform = 'translateX(0)';
-                        box.style.opacity = '1';
-                        box.style.display = 'block';
-                    }, 10);
-                }
-
-                // Adiciona OSM Buildings tileset (sempre antes do KML)
-                const buildingsTileset = await Cesium.createOsmBuildingsAsync();
-                // Offset vertical em metros (ajuste conforme necessário)
-                const osmOffset = 0;
-                const osmTranslation = Cesium.Cartesian3.fromElements(0, 0, osmOffset, new Cesium.Cartesian3());
-                buildingsTileset.modelMatrix = Cesium.Matrix4.fromTranslation(osmTranslation);
-                viewer.scene.primitives.add(buildingsTileset);
-                // Garantir estado inicial: mostrar OSM (esta variante inicia com OSM visível)
-                buildingsTileset.show = true;
-
-                // Botão para mostrar/ocultar OSM temporariamente
-                // Inicialmente mantemos as OSM visíveis (não mostrar sobre nossos GLBs)
-                let osmVisible = true;
-                const activeGlbs = new Set(); // ids de prédios que atualmente exibem GLB (detalhe)
-
-                // Adiciona GLBs lowpoly ao iniciar (inclusive monumentos), mantendo como padrão as OSM originais visíveis
-                // glbEntities[id] pode ser: Entity (low), Entity (detalhe único) ou Array<Entity> (detalhe multi-blocos)
-                let glbEntities = {};
-
-                // --- Preview Laranja (aplicado por padrão a todos os LOWs) ---
-                const PREVIEW_ORANGE = Cesium.Color.fromCssColorString('#b45f00');
-
-                function setEntityTintSingle(ent, apply) {
-                    try {
-                        if (!ent || !ent.model) return;
-                        if (apply) {
-                            ent.model.color = PREVIEW_ORANGE;
-                            ent.model.colorBlendMode = Cesium.ColorBlendMode.REPLACE;
-                            ent.model.colorBlendAmount = 1.0;
-                        } else {
-                            // Reverter: limpa propriedades (volta ao comportamento padrão)
-                            try { ent.model.color = undefined; } catch (e) { }
-                            try { ent.model.colorBlendMode = undefined; } catch (e) { }
-                            try { ent.model.colorBlendAmount = undefined; } catch (e) { }
-                        }
-                    } catch (e) {
-                        console.warn('Falha ao aplicar tint no entity', ent && ent.id, e);
-                    }
-                }
-                // Nota: não temos botão; os LOWs recebem tint por padrão quando criados.
-                // Helper para atualizar o estilo do tileset conforme osmVisible e quais GLBs estão ativos
-                function updateTilesetShowForOSM(osmOn) {
-                    if (!buildingsTileset) return;
-                    if (!osmOn) {
-                        // ocultar todo tileset
-                        buildingsTileset.show = false;
-                        return;
-                    }
-
-                    // Mostrar tileset, exceto os elementos que possuem um modelo 'low' (uri_base)
-                    buildingsTileset.show = true;
-
-                    // Reunir lista de IDs cuja OSM deve ser ocultada:
-                    // - todos os ids que têm uri_base (temos um modelo low para eles)
-                    // - além dos activeGlbs (detalhes abertos)
-                    const hideSet = new Set();
-                    Object.keys(buildingsMap).forEach(id => {
-                        const d = buildingsMap[id];
-                        if (d && d.uri_base) hideSet.add(String(id));
-                    });
-                    activeGlbs.forEach(id => hideSet.add(String(id)));
-
-                    if (hideSet.size === 0) {
-                        // sem ids a esconder: mostra tudo (estilo padrão)
-                        buildingsTileset.style = new Cesium.Cesium3DTileStyle({
-                            show: true,
-                            color: "color('white', 1)"
-                        });
-                        return;
-                    }
-
-                    // Construir as condições para Cesium: cada condição é uma expressão string
-                    // que compara ${elementId} com o id do prédio e retorna false para esconder.
-                    const conditions = [];
-                    hideSet.forEach(hid => {
-                        // Se o id for numérico (apenas dígitos), compare sem aspas para evitar
-                        // comparar número com string — caso contrário, compare como string.
-                        let expr;
-                        if (/^\d+$/.test(hid)) {
-                            // Ex.: "${elementId} === 123456"
-                            expr = "${elementId} === " + hid;
-                        } else {
-                            // Ex.: "${elementId} === 'abc-123'"
-                            expr = "${elementId} === '" + hid + "'";
-                        }
-                        conditions.push([expr, false]);
-                    });
-                    // regra final: se nenhuma condição anterior for verdadeira, mostrar
-                    conditions.push([true, true]);
-
-                    buildingsTileset.style = new Cesium.Cesium3DTileStyle({
-                        show: { conditions: conditions }
-                    });
-                }
-                function addLowModel(id) {
-                    const data = buildingsMap[id];
-                    if (!data || !data.uri_base) return;
-                    // Remove versões anteriores (low ou detail)
-                    removeDetailModel(id);
-                    const entLowExisting = viewer.entities.getById(id + '_low');
-                    if (entLowExisting) viewer.entities.remove(entLowExisting);
-                    const ent = viewer.entities.add({
-                        id: id + '_low',
-                        position: data.position,
-                        orientation: Cesium.Transforms.headingPitchRollQuaternion(
-                            data.position,
-                            data.orientation
-                        ),
-                        model: {
-                            uri: data.uri_base,
-                            maximumScale: 20000,
-                            heightReference: Cesium.HeightReference.NONE,
-                            shadows: Cesium.ShadowMode.ENABLED
-                        }
-                    });
-                    glbEntities[id] = ent; // referencia ao low
-                    console.debug('addLowModel', id, data.uri_base);
-                    // Aplicar tint laranja por padrão a todos os LOWs
-                    try { setEntityTintSingle(ent, true); } catch (e) { /* noop */ }
-                    // Ao garantir o low, removemos id de activeGlbs (se estava)
-                    if (activeGlbs.has(id)) {
-                        activeGlbs.delete(id);
-                        updateTilesetShowForOSM(osmVisible);
-                    }
-                }
-                function addDetailModel(id) {
-                    const data = buildingsMap[id];
-                    if (!data || !data.uri_detail) return;
-                    // Remove low anterior
-                    const low = viewer.entities.getById(id + '_low');
-                    if (low) viewer.entities.remove(low);
-                    // uri_detail pode ser string ou array
-                    if (Array.isArray(data.uri_detail)) {
-                        const parts = [];
-                        data.uri_detail.forEach((uri, idx) => {
-                            const ent = viewer.entities.add({
-                                id: id + '_detail_' + idx,
-                                position: data.position,
-                                orientation: Cesium.Transforms.headingPitchRollQuaternion(
-                                    data.position,
-                                    data.orientation
-                                ),
-                                model: {
-                                    uri: uri,
-                                    maximumScale: 20000,
-                                    heightReference: Cesium.HeightReference.NONE,
-                                    shadows: Cesium.ShadowMode.ENABLED
-                                }
-                            });
-                                parts.push(ent);
-                                console.debug('addDetailModel (part)', id, uri);
-                        });
-                        glbEntities[id] = parts; // array de partes
-                        // marca como GLB ativo
-                        activeGlbs.add(id);
-                        updateTilesetShowForOSM(osmVisible);
-                    } else {
-                        const ent = viewer.entities.add({
-                            id: id, // detalhe único usa id puro
-                            position: data.position,
-                            orientation: Cesium.Transforms.headingPitchRollQuaternion(
-                                data.position,
-                                data.orientation
-                            ),
-                            model: {
-                                uri: data.uri_detail,
-                                maximumScale: 20000,
-                                heightReference: Cesium.HeightReference.NONE,
-                                shadows: Cesium.ShadowMode.ENABLED
-                            }
-                        });
-                        glbEntities[id] = ent;
-                        console.debug('addDetailModel', id, data.uri_detail);
-                        // marca como GLB ativo
-                        activeGlbs.add(id);
-                        updateTilesetShowForOSM(osmVisible);
-                    }
-                }
-                function removeDetailModel(id) {
-                    const current = glbEntities[id];
-                    if (!current) return;
-                    if (Array.isArray(current)) {
-                        current.forEach(ent => viewer.entities.remove(ent));
-                    } else if (current && current.id && (current.id.endsWith('_low') || current.id === id)) {
-                        // handled elsewhere
-                    } else {
-                        viewer.entities.remove(current);
-                    }
-                    // Mantém chave para recriar low depois
-                }
-                // Inicial: adiciona somente lows (exceto plano 999999999)
-                Object.keys(buildingsMap).forEach(id => {
-                    if (id === '999999999') return;
-                    addLowModel(id);
-                });
-
-                // Após criar os lows, aplica a lógica de mostrar/ocultar OSM conforme osmVisible
-                updateTilesetShowForOSM(osmVisible);
-
-                // Configura handler do botão toggle-osm agora que a função updateTilesetShowForOSM existe
-                const toggleOsmBtn = document.getElementById('toggle-osm-btn');
-                if (toggleOsmBtn) {
-                    toggleOsmBtn.onclick = function() {
-                        osmVisible = !osmVisible;
-                        updateTilesetShowForOSM(osmVisible);
-                        toggleOsmBtn.innerText = osmVisible ? 'Ocultar OSM' : 'Mostrar OSM';
-                    };
-                    toggleOsmBtn.innerText = osmVisible ? 'Ocultar OSM' : 'Mostrar OSM';
-                }
-
-                // Evento de clique para mostrar ID e coordenadas do prédio OSM
-                // Handler único para clique
-                viewer.screenSpaceEventHandler.setInputAction(function (click) {
-                    console.log('Clique detectado', click.position);
-                    const pickedObject = viewer.scene.pick(click.position);
-                    // Obtém coordenadas do clique
-                    const cartesian = viewer.scene.pickPosition(click.position);
-                    let coords = null;
-                    if (cartesian) {
-                        const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-                        const lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
-                        const lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
-                        const height = cartographic.height.toFixed(2);
-                        coords = { lon, lat, height };
-                    }
-                    if (Cesium.defined(pickedObject)) {
-                        // Clique em marcador de lenda
-                        if (pickedObject.id && pickedObject.id.lendaId !== undefined) {
-                            showLendaInfobox(pickedObject.id.lendaId);
-                            return;
-                        }
-                        // Clique no marcador de prefeitos
-                        if (pickedObject.id && pickedObject.id.id === 'prefeitura_prefeitos_marker') {
-                            showPrefeitosCarousel();
-                            return;
-                        }
-                        // marcador de marechais agora é um botão DOM; clique no mapa não aciona
-                        // Clique em OSM
-                        if (pickedObject.getProperty) {
-                            const elementId = pickedObject.getProperty('elementId');
-                            if (elementId) {
-                                console.log('[OSM] ID do prédio:', elementId, 'Coordenadas:', coords);
-                                if (buildingsMap[elementId]) {
-                                    toggleOsmAndGlb(elementId);
-                                } else {
-                                    // Mostra infobox simples para OSM sem GLB
-                                    let oldBox = document.getElementById('infobox');
-                                    if (oldBox) oldBox.parentNode.removeChild(oldBox);
-                                    let box = document.createElement('div');
-                                    box.id = 'infobox';
-                                    box.style.position = 'fixed';
-                                    box.style.top = '70px';
-                                    box.style.right = '20px';
-                                    box.style.setProperty('background', BOX_BG, 'important');
-                                    box.style.setProperty('color', BOX_FG, 'important');
-                                    box.style.border = '1.5px solid #aaa';
-                                    box.style.padding = '14px';
-                                    box.style.zIndex = 30;
-                                    box.style.width = '320px';
-                                    box.style.maxWidth = '95vw';
-                                    box.style.maxHeight = '70vh';
-                                    box.style.overflowY = 'auto';
-                                    box.style.boxShadow = '0 2px 16px #000a';
-                                    box.style.borderRadius = '10px';
-                                    box.style.fontFamily = 'sans-serif';
-                                    box.style.transform = 'translateX(380px)';
-                                    box.style.opacity = '0';
-                                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                                    document.body.appendChild(box);
-                                    box.innerHTML = `
-                                        <div style='text-align:center;color:#fff;'>
-                                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Prédio OSM</div>
-                                            <small style='color:#ccc;'>ID: ${elementId}</small><br><br>
-                                            <div style='margin-top:12px;text-align:left;font-size:15px;'>
-                                                Coordenadas:<br>
-                                                <span style='color:#fff;'>${coords ? `${coords.lat}, ${coords.lon} (alt: ${coords.height}m)` : 'Indisponível'}</span>
-                                            </div>
-                                            <div style='margin-top:12px;'><button id='close-infobox' style='background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button></div>
-                                        </div>
-                                    `;
-                                    document.getElementById('close-infobox').onclick = () => {
-                                        if (box.parentNode) box.parentNode.removeChild(box);
-                                    };
-                                    setTimeout(() => {
-                                        box.style.transform = 'translateX(0)';
-                                        box.style.opacity = '1';
-                                        box.style.display = 'block';
-                                    }, 10);
-                                }
-                            } else {
-                                console.log('[OSM] Nenhum elementId encontrado. Coordenadas:', coords);
-                            }
-                            return;
-                        }
-                        // Clique em marcador turístico
-                        if (pickedObject && pickedObject.id && pickedObject.id.tourismId) {
-                            const tid = pickedObject.id.tourismId;
-                            const p = tourismPoints.find(x => x.id === tid);
-                            if (p) {
-                                // mostra um infobox simples
-                                let old = document.getElementById('tourism-infobox');
-                                if (old) old.parentNode.removeChild(old);
-                                const box = document.createElement('div');
-                                box.id = 'tourism-infobox';
-                                box.style.position = 'fixed';
-                                box.style.top = '10px';
-                                box.style.right = '20px';
-                                box.style.setProperty('background', BOX_BG, 'important');
-                                box.style.setProperty('color', BOX_FG, 'important');
-                                box.style.color = BOX_FG;
-                                box.style.padding = '10px';
-                                box.style.zIndex = 70;
-                                box.style.border = '1px solid #666';
-                                box.style.borderRadius = '8px';
-                                box.innerHTML = `
-                                        <div style='text-align:center;'>
-                                            <img src='${(p.images && p.images[0]) ? p.images[0] : "placeholder_tour.jpg"}' style='width:300px;height:200px;object-fit:cover;border-radius:6px;display:block;margin:0 auto 8px;' />
-                                        </div>
-                                        <div style='font-weight:bold;margin-bottom:6px;'>${p.name}</div>
-                                        <div style='display:flex;gap:6px;flex-wrap:wrap;align-items:center;'>
-                                            <button id='tourism-open-page' style='padding:6px;background:'+BTN_BG+';color:'+BOX_FG+';'>Abrir página</button>
-                                            ${p.infoUrl ? `<a id='tourism-more-info' href='${p.infoUrl}' target='_blank' style='color:#9fd;text-decoration:underline;font-size:13px;margin-left:4px;'>Mais informações</a>` : ''}
-                                            <button id='tourism-close' style='padding:6px;background:'+BOX_BG+';color:'+BOX_FG+';'>Fechar</button>
-                                        </div>`;
-                                document.body.appendChild(box);
-                                document.getElementById('tourism-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
-                                document.getElementById('tourism-open-page').onclick = () => { if (p.pageUrl) window.open(p.pageUrl, '_blank'); };
-                            }
-                            return;
-                        }
-                        // Clique em GLB lowpoly de qualquer prédio
-                        if (pickedObject.id && pickedObject.id.id && pickedObject.id.id.endsWith('_low')) {
-                            const idBase = pickedObject.id.id.replace('_low', '');
-                            const data = buildingsMap[idBase];
-                            if (data && data.uri_detail) {
-                                addDetailModel(idBase);
-                                showInfobox(idBase);
-                            }
-                            return;
-                        }
-                        // Clique em GLB detalhado (único ou parte). Detecta baseId.
-                        if (pickedObject.id && pickedObject.id.id) {
-                            let pickedId = pickedObject.id.id;
-                            let baseId = pickedId;
-                            if (/(_detail_\d+)$/.test(pickedId)) {
-                                baseId = pickedId.replace(/_detail_\d+$/, '');
-                            }
-                            if (buildingsMap[baseId] && glbEntities[baseId]) {
-                                showInfobox(baseId);
-                                return;
-                            }
-                        }
-                    }
-                }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-                // Lógica de alternância OSM/GLB
-                // ...existing code...
-
-                // Cria/mostra infobox
-                function showInfobox(id) {
-                    const data = buildingsMap[id];
-                    if (!data || !data.info) return;
-                    let oldBox = document.getElementById('infobox');
-                    if (oldBox) oldBox.parentNode.removeChild(oldBox);
-                    let box = document.createElement('div');
-                    box.id = 'infobox';
-                    box.style.position = 'fixed';
-                    box.style.top = '10px';
-                    box.style.right = '20px';
-                    box.style.setProperty('background', BOX_BG, 'important');
-                    box.style.setProperty('color', BOX_FG, 'important');
-                    box.style.border = '1.5px solid #aaa';
-                    box.style.padding = '14px';
-                    box.style.zIndex = 30;
-                    box.style.width = '320px';
-                    box.style.maxWidth = '95vw';
-                    box.style.maxHeight = '70vh';
-                    box.style.overflowY = 'auto';
-                    box.style.boxShadow = '0 2px 16px #000a';
-                    box.style.borderRadius = '10px';
-                    box.style.fontFamily = 'sans-serif';
-                    box.style.transform = 'translateX(380px)';
-                    box.style.opacity = '0';
-                    box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
-                    document.body.appendChild(box);
-
-                    // Zebra para descrição longa
-                    let zebraDesc = '';
-                    if (data.info.description) {
-                        let descParts = data.info.description.split(/<br\s*\/?><br\s*\/?/);
-                        zebraDesc = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
-                    }
-
-                    let extraBtn = '';
-                    if (data.uri_base && data.uri_detail) {
-                        extraBtn = `<button id='back-to-low' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>Voltar ao modelo simplificado</button> `;
-                    }
-                    let carousel = '';
-                    if (data.info.images && data.info.images.length > 0) {
-                        if (data.info.images.length === 1) {
-                            carousel = `<div style="text-align:center;"><img id="carousel-img-glb" src="${data.info.images[0]}" class="img-building" /></div>`;
-                        } else {
-                            carousel = `
-                            <div id="carousel-glb" style="text-align:center;">
-                                <img id="carousel-img-glb" src="${data.info.images[0]}" class="img-building" />
-                                <br>
-                                <button id="prev-img-glb" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                <span id="img-indicator-glb" style='color:${BOX_FG};'>1/${data.info.images.length}</span>
-                                <button id="next-img-glb" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
-                            </div>`;
-                        }
-                    }
-                    box.innerHTML = `
-                        <div style='text-align:center;color:#fff;position:relative;min-height:120px;'>
-                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>${data.info.title}</div>
-                            <br>
-                            ${carousel}
-                            <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebraDesc}</div>
-                            <div style='height:48px;'></div>
-                            <div style='position:sticky;bottom:0;left:0;width:100%;background:'+BOX_ALT+';padding-top:8px;padding-bottom:8px;z-index:2;display:flex;gap:8px;justify-content:center;box-shadow:0 -2px 8px #000a;'>
-                                ${extraBtn}<button id='close-infobox' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('close-infobox').onclick = () => {
-                        if (box.parentNode) box.parentNode.removeChild(box);
-                    };
-                    // Carrossel de imagens GLB
-                    if (data.info.images && data.info.images.length > 1) {
-                        let idxImg = 0;
-                        const imgEl = document.getElementById('carousel-img-glb');
-                        const indicator = document.getElementById('img-indicator-glb');
-                        document.getElementById('prev-img-glb').onclick = () => {
-                            idxImg = (idxImg - 1 + data.info.images.length) % data.info.images.length;
-                            imgEl.src = data.info.images[idxImg];
-                            indicator.textContent = `${idxImg + 1}/${data.info.images.length}`;
-                        };
-                        document.getElementById('next-img-glb').onclick = () => {
-                            idxImg = (idxImg + 1) % data.info.images.length;
-                            imgEl.src = data.info.images[idxImg];
-                            indicator.textContent = `${idxImg + 1}/${data.info.images.length}`;
-                        };
-                    }
-                    if (data.uri_base && data.uri_detail) {
-                        document.getElementById('back-to-low').onclick = () => {
-                            // Remove detalhe(s) e re-adiciona low
-                            const current = glbEntities[id];
-                            if (Array.isArray(current)) {
-                                current.forEach(ent => viewer.entities.remove(ent));
-                            } else if (current) {
-                                // pode ser entidade detalhada única
-                                if (current.id && !current.id.endsWith('_low')) {
-                                    viewer.entities.remove(current);
-                                }
-                            }
-                            // marca que este id não tem mais GLB ativo
-                            if (activeGlbs.has(id)) {
-                                activeGlbs.delete(id);
-                                updateTilesetShowForOSM(osmVisible);
-                            }
-                            addLowModel(id);
-                            if (box.parentNode) box.parentNode.removeChild(box);
-                        };
-                    }
-                    // Animação de entrada
-                    setTimeout(() => {
-                        box.style.transform = 'translateX(0)';
-                        box.style.opacity = '1';
-                        box.style.display = 'block';
-                    }, 10);
-                }
-
-                function toggleOsmAndGlb(id) {
-                    // Quando clicar em OSM de um prédio com GLB: abre detalhe e garante que
-                    // o OSM deste prédio será ocultado enquanto o GLB estiver ativo.
-                    // addDetailModel já adiciona id em activeGlbs e chama updateTilesetShowForOSM.
-                    const prev = glbEntities[id];
-                    if (Array.isArray(prev)) prev.forEach(ent => viewer.entities.remove(ent));
-                    else if (prev) viewer.entities.remove(prev);
-                    addDetailModel(id);
-                }
-
-                // Handler duplicado removido para evitar sobrescrita
-
-            } catch (error) {
-                console.error('Erro na inicialização:', error);
-            }
-        }
-
-        init();
-    </script>
 </body>
 
 </html>
