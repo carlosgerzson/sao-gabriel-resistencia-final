@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <title>Cesium 3D</title>
+    <title>São Gabriel — OSM Variante (completo)</title>
     <style type="text/css">
         body,
         html {
@@ -30,6 +30,7 @@
             display: block;
             margin: 0 auto;
         }
+
         .img-lenda {
             width: 300px;
             height: 200px;
@@ -38,6 +39,7 @@
             display: block;
             margin: 0 auto;
         }
+
         .img-building {
             width: 300px;
             height: 300px;
@@ -46,15 +48,22 @@
             display: block;
             margin: 0 auto;
         }
+
         /* Esconder o rodapé/credit do Cesium em telas pequenas (mobile) para evitar quebra de layout */
         @media (max-width: 600px) {
+
             /* O widget de crédito do Cesium contém links; selecionamos por seletor genérico e por href */
-            .cesium-viewer-bottom, .cesium-viewer .cesium-credit {
+            .cesium-viewer-bottom,
+            .cesium-viewer .cesium-credit {
                 display: none !important;
             }
+
             /* alternativa mais específica: esconder apenas links para cesium.com, se existirem */
-            a[href*="cesium.com"] { display: none !important; }
+            a[href*="cesium.com"] {
+                display: none !important;
+            }
         }
+
         /* Esconder botões / widgets no topo direito do Cesium (desktop e mobile) */
         /* Isto remove: pesquisa (geocoder), Home, SceneMode (plane/curve), e botão de ajuda (interrogação) */
         .cesium-viewer .cesium-viewer-toolbar,
@@ -69,8 +78,7 @@
         /* seletores alternativos por atributo/title (fallback) */
         .cesium-viewer .cesium-button[title*="Home"],
         .cesium-viewer .cesium-button[title*="Search"],
-        .cesium-viewer .cesium-button[title*="Help"]
-        {
+        .cesium-viewer .cesium-button[title*="Help"] {
             display: none !important;
         }
     </style>
@@ -78,43 +86,63 @@
 
 <body>
     <div id="cesiumContainer"></div>
-    
+
+
     <!-- Painel lateral agrupando os botões de controle -->
     <div id="left-panel" style="position:fixed;top:45px;left:5px;z-index:2;display:flex;flex-direction:column;gap:8px;">
         <!-- Botão 'Todos' controla a visibilidade dos controles abaixo -->
-        <button id="todos-btn" aria-expanded="true" style="background:#ffd;border:1px solid #888;padding:6px 10px;border-radius:6px;font-weight:600;">Todos ▾</button>
+        <button id="todos-btn" aria-expanded="true"
+            style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;font-weight:600;">Todos ▾</button>
         <div id="left-controls" style="display:flex;flex-direction:column;gap:8px;overflow:hidden;transition:max-height 0.28s ease;">
-            <button id="toggle-osm-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;display:none;">Mostrar/ocultar OSM</button>
-            <button id="mapa-tratados-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_tratados</button>
-            <button id="mapa-1930-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_1930</button>
-            <!-- Tourism buttons (simplified) -->
-            <button id="tourism-list-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">Lista Turismo</button>
-            <button id="tourism-toggle-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">marcadores Turismo (8)</button>
-            <!-- Botões fixos adicionais -->
-            <button id="marechais-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">Marechais</button>
-            <button id="ilustres-btn" style="background:#ffe;border:1px solid #888;padding:6px 10px;border-radius:6px;">Homens Ilustres</button>
+            <button id="toggle-osm-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Ocultar OSM</button>
+            <button id="toggle-base-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa Urbano</button>
+            <!-- Controles visuais para o Mapa Urbano: escolha do basemap + ajustes -->
+            <div id="urban-style-panel" style="background:rgba(0,0,0,0.45);padding:8px;border-radius:6px;border:1px solid rgba(200,200,200,0.06);display:flex;flex-direction:column;gap:6px;">
+                <div style="font-size:12px;color:#ddd;font-weight:600;">Ajuste visual (Mapa Urbano)</div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
+                    <label for="urban-basemap" style="min-width:64px;">Base</label>
+                    <select id="urban-basemap" style="flex:1;padding:4px;border-radius:4px;background:#222;color:#fff;border:1px solid #444;">
+                        <option value="osm">OpenStreetMap (padrão)</option>
+                        <option value="maptiler">MapTiler (streets)</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
+                    <label for="urban-alpha" style="min-width:64px;">Opacidade</label>
+                    <input id="urban-alpha" type="range" min="0" max="1" step="0.01" value="1" style="flex:1;" />
+                    <span id="urban-alpha-val" style="width:34px;text-align:right;">1.00</span>
+                </div>
+                <!-- Brilho e Contraste removidos para simplificar painel em dispositivos pequenos -->
+                <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:#ddd;">
+                    <label for="urban-sat" style="min-width:64px;">Saturação</label>
+                    <input id="urban-sat" type="range" min="0" max="2.0" step="0.01" value="0.88" style="flex:1;" />
+                    <span id="urban-sat-val" style="width:34px;text-align:right;">0.88</span>
+                </div>
+                <!-- Presets removidos: UI simplificada (apenas sliders e seleção de basemap) -->
+            </div>
+            <button id="mapa-tratados-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_tratados</button>
+            <button id="mapa-1930-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Mapa SG_1930</button>
+            <button id="tourism-toggle-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Turismo (8)</button>
+            <button id="marechais-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Marechais</button>
+            <button id="lendas-toggle-btn" style="background:#292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Lendas (5)</button>
+            <button id="monuments-toggle-btn" style="background:#333;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Monumentos (3)</button>
+            <button id="ilustres-btn" style="background: #292929;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Homens Ilustres</button>
+            <button id="reset-zoom-btn" title="Centralizar Praça" aria-label="Centralizar Praça" style="background:#5d0606;color:#f5f5f5;border:1px solid #888;padding:6px 10px;border-radius:6px;">Centralizar Praça</button>
         </div>
     </div>
-        <!-- Botão fixo de boas-vindas -->
-        <button id="welcome-btn" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:100;background:#333;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">Bem Vindo</button>
-    <!--<select id="category-selector" style="z-index: 1; position: fixed; top: 5px; left: 5px;">
-
-    </select>-->
-
-
-
+    <!-- Botão fixo de boas-vindas -->
+    <button id="welcome-btn" style="position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:100;background:#333;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">Bem Vindo</button>
 
 
     <script type="module">
 
-    console.log('Script carregado');
+        console.log('Script carregado - index-osm-full');
 
-    import { buildingsMap } from './buildingsData.js';
-    import { lendas } from './lendasData.js';
-    import { prefeitos } from './prefeitosData.js';
-    import { marechaisData } from './marechaisData.js';
-    import { tourismPoints } from './tourismData.js';
-    import { ilustres } from './ilustresData.js';
+        import { buildingsMap } from './buildingsData.js';
+        import { lendas } from './lendasData.js';
+        import { prefeitos } from './prefeitosData.js';
+        import { marechaisData } from './marechaisData.js';
+        import { tourismPoints } from './tourismData.js';
+        import { ilustres } from './ilustresData.js';
 
 
         // Função para adicionar um mapa histórico como plano
@@ -163,7 +191,12 @@
         }
 
         let viewer;
-    async function init() {
+        async function init() {
+            // cores padrão para caixas (padronizar facilmente aqui)
+            const BOX_BG = '#333';
+            const BOX_FG = '#f5f5f5';
+            const BOX_ALT = '#292929';
+            const BTN_BG = '#444';
             // ...existing code...
             try {
                 // Inicializa o visualizador com Cesium World Terrain
@@ -175,6 +208,20 @@
                     timelcnine: false,
                     baseLayerPicker: false,
                 });
+
+                // Referência para camada urbana adicionada (se alguma)
+                let urbanImageryLayer = null;
+                // Se não houver nenhuma imagery layer por padrão, criaremos um fallback OSM
+                function ensureFallbackImagery() {
+                    try {
+                        if (viewer.imageryLayers.length === 0) {
+                            const osmFallback = new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
+                            viewer.imageryLayers.addImageryProvider(osmFallback);
+                        }
+                    } catch (e) {
+                        console.warn('Falha ao adicionar fallback OSM:', e);
+                    }
+                }
 
 
                 // Controles da câmera
@@ -196,7 +243,7 @@
                     },
                     duration: 3.5,
                     easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
-                    complete: function() {
+                    complete: function () {
                         // Depois do flyTo inicial, mostra a caixa de boas-vindas
                         try { showWelcomeBox(); } catch (e) { console.warn('Erro ao mostrar welcome box', e); }
                     }
@@ -205,10 +252,233 @@
                 // Garante que as sombras estejam ativas
                 viewer.shadows = true;
 
+                // (Sem alterações forçadas ao relógio ou iluminação do globo)
+
+                // --- Base imagery switch (Satélite <-> Mapa Urbano - Carto Positron) ---
+                // Inicial: Mapa Urbano ativo por padrão. Permitimos apenas alternar ON/OFF do mapa urbano
+                let urbanBaseActive = true;
+                function setUrbanBase() {
+                    try {
+                        // adiciona camada urbana por cima das existentes (não remove outras)
+                        // remove apenas a camada urbana anterior, se existir
+                        if (urbanImageryLayer) {
+                            try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
+                            urbanImageryLayer = null;
+                        }
+                        const carto = new Cesium.UrlTemplateImageryProvider({
+                            url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                            subdomains: ['a', 'b', 'c', 'd'],
+                            credit: 'Carto Positron'
+                        });
+                        urbanImageryLayer = viewer.imageryLayers.addImageryProvider(carto);
+                        urbanBaseActive = true;
+                        const btn = document.getElementById('toggle-base-btn');
+                        if (btn) {
+                            btn.innerText = 'Ocultar Mapa Urbano';
+                            btn.disabled = false;
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao aplicar Carto Positron:', e);
+                    }
+                }
+
+                function hideUrbanBase() {
+                    try {
+                        // remove apenas a camada urbana adicionada
+                        if (urbanImageryLayer) {
+                            try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
+                            urbanImageryLayer = null;
+                        }
+                        // se não houver nenhuma outra camada, garante um fallback (OSM)
+                        ensureFallbackImagery();
+                        urbanBaseActive = false;
+                        const btn = document.getElementById('toggle-base-btn');
+                        if (btn) {
+                            btn.innerText = 'Mostrar Mapa Urbano';
+                            btn.disabled = false;
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao ocultar Mapa Urbano:', e);
+                    }
+                }
+
+                // Inicializa explicitamente a base urbana (Carto Positron)
+                setUrbanBase();
+
                 // Botões para alternar mapas históricos
                 document.getElementById('mapa-tratados-btn').onclick = () => {
                     mostrarOuOcultarMapaHistorico('SG_tratados.jpg');
                 };
+                // Ativa handler do botão para alternar Mapa Urbano ON/OFF
+                const toggleBaseBtn = document.getElementById('toggle-base-btn');
+                if (toggleBaseBtn) {
+                    toggleBaseBtn.onclick = () => {
+                        if (urbanBaseActive) {
+                            hideUrbanBase();
+                        } else {
+                            setUrbanBase();
+                        }
+                    };
+                    // texto inicial já ajustado por setUrbanBase()
+                }
+                // Estado e estilos atuais para o layer urbano (padrões leves para reduzir branco)
+                let urbanProviderStyle = 'osm'; // pode ser: osm | maptiler
+                const urbanStyle = {
+                    alpha: 1.0,
+                    saturation: 0.88,
+                    hue: 0.0
+                };
+
+                // Cria um ImageryProvider conforme o estilo solicitado
+                function createUrbanProvider(styleName) {
+                    try {
+                        switch (styleName) {
+                            case 'carto-dark':
+                                return new Cesium.UrlTemplateImageryProvider({
+                                    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                                    subdomains: ['a', 'b', 'c', 'd'],
+                                    credit: 'Carto Dark'
+                                });
+                            case 'stamen-toner-lite':
+                                return new Cesium.UrlTemplateImageryProvider({
+                                    url: 'https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png',
+                                    credit: 'Stamen Toner Lite'
+                                });
+                            case 'osm':
+                                return new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
+                            case 'maptiler':
+                                // MapTiler raster tiles (requere token). Token fornecido pelo usuário.
+                                return new Cesium.UrlTemplateImageryProvider({
+                                    url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=UPIhGua21q5Oraty8VhJ',
+                                    credit: 'MapTiler'
+                                });
+                            case 'carto-light':
+                            default:
+                                return new Cesium.UrlTemplateImageryProvider({
+                                    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                                    subdomains: ['a', 'b', 'c', 'd'],
+                                    credit: 'Carto Positron'
+                                });
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao criar imagery provider:', e);
+                        return new Cesium.OpenStreetMapImageryProvider({ url: 'https://a.tile.openstreetmap.org/' });
+                    }
+                }
+
+                // Aplica as propriedades ao imagery layer (se existir)
+                function applyUrbanStyleToLayer(layer, style) {
+                    if (!layer) return;
+                    try {
+                        if (typeof style.alpha === 'number') layer.alpha = Number(style.alpha);
+                        if (typeof style.saturation === 'number') layer.saturation = Number(style.saturation);
+                        if (typeof style.hue === 'number') layer.hue = Number(style.hue);
+                    } catch (e) {
+                        console.warn('Falha ao aplicar estilo urbano:', e);
+                    }
+                }
+
+                // Atualiza os controles UI para refletir valores atuais
+                function updateUrbanControlsUI() {
+                    const a = document.getElementById('urban-alpha');
+                    const s = document.getElementById('urban-sat');
+                    const h = document.getElementById('urban-hue');
+                    if (a) { a.value = String(urbanStyle.alpha); }
+                    if (s) { s.value = String(urbanStyle.saturation); }
+                    if (h) { h.value = String(urbanStyle.hue); }
+                    const av = document.getElementById('urban-alpha-val'); if (av) av.textContent = Number(urbanStyle.alpha).toFixed(2);
+                    const sv = document.getElementById('urban-sat-val'); if (sv) sv.textContent = Number(urbanStyle.saturation).toFixed(2);
+                    const hv = document.getElementById('urban-hue-val'); if (hv) hv.textContent = Number(urbanStyle.hue).toFixed(2);
+                }
+
+                // Liga os eventos dos sliders e botões de preset
+                function bindUrbanStyleControls() {
+                    const a = document.getElementById('urban-alpha');
+                    const s = document.getElementById('urban-sat');
+                    const h = document.getElementById('urban-hue');
+                    if (a) a.oninput = function () { urbanStyle.alpha = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
+                    if (s) s.oninput = function () { urbanStyle.saturation = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
+                    if (h) h.oninput = function () { urbanStyle.hue = Number(this.value); applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle); updateUrbanControlsUI(); };
+
+                    // Presets e botão Restaurar removidos — mantemos apenas sliders.
+                }
+
+                // Quando criamos a camada urbana, aplicamos estilos e respeitamos o estilo selecionado
+                const originalSetUrbanBase = setUrbanBase;
+                setUrbanBase = function(selectedStyle) {
+                    // permitimos setUrbanBase() sem argumento para manter compatibilidade
+                    if (typeof selectedStyle === 'string') urbanProviderStyle = selectedStyle;
+                    // remove camada antiga se existir
+                    if (urbanImageryLayer) {
+                        try { viewer.imageryLayers.remove(urbanImageryLayer); } catch (e) { }
+                        urbanImageryLayer = null;
+                    }
+                    try {
+                        const provider = createUrbanProvider(urbanProviderStyle);
+                        urbanImageryLayer = viewer.imageryLayers.addImageryProvider(provider);
+                        urbanBaseActive = true;
+                        const btn = document.getElementById('toggle-base-btn');
+                        if (btn) btn.innerText = 'Ocultar Mapa Urbano';
+                        // aplica estilo atual ao novo layer
+                        applyUrbanStyleToLayer(urbanImageryLayer, urbanStyle);
+                        updateUrbanControlsUI();
+                    } catch (e) {
+                        console.warn('Erro ao setar base urbana:', e);
+                        ensureFallbackImagery();
+                    }
+                };
+
+                // Ligação do seletor de basemap no UI
+                const basemapSelect = document.getElementById('urban-basemap');
+                if (basemapSelect) {
+                    // inicializa valor
+                    basemapSelect.value = urbanProviderStyle;
+                    basemapSelect.onchange = function() {
+                        urbanProviderStyle = this.value;
+                        // re-cria a camada urbana com o novo provider e reaplica estilos
+                        if (urbanBaseActive) setUrbanBase(urbanProviderStyle);
+                    };
+                }
+
+                // Garantir que a camada urbana inicial use o provider desejado (padrão: 'osm')
+                // Isso substitui a camada Carto criada anteriormente no carregamento, sem remover
+                // o código Carto do projeto — apenas recria o layer usando o provider selecionado.
+                try {
+                    setUrbanBase(urbanProviderStyle);
+                } catch (e) {
+                    console.warn('Falha ao aplicar base urbana inicial:', e);
+                }
+
+                // Se o controle de hue não estiver presente no HTML, criá-lo dinamicamente
+                function ensureHueControlExists() {
+                    try {
+                        if (document.getElementById('urban-hue')) return; // já existe
+                        const container = document.getElementById('urban-controls') || document.getElementById('left-controls') || document.body;
+                        const wrapper = document.createElement('div');
+                        wrapper.style.marginTop = '6px';
+                        wrapper.innerHTML = `
+                            <label style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#ddd;">
+                                <span>Hue</span>
+                                <span id="urban-hue-val">${Number(urbanStyle.hue).toFixed(2)}</span>
+                            </label>
+                            <input id="urban-hue" type="range" min="-1.0" max="1.0" step="0.01" value="${urbanStyle.hue}" style="width:100%;">
+                        `;
+                        // Tenta inserir próximo ao controle de alpha se existir
+                        const alphaEl = document.getElementById('urban-alpha');
+                        if (alphaEl && alphaEl.parentNode) {
+                            alphaEl.parentNode.insertAdjacentElement('afterend', wrapper);
+                        } else {
+                            container.appendChild(wrapper);
+                        }
+                    } catch (e) {
+                        console.warn('Falha ao criar controle de Hue dinamicamente:', e);
+                    }
+                }
+
+                ensureHueControlExists();
+
+                // Bind initial
+                bindUrbanStyleControls();
                 document.getElementById('mapa-1930-btn').onclick = () => {
                     mostrarOuOcultarMapaHistorico('SG_1930.jpg');
                 };
@@ -221,24 +491,50 @@
                 }
                 if (todosBtn && leftControls) {
                     todosBtn.onclick = () => {
-                        const isExpanded = todosBtn.getAttribute('aria-expanded') === 'true';
-                        if (isExpanded) {
-                            // colapsa
-                            leftControls.style.maxHeight = '0px';
-                            todosBtn.setAttribute('aria-expanded', 'false');
-                            todosBtn.innerText = 'Todos ▸';
-                        } else {
-                            // expande para o tamanho do conteúdo
-                            leftControls.style.maxHeight = leftControls.scrollHeight + 'px';
-                            todosBtn.setAttribute('aria-expanded', 'true');
-                            todosBtn.innerText = 'Todos ▾';
+                        // Implementação simples: alterna display dos botões filhos dentro de #left-controls
+                        const children = Array.from(leftControls.children).filter(ch => ch !== todosBtn);
+                        if (!children.length) return;
+                        // verifica visibilidade do primeiro filho
+                        const firstVisible = getComputedStyle(children[0]).display !== 'none';
+                        children.forEach(ch => {
+                            ch.style.display = firstVisible ? 'none' : '';
+                        });
+                        todosBtn.setAttribute('aria-expanded', (!firstVisible).toString());
+                        todosBtn.innerText = firstVisible ? 'Todos ▸' : 'Todos ▾';
+                    };
+                }
+                // Botão para refazer o zoom/voo inicial para a praça
+                const resetZoomBtn = document.getElementById('reset-zoom-btn');
+                if (resetZoomBtn) {
+                    resetZoomBtn.onclick = () => {
+                        try {
+                            // Evita cliques repetidos enquanto a animação acontece
+                            resetZoomBtn.disabled = true;
+                            resetZoomBtn.style.opacity = '0.6';
+                            viewer.camera.flyTo({
+                                destination: Cesium.Cartesian3.fromDegrees(pracaCentro.lon, pracaCentro.lat, pracaCentro.altura),
+                                orientation: {
+                                    heading: Cesium.Math.toRadians(0.0),
+                                    pitch: Cesium.Math.toRadians(-45.0),
+                                    roll: 0.0
+                                },
+                                duration: 3.5,
+                                easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
+                                complete: function () {
+                                    resetZoomBtn.disabled = false;
+                                    resetZoomBtn.style.opacity = '';
+                                }
+                            });
+                        } catch (e) {
+                            console.warn('Erro ao refazer zoom:', e);
+                            resetZoomBtn.disabled = false;
+                            resetZoomBtn.style.opacity = '';
                         }
                     };
                 }
                 // Tourism UI (simplified)
-                document.getElementById('tourism-list-btn').onclick = () => {
-                    showTourismListModal();
-                };
+                // Nota: o botão de "Lista Turismo" e seu modal foram removidos —
+                // mantemos apenas o toggle de marcadores (tourism-toggle-btn).
 
                 // Função que cria a caixa de boas-vindas centralizada com conteúdo da prefeitura
                 function showWelcomeBox() {
@@ -255,8 +551,8 @@
                     box.style.maxWidth = '95vw';
                     box.style.maxHeight = '70vh';
                     box.style.overflowY = 'auto';
-                    box.style.background = '#333';
-                    box.style.color = '#f5f5f5';
+                    box.style.background = BOX_BG;
+                    box.style.color = BOX_FG;
                     box.style.padding = '16px';
                     box.style.borderRadius = '10px';
                     box.style.boxShadow = '0 4px 30px rgba(0,0,0,0.4)';
@@ -284,49 +580,49 @@
                     document.getElementById('welcome-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
                 }
 
-                    // Injetar CSS responsivo para mobile (aplica-se especialmente à caixa de boas-vindas e infoboxes)
-                    (function injectMobileStyles() {
-                        const styleId = 'mobile-responsive-styles';
-                        if (document.getElementById(styleId)) return;
-                        const css = `
-                            @media (max-width: 480px) {
+                // Injetar CSS responsivo para mobile (aplica-se especialmente à caixa de boas-vindas e infoboxes)
+                (function injectMobileStyles() {
+                    const styleId = 'mobile-responsive-styles';
+                    if (document.getElementById(styleId)) return;
+                    const css = `
+                            /* Regras específicas para telefones modernos (iPhone/Android) */
+                            @media (max-width: 420px) {
                                 /* Caixa de boas-vindas - ocupa maior altura e largura reduzida */
                                 #welcome-box {
                                     left: 50% !important;
-                                    top: 5% !important;
+                                    top: 6% !important;
                                     transform: translateX(-50%) !important;
-                                    width: 95vw !important;
-                                    max-width: 95vw !important;
-                                    height: 85vh !important;
-                                    max-height: 85vh !important;
+                                    width: 94vw !important;
+                                    max-width: 94vw !important;
+                                    height: 84vh !important;
+                                    max-height: 84vh !important;
                                     overflow: auto !important;
-                                    padding: 12px !important;
+                                    padding: 14px !important;
                                     border-radius: 10px !important;
                                     box-shadow: 0 6px 40px rgba(0,0,0,0.6) !important;
                                     z-index: 200 !important;
                                 }
                                 /* Tornar botões e textos maiores para touch */
                                 #welcome-box button, #welcome-box a {
-                                    padding: 10px 12px !important;
-                                    font-size: 15px !important;
+                                    padding: 12px 14px !important;
+                                    font-size: 16px !important;
                                     border-radius: 8px !important;
                                 }
 
-                                
                                 /* Ajuste geral dos infoboxes para layout em coluna e conteúdo rolável */
-                                #infobox, #prefeitos-box, #marechais-box, #ilustres-box, #infobox-lenda, #tourism-infobox, #tourism-list-modal {
+                                #infobox, #prefeitos-box, #marechais-box, #ilustres-box, #infobox-lenda, #tourism-infobox {
                                     left: 50% !important;
                                     right: auto !important;
-                                    top: 4% !important;
+                                    top: 6% !important;
                                     transform: translateX(-50%) !important;
-                                    width: 95vw !important;
-                                    max-width: 95vw !important;
-                                    /* Aumenta um pouco a altura no mobile para garantir que o botão Fechar fique visível */
-                                    height: 92vh !important;
-                                    max-height: 92vh !important;
+                                    width: 94vw !important;
+                                    max-width: 94vw !important;
+                                    /* Aumenta a altura no mobile para garantir conteúdo legível */
+                                    height: 86vh !important;
+                                    max-height: 86vh !important;
                                     overflow: hidden !important; /* container principal não rola; conteúdo interno rola */
                                     border-radius: 10px !important;
-                                    padding: 12px !important;
+                                    padding: 14px !important;
                                     box-sizing: border-box !important;
                                     z-index: 200 !important;
                                     display: flex !important;
@@ -334,7 +630,7 @@
                                 }
 
                                 /* Conteúdo interno (primeiro filho) fica rolável; botão de fechar fica fixo na base do container */
-                                #infobox > div, #prefeitos-box > div, #marechais-box > div, #ilustres-box > div, #infobox-lenda > div, #tourism-infobox > div, #tourism-list-modal > div {
+                                #infobox > div, #prefeitos-box > div, #marechais-box > div, #ilustres-box > div, #infobox-lenda > div, #tourism-infobox > div {
                                     overflow: auto !important;
                                     flex: 1 1 auto !important;
                                     display: flex !important;
@@ -343,8 +639,8 @@
 
                                 /* Garante que as imagens não ocupem espaço excessivo e empurrem o botão para fora */
                                 .img-building, .img-prefeito, .img-lenda {
-                                    /* reduzimos um pouco a altura das imagens para abrir espaço para botões */
-                                    max-height: calc(34vh) !important;
+                                    /* aumenta a reserva para imagem, mas limita para não ultrapassar o viewport */
+                                    max-height: 40vh !important;
                                     width: auto !important;
                                     object-fit: contain !important;
                                     display: block !important;
@@ -356,21 +652,79 @@
                                 #ilustres-box button#ilustres-close,
                                 #prefeitos-box button#prefeitos-close,
                                 #infobox button#close-infobox,
-                                #infobox-lenda button#close-infobox-lenda,
-                                #tourism-list-modal button#close-tourism-list {
+                                #infobox-lenda button#close-infobox-lenda {
                                     align-self: center !important;
                                     margin-top: 12px !important;
                                     flex-shrink: 0 !important;
                                 }
+
+                                /* Left-panel stays at top-left on most phones; make controls scrollable vertically
+                                   Botões maiores, área limitada para evitar cobrir todo o mapa (rolagem interna) */
+                                #left-panel {
+                                    left: 8px !important;
+                                    right: auto !important;
+                                    top: 12px !important;
+                                    bottom: auto !important;
+                                    display: flex !important;
+                                    flex-direction: column !important;
+                                    gap: 8px !important;
+                                    align-items: flex-start !important;
+                                    /* reduzir z-index para ficar atrás das infoboxes (infoboxes usam z ~200) */
+                                    z-index: 40 !important;
+                                    max-width: 46vw !important; /* ocupa até metade da largura para mobile */
+                                }
+                                #left-controls {
+                                    display: flex !important;
+                                    flex-direction: column !important;
+                                    gap: 8px !important;
+                                    overflow-x: hidden !important;
+                                    overflow-y: auto !important;
+                                    max-height: 64vh !important; /* limita a área e permite rolagem */
+                                    width: 100% !important;
+                                    padding: 6px 4px !important;
+                                    -webkit-overflow-scrolling: touch !important;
+                                }
+                                /* botões do painel: largura mínima e padding fixo para evitar compressão/resize ao colapsar */
+                                #left-panel button, #left-controls button {
+                                    padding: 10px 12px !important;
+                                    font-size: 15px !important;
+                                    border-radius: 8px !important;
+                                    white-space: normal !important; /* permite quebra de linha em labels longas */
+                                    text-align: left !important;
+                                    min-width: 84px !important;
+                                    box-sizing: border-box !important;
+                                }
+                                /* garantir que o botão 'Todos' mantenha estilo previsível (não encolha) */
+                                #todos-btn {
+                                    padding: 8px 10px !important;
+                                    font-size: 14px !important;
+                                    min-width: 88px !important;
+                                    box-sizing: border-box !important;
+                                }
+
+                                /* transição consistente para expand/collapse */
+                                #left-controls {
+                                    transition: max-height 0.28s ease !important;
+                                }
+                            }
+
+                            /* Reforço para telas ainda menores (ex: telefones compactos) */
+                            @media (max-width: 420px) {
+                                #infobox, #prefeitos-box, #marechais-box, #ilustres-box, #infobox-lenda, #tourism-infobox {
+                                    width: 96vw !important;
+                                    height: 88vh !important;
+                                    padding: 12px !important;
+                                }
+                                .img-building, .img-prefeito, .img-lenda { max-height: 42vh !important; }
                             }
                         `;
-                        const st = document.createElement('style');
-                        st.id = styleId;
-                        st.appendChild(document.createTextNode(css));
-                        document.head.appendChild(st);
-                    })();
+                    const st = document.createElement('style');
+                    st.id = styleId;
+                    st.appendChild(document.createTextNode(css));
+                    document.head.appendChild(st);
+                })();
 
-                    // Handler do botão fixo 'Bem Vindo'
+                // Handler do botão fixo 'Bem Vindo'
                 const wb = document.getElementById('welcome-btn');
                 if (wb) wb.onclick = () => { showWelcomeBox(); };
 
@@ -424,57 +778,44 @@
                     tourismEntities = [];
                 }
 
-                function showTourismListModal() {
-                    let old = document.getElementById('tourism-list-modal');
-                    if (old) old.parentNode.removeChild(old);
-                    const modal = document.createElement('div');
-                    modal.id = 'tourism-list-modal';
-                    modal.style.position = 'fixed';
-                    modal.style.top = '80px';
-                    modal.style.right = '20px';
-                    modal.style.setProperty('background', '#666', 'important');
-                    modal.style.setProperty('color', '#fff', 'important');
-                    modal.style.padding = '12px';
-                    modal.style.zIndex = 60;
-                    modal.style.border = '1px solid #666';
-                    modal.style.borderRadius = '8px';
-                    modal.style.maxHeight = '70vh';
-                    modal.style.overflowY = 'auto';
-                    modal.style.minWidth = '220px';
-                    modal.style.fontSize = '14px';
-                    modal.innerHTML = `<div style='font-weight:bold;margin-bottom:8px;'>Pontos Turísticos</div>`;
-                    tourismPoints.forEach(p => {
-                        const item = document.createElement('div');
-                        item.style.marginBottom = '6px';
-                        item.innerHTML = `<div style='font-weight:bold;'>${p.name}</div>
-                            <div style='display:flex;gap:6px;margin-top:4px;align-items:center;'>
-                                <button data-id='${p.id}' class='open-page' style='padding:4px 6px;font-size:13px;'>Abrir página</button>
-                                ${p.infoUrl ? `<a href='${p.infoUrl}' target='_blank' style='color:#9fd;margin-left:6px;text-decoration:underline;font-size:13px;'>Mais informações</a>` : ''}
-                            </div>`;
-                        modal.appendChild(item);
-                    });
-                    const closeBtn = document.createElement('div');
-                    closeBtn.style.marginTop = '8px';
-                    closeBtn.innerHTML = `<button id='close-tourism-list' style='padding:6px 10px;'>Fechar</button>`;
-                    modal.appendChild(closeBtn);
-                    document.body.appendChild(modal);
-                    modal.querySelectorAll('.open-page').forEach(b => b.onclick = (e) => {
-                        const id = e.target.getAttribute('data-id');
-                        const p = tourismPoints.find(x => x.id === id);
-                        if (p && p.pageUrl) window.open(p.pageUrl, '_blank');
-                    });
-                    // apenas abre páginas individuais
-                    document.getElementById('close-tourism-list').onclick = () => { if (modal.parentNode) modal.parentNode.removeChild(modal); };
-                    modal.querySelectorAll('.open-page').forEach(b => b.onclick = (e) => {
-                        const id = e.target.getAttribute('data-id');
-                        const p = tourismPoints.find(x => x.id === id);
-                        if (p && p.pageUrl) window.open(p.pageUrl, '_blank');
-                    });
-                }
-               
+                // showTourismListModal removed — lista de turismo foi eliminada do menu
+
+
 
                 // Adiciona marcadores das lendas
                 const lendaEntities = [];
+                // Estado do toggle de Lendas (botão no menu 'Todos')
+                let lendasMarkersVisible = false;
+                // Handler do botão de Lendas (adicionado ao menu 'Todos')
+                const lendasToggleBtn = document.getElementById('lendas-toggle-btn');
+                if (lendasToggleBtn) {
+                    lendasToggleBtn.onclick = () => {
+                        lendasMarkersVisible = !lendasMarkersVisible;
+                        // Alterna visibilidade das entidades já criadas
+                        lendaEntities.forEach(ent => {
+                            try { ent.show = lendasMarkersVisible; } catch (e) { /* ent pode ser indefinido */ }
+                        });
+                        // manter o texto fixo em 'Lendas (5)'
+                        lendasToggleBtn.innerText = 'Lendas (5)';
+                        // Se marcadores devem aparecer, cria-los caso ainda não existam
+                        if (lendasMarkersVisible && lendaEntities.length === 0 && typeof lendas !== 'undefined') {
+                            lendas.forEach((lenda, idx) => {
+                                const entity = viewer.entities.add({
+                                    position: Cesium.Cartesian3.fromDegrees(lenda.position.lon, lenda.position.lat, 5),
+                                    billboard: {
+                                        image: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                                        width: 40,
+                                        height: 40,
+                                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                                    },
+                                    lendaId: idx
+                                });
+                                lendaEntities.push(entity);
+                            });
+                        }
+                    };
+                }
                 // Marcador para carrossel de prefeitos (sobre a prefeitura)
                 const prefeituraData = buildingsMap['494741651'];
                 let prefeitosMarker = null;
@@ -492,6 +833,55 @@
                     });
                 }
 
+                // Monumentos (IDs finais no buildingsMap) - toggle para destacar/mostrar marcadores
+                let monumentsVisible = false;
+                const monumentIds = ['111111111', '222222222', '333333333'];
+                const monumentEntities = [];
+                const monumentsToggleBtn = document.getElementById('monuments-toggle-btn');
+                if (monumentsToggleBtn) {
+                    monumentsToggleBtn.onclick = () => {
+                        monumentsVisible = !monumentsVisible;
+                        if (monumentsVisible) {
+                            // cria elipses (halo) no solo para cada monumento — mais legível contra o terreno
+                            monumentIds.forEach(id => {
+                                const data = buildingsMap[id];
+                                if (!data || !data.position) return;
+                                // elipse principal: halo semi-transparente
+                                const halo = viewer.entities.add({
+                                    id: 'monument_halo_' + id,
+                                    position: data.position,
+                                    ellipse: {
+                                        semiMajorAxis: 12.0,
+                                        semiMinorAxis: 8.0,
+                                        material: Cesium.Color.fromBytes(255, 200, 0, 160), // amarelo/laranja translúcido
+                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                                        classificationType: Cesium.ClassificationType.BOTH
+                                    }
+                                });
+                                // sombra/outline: elipse menor e mais escura
+                                const edge = viewer.entities.add({
+                                    id: 'monument_edge_' + id,
+                                    position: data.position,
+                                    ellipse: {
+                                        semiMajorAxis: 9.0,
+                                        semiMinorAxis: 6.0,
+                                        material: Cesium.Color.BLACK.withAlpha(0.25),
+                                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                                        classificationType: Cesium.ClassificationType.BOTH
+                                    }
+                                });
+                                monumentEntities.push(halo, edge);
+                            });
+                            monumentsToggleBtn.innerText = 'Monumentos (3) ✓';
+                        } else {
+                            // remove halos
+                            monumentEntities.forEach(e => viewer.entities.remove(e));
+                            monumentEntities.length = 0;
+                            monumentsToggleBtn.innerText = 'Monumentos (3)';
+                        }
+                    };
+                }
+
                 // Botão para Marechais (abre carrossel)
                 const marechaisBtn = document.createElement('button');
                 marechaisBtn.id = 'marechais-btn';
@@ -507,6 +897,8 @@
                 // Atacha handler ao botão estático 'Marechais'
                 const marechaisBtnStatic = document.getElementById('marechais-btn');
                 if (marechaisBtnStatic) marechaisBtnStatic.onclick = () => { showMarechaisCarousel(); };
+                
+                // Inversão de sombras removida — sem alterações programáticas na luz da cena.
                 // Função para mostrar carrossel/infobox dos Marechais
                 function showMarechaisCarousel(startIndex = 0) {
                     if (!marechaisData || !marechaisData.length) return;
@@ -517,9 +909,9 @@
                     box.id = 'marechais-box';
                     box.style.position = 'fixed';
                     box.style.top = '10px';
-                        box.style.right = '20px';
-                    box.style.setProperty('background', '#333', 'important');
-                    box.style.setProperty('color', '#fff', 'important');
+                    box.style.right = '20px';
+                    box.style.setProperty('background', BOX_BG, 'important');
+                    box.style.setProperty('color', BOX_FG, 'important');
                     box.style.border = '1.5px solid #aaa';
                     box.style.padding = '14px';
                     box.style.zIndex = 30;
@@ -527,7 +919,7 @@
                     box.style.boxShadow = '0 2px 16px #000a';
                     box.style.borderRadius = '10px';
                     box.style.fontFamily = 'sans-serif';
-                        box.style.transform = 'translateX(380px)';
+                    box.style.transform = 'translateX(380px)';
                     box.style.opacity = '0';
                     box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
                     document.body.appendChild(box);
@@ -542,25 +934,25 @@
                         const foto = m.foto ? m.foto : 'placeholder_prefeito.jpg';
                         let zebra = '';
                         if (m.resumo) {
-                            let descParts = m.resumo.split(/<br\s*\/?>/);
-                            zebra = descParts.map((part, i) => `<div style='background:${i%2===0?'#333':'#292929'};color:#fff;padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
+                            let descParts = m.resumo.split(/<br\s*\/?/);
+                            zebra = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
                         }
                         if (m.observacao) {
                             zebra += `<div style='margin-top:6px;'><b>Obs.:</b></div>`;
-                            zebra += `<div style='background:#292929;color:#fff;padding:2px 6px;border-radius:3px;'>${m.observacao}</div>`;
+                            zebra += `<div style='background:${BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${m.observacao}</div>`;
                         }
                         box.innerHTML = `
                             <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>Marechais de São Gabriel</div>
+                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Marechais de São Gabriel</div>
                                 <b style='font-size:17px;'>${m.nome}</b><br><br>
-                                <img src='${foto}' alt='${m.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:#444;'>
+                                <img src='${foto}' alt='${m.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
                                 <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebra}</div>
                                 <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='marechais-prev' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#aaf;'>${idx + 1} / ${marechaisData.length}</span>
-                                    <button id='marechais-next' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
+                                    <button id='marechais-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
+                                    <span style='color:#fff;'>${idx + 1} / ${marechaisData.length}</span>
+                                    <button id='marechais-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
                                 </div>
-                                <button id='marechais-close' style='margin-top:14px;background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
+                                <button id='marechais-close' style='margin-top:14px;background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
                             </div>`;
                         document.getElementById('marechais-prev').onclick = () => { idx = (idx - 1 + marechaisData.length) % marechaisData.length; render(); };
                         document.getElementById('marechais-next').onclick = () => { idx = (idx + 1) % marechaisData.length; render(); };
@@ -589,9 +981,9 @@
                     box.id = 'prefeitos-box';
                     box.style.position = 'fixed';
                     box.style.top = '10px';
-                        box.style.right = '20px';
-                    box.style.setProperty('background', '#333', 'important');
-                    box.style.setProperty('color', '#fff', 'important');
+                    box.style.right = '20px';
+                    box.style.setProperty('background', BOX_BG, 'important');
+                    box.style.setProperty('color', BOX_FG, 'important');
                     box.style.border = '1.5px solid #aaa';
                     box.style.padding = '14px';
                     box.style.zIndex = 30;
@@ -599,7 +991,7 @@
                     box.style.boxShadow = '0 2px 16px #000a';
                     box.style.borderRadius = '10px';
                     box.style.fontFamily = 'sans-serif';
-                        box.style.transform = 'translateX(380px)';
+                    box.style.transform = 'translateX(380px)';
                     box.style.opacity = '0';
                     box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
                     document.body.appendChild(box);
@@ -619,27 +1011,27 @@
                         if (p.periodos && p.periodos.length) {
                             zebra += `<div style='margin-bottom:2px;'><b>Período(s):</b></div>`;
                             p.periodos.forEach((per, i) => {
-                                zebra += `<div style='background:${i%2===0?'#333':'#292929'};color:#fff;padding:2px 6px;border-radius:3px;'>${per}</div>`;
+                                zebra += `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${per}</div>`;
                             });
                         }
                         if (p.observacao) {
                             zebra += `<div style='margin-top:6px;'><b>Obs.:</b></div>`;
-                            zebra += `<div style='background:#292929;color:#fff;padding:2px 6px;border-radius:3px;'>${p.observacao}</div>`;
+                            zebra += `<div style='background:${BOX_ALT};color:${BOX_FG};padding:2px 6px;border-radius:3px;'>${p.observacao}</div>`;
                         }
                         box.innerHTML = `
                             <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>Prefeitos de São Gabriel</div>
+                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Prefeitos de São Gabriel</div>
                                 <b style='font-size:17px;'>${p.nome}</b><br><br>
-                                <img src='${foto}' alt='${p.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:#444;'>
+                                <img src='${foto}' alt='${p.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
                                 <div style='margin-top:12px;text-align:left;font-size:15px;'>
                                     ${zebra}
                                 </div>
                                 <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='prefeitos-prev' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#aaf;'>${idx + 1} / ${prefeitos.length}</span>
-                                    <button id='prefeitos-next' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
+                                    <button id='prefeitos-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
+                                    <span style='color:#fff;'>${idx + 1} / ${prefeitos.length}</span>
+                                    <button id='prefeitos-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
                                 </div>
-                                <button id='prefeitos-close' style='margin-top:14px;background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
+                                <button id='prefeitos-close' style='margin-top:14px;background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
                             </div>`;
                         document.getElementById('prefeitos-prev').onclick = () => { idx = (idx - 1 + prefeitos.length) % prefeitos.length; render(); };
                         document.getElementById('prefeitos-next').onclick = () => { idx = (idx + 1) % prefeitos.length; render(); };
@@ -657,7 +1049,7 @@
                     }
                     render();
                 }
-                
+
                 // Carrossel para Homens Ilustres (foto + resumo + fonte)
                 function showIlustresCarousel(startIndex = 0) {
                     if (!ilustres || !ilustres.length) return;
@@ -669,8 +1061,8 @@
                     box.style.position = 'fixed';
                     box.style.top = '10px';
                     box.style.right = '20px';
-                    box.style.setProperty('background', '#333', 'important');
-                    box.style.setProperty('color', '#fff', 'important');
+                    box.style.setProperty('background', BOX_BG, 'important');
+                    box.style.setProperty('color', BOX_FG, 'important');
                     box.style.border = '1.5px solid #aaa';
                     box.style.padding = '14px';
                     box.style.zIndex = 30;
@@ -688,18 +1080,17 @@
                         const foto = it.foto ? it.foto : 'placeholder_prefeito.jpg';
                         box.innerHTML = `
                             <div style='text-align:center;color:#fff;'>
-                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>Homens Ilustres</div>
+                                <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Homens Ilustres</div>
                                 <b style='font-size:17px;'>${it.nome}</b><br><br>
-                                <img src='${foto}' alt='${it.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:#444;'>
+                                <img src='${foto}' alt='${it.nome}' class='img-prefeito' style='border:1.5px solid #aaa;background:'+BTN_BG+';'>
                                 <div style='margin-top:12px;text-align:left;font-size:14px;color:#ddd;'>${it.resumo}</div>
                                 <div style='display:flex;justify-content:space-between;margin-top:12px;'>
-                                    <button id='ilustres-prev' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                    <span style='color:#aaf;'>${idx + 1} / ${ilustres.length}</span>
-                                    <button id='ilustres-next' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
+                                    <button id='ilustres-prev' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
+                                    <span style='color:#fff;'>${idx + 1} / ${ilustres.length}</span>
+                                    <button id='ilustres-next' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
                                 </div>
                                 <div style='margin-top:10px;display:flex;gap:8px;justify-content:center;'>
-                                    ${it.fonte ? `<a href='${it.fonte}' target='_blank' style='color:#9fd;text-decoration:underline;padding:6px 10px;background:#223;border-radius:4px;'>Fonte</a>` : ''}
-                                    <button id='ilustres-close' style='background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 12px;cursor:pointer;'>Fechar</button>
+                                    <button id='ilustres-close' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 12px;cursor:pointer;'>Fechar</button>
                                 </div>
                             </div>`;
                         document.getElementById('ilustres-prev').onclick = () => { idx = (idx - 1 + ilustres.length) % ilustres.length; render(); };
@@ -738,9 +1129,9 @@
                     box.id = 'infobox-lenda';
                     box.style.position = 'fixed';
                     box.style.top = '10px';
-                        box.style.right = '20px';
-                    box.style.setProperty('background', '#494949', 'important');
-                    box.style.setProperty('color', '#fff', 'important');
+                    box.style.right = '20px';
+                    box.style.setProperty('background', BOX_BG, 'important');
+                    box.style.setProperty('color', BOX_FG, 'important');
                     box.style.border = '1.5px solid #aaa';
                     box.style.padding = '14px';
                     box.style.zIndex = 30;
@@ -748,7 +1139,7 @@
                     box.style.boxShadow = '0 2px 16px #000a';
                     box.style.borderRadius = '10px';
                     box.style.fontFamily = 'sans-serif';
-                        box.style.transform = 'translateX(380px)';
+                    box.style.transform = 'translateX(380px)';
                     box.style.opacity = '0';
                     box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
                     box.style.overflowY = 'auto';
@@ -758,7 +1149,7 @@
                     let zebraDesc = '';
                     if (lenda.description) {
                         let descParts = lenda.description.split(/<br\s*\/?><br\s*\/?/);
-                        zebraDesc = descParts.map((part, i) => `<div style='background:${i%2===0?'#333':'#292929'};color:#fff;padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
+                        zebraDesc = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
                     }
 
                     let carousel = '';
@@ -770,18 +1161,18 @@
                             <div id="carousel-lenda" style="text-align:center;">
                                 <img id="carousel-img" src="${lenda.images[0]}" class="img-lenda" />
                                 <br>
-                                <button id="prev-img" style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                <span id="img-indicator" style='color:#aaf;'>1/${lenda.images.length}</span>
-                                <button id="next-img" style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
+                                <button id="prev-img" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
+                                <span id="img-indicator" style='color:${BOX_FG};'>1/${lenda.images.length}</span>
+                                <button id="next-img" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
                             </div>`;
                         }
                     }
                     box.innerHTML = `
                         <div style='text-align:center;color:#fff;'>
-                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>${lenda.title}</div>
+                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>${lenda.title}</div>
                             ${carousel}
                             <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebraDesc}</div>
-                            <div style='margin-top:12px;'><button id='close-infobox-lenda' style='background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button></div>
+                            <div style='margin-top:12px;'><button id='close-infobox-lenda' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button></div>
                         </div>
                     `;
                     document.getElementById('close-infobox-lenda').onclick = () => {
@@ -815,29 +1206,42 @@
                 const buildingsTileset = await Cesium.createOsmBuildingsAsync();
                 // Offset vertical em metros (ajuste conforme necessário)
                 const osmOffset = 0;
-                const osmTranslation = Cesium.Cartesian3.fromElements(0,0, osmOffset, new Cesium.Cartesian3());
+                const osmTranslation = Cesium.Cartesian3.fromElements(0, 0, osmOffset, new Cesium.Cartesian3());
                 buildingsTileset.modelMatrix = Cesium.Matrix4.fromTranslation(osmTranslation);
                 viewer.scene.primitives.add(buildingsTileset);
-                // Garantir estado inicial: ocultar OSM (definimos explicitamente false aqui
-                // para evitar usar a variável antes de sua declaração)
-                buildingsTileset.show = false;
+                // Garantir estado inicial: mostrar OSM (esta variante inicia com OSM visível)
+                buildingsTileset.show = true;
 
                 // Botão para mostrar/ocultar OSM temporariamente
-                // Inicialmente mantemos as OSM ocultas (não mostrar sobre nossos GLBs)
-                let osmVisible = false;
+                // Inicialmente mantemos as OSM visíveis (não mostrar sobre nossos GLBs)
+                let osmVisible = true;
                 const activeGlbs = new Set(); // ids de prédios que atualmente exibem GLB (detalhe)
-                // Handler do botão toggle-osm-btn está temporariamente oculto na UI.
-                // Mantivemos a lógica abaixo comentada para referência futura (re-ativar se precisar obter elevação/coords):
-                /*
-                document.getElementById('toggle-osm-btn').onclick = function() {
-                    osmVisible = !osmVisible;
-                    updateTilesetShowForOSM(osmVisible);
-                };
-                */
 
                 // Adiciona GLBs lowpoly ao iniciar (inclusive monumentos), mantendo como padrão as OSM originais visíveis
                 // glbEntities[id] pode ser: Entity (low), Entity (detalhe único) ou Array<Entity> (detalhe multi-blocos)
                 let glbEntities = {};
+
+                // --- Preview Laranja (aplicado por padrão a todos os LOWs) ---
+                const PREVIEW_ORANGE = Cesium.Color.fromCssColorString('#b45f00');
+
+                function setEntityTintSingle(ent, apply) {
+                    try {
+                        if (!ent || !ent.model) return;
+                        if (apply) {
+                            ent.model.color = PREVIEW_ORANGE;
+                            ent.model.colorBlendMode = Cesium.ColorBlendMode.REPLACE;
+                            ent.model.colorBlendAmount = 1.0;
+                        } else {
+                            // Reverter: limpa propriedades (volta ao comportamento padrão)
+                            try { ent.model.color = undefined; } catch (e) { }
+                            try { ent.model.colorBlendMode = undefined; } catch (e) { }
+                            try { ent.model.colorBlendAmount = undefined; } catch (e) { }
+                        }
+                    } catch (e) {
+                        console.warn('Falha ao aplicar tint no entity', ent && ent.id, e);
+                    }
+                }
+                // Nota: não temos botão; os LOWs recebem tint por padrão quando criados.
                 // Helper para atualizar o estilo do tileset conforme osmVisible e quais GLBs estão ativos
                 function updateTilesetShowForOSM(osmOn) {
                     if (!buildingsTileset) return;
@@ -846,24 +1250,22 @@
                         buildingsTileset.show = false;
                         return;
                     }
-                    // Mostrar tileset, mas ocultar elementos que possuem GLB ativo ou que
-                    // já têm um modelo low (uri_base) atualmente presente como entidade.
+
+                    // Mostrar tileset, exceto os elementos que possuem um modelo 'low' (uri_base)
                     buildingsTileset.show = true;
 
                     // Reunir lista de IDs cuja OSM deve ser ocultada:
                     // - todos os ids que têm uri_base (temos um modelo low para eles)
                     // - além dos activeGlbs (detalhes abertos)
                     const hideSet = new Set();
-                    // adiciona IDs que possuem uri_base (não queremos que o tileset OSM sobreponha nossos lows)
                     Object.keys(buildingsMap).forEach(id => {
                         const d = buildingsMap[id];
-                        if (d && d.uri_base) hideSet.add(id);
+                        if (d && d.uri_base) hideSet.add(String(id));
                     });
-                    // adiciona GLBs detalhados ativos (redundante em muitos casos, mas seguro)
-                    activeGlbs.forEach(id => hideSet.add(id));
+                    activeGlbs.forEach(id => hideSet.add(String(id)));
 
                     if (hideSet.size === 0) {
-                        // sem ids a esconder: mostra tudo
+                        // sem ids a esconder: mostra tudo (estilo padrão)
                         buildingsTileset.style = new Cesium.Cesium3DTileStyle({
                             show: true,
                             color: "color('white', 1)"
@@ -871,15 +1273,27 @@
                         return;
                     }
 
-                    // Construir condições corretamente: cada condição é uma expressão que
-                    // compara ${elementId} com o id string e retorna false para ocultar.
-                    const conds = [];
+                    // Construir as condições para Cesium: cada condição é uma expressão string
+                    // que compara ${elementId} com o id do prédio e retorna false para esconder.
+                    const conditions = [];
                     hideSet.forEach(hid => {
-                        conds.push([`\${elementId} === '${hid}'`, false]);
+                        // Se o id for numérico (apenas dígitos), compare sem aspas para evitar
+                        // comparar número com string — caso contrário, compare como string.
+                        let expr;
+                        if (/^\d+$/.test(hid)) {
+                            // Ex.: "${elementId} === 123456"
+                            expr = "${elementId} === " + hid;
+                        } else {
+                            // Ex.: "${elementId} === 'abc-123'"
+                            expr = "${elementId} === '" + hid + "'";
+                        }
+                        conditions.push([expr, false]);
                     });
-                    conds.push([true, true]);
+                    // regra final: se nenhuma condição anterior for verdadeira, mostrar
+                    conditions.push([true, true]);
+
                     buildingsTileset.style = new Cesium.Cesium3DTileStyle({
-                        show: { conditions: conds }
+                        show: { conditions: conditions }
                     });
                 }
                 function addLowModel(id) {
@@ -904,6 +1318,9 @@
                         }
                     });
                     glbEntities[id] = ent; // referencia ao low
+                    console.debug('addLowModel', id, data.uri_base);
+                    // Aplicar tint laranja por padrão a todos os LOWs
+                    try { setEntityTintSingle(ent, true); } catch (e) { /* noop */ }
                     // Ao garantir o low, removemos id de activeGlbs (se estava)
                     if (activeGlbs.has(id)) {
                         activeGlbs.delete(id);
@@ -934,7 +1351,8 @@
                                     shadows: Cesium.ShadowMode.ENABLED
                                 }
                             });
-                            parts.push(ent);
+                                parts.push(ent);
+                                console.debug('addDetailModel (part)', id, uri);
                         });
                         glbEntities[id] = parts; // array de partes
                         // marca como GLB ativo
@@ -956,6 +1374,7 @@
                             }
                         });
                         glbEntities[id] = ent;
+                        console.debug('addDetailModel', id, data.uri_detail);
                         // marca como GLB ativo
                         activeGlbs.add(id);
                         updateTilesetShowForOSM(osmVisible);
@@ -978,6 +1397,20 @@
                     if (id === '999999999') return;
                     addLowModel(id);
                 });
+
+                // Após criar os lows, aplica a lógica de mostrar/ocultar OSM conforme osmVisible
+                updateTilesetShowForOSM(osmVisible);
+
+                // Configura handler do botão toggle-osm agora que a função updateTilesetShowForOSM existe
+                const toggleOsmBtn = document.getElementById('toggle-osm-btn');
+                if (toggleOsmBtn) {
+                    toggleOsmBtn.onclick = function() {
+                        osmVisible = !osmVisible;
+                        updateTilesetShowForOSM(osmVisible);
+                        toggleOsmBtn.innerText = osmVisible ? 'Ocultar OSM' : 'Mostrar OSM';
+                    };
+                    toggleOsmBtn.innerText = osmVisible ? 'Ocultar OSM' : 'Mostrar OSM';
+                }
 
                 // Evento de clique para mostrar ID e coordenadas do prédio OSM
                 // Handler único para clique
@@ -1021,9 +1454,9 @@
                                     box.id = 'infobox';
                                     box.style.position = 'fixed';
                                     box.style.top = '70px';
-                                        box.style.right = '20px';
-                                    box.style.setProperty('background', '#494949', 'important');
-                                    box.style.setProperty('color', '#fff', 'important');
+                                    box.style.right = '20px';
+                                    box.style.setProperty('background', BOX_BG, 'important');
+                                    box.style.setProperty('color', BOX_FG, 'important');
                                     box.style.border = '1.5px solid #aaa';
                                     box.style.padding = '14px';
                                     box.style.zIndex = 30;
@@ -1034,17 +1467,17 @@
                                     box.style.boxShadow = '0 2px 16px #000a';
                                     box.style.borderRadius = '10px';
                                     box.style.fontFamily = 'sans-serif';
-                                        box.style.transform = 'translateX(380px)';
+                                    box.style.transform = 'translateX(380px)';
                                     box.style.opacity = '0';
                                     box.style.transition = 'transform 0.6s cubic-bezier(.6,1.5,.4,1), opacity 0.4s';
                                     document.body.appendChild(box);
                                     box.innerHTML = `
                                         <div style='text-align:center;color:#fff;'>
-                                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>Prédio OSM</div>
+                                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>Prédio OSM</div>
                                             <small style='color:#ccc;'>ID: ${elementId}</small><br><br>
                                             <div style='margin-top:12px;text-align:left;font-size:15px;'>
                                                 Coordenadas:<br>
-                                                <span style='color:#aaf;'>${coords ? `${coords.lat}, ${coords.lon} (alt: ${coords.height}m)` : 'Indisponível'}</span>
+                                                <span style='color:#fff;'>${coords ? `${coords.lat}, ${coords.lon} (alt: ${coords.height}m)` : 'Indisponível'}</span>
                                             </div>
                                             <div style='margin-top:12px;'><button id='close-infobox' style='background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button></div>
                                         </div>
@@ -1063,38 +1496,42 @@
                             }
                             return;
                         }
-                            // Clique em marcador turístico
-                            if (pickedObject && pickedObject.id && pickedObject.id.tourismId) {
-                                const tid = pickedObject.id.tourismId;
-                                const p = tourismPoints.find(x => x.id === tid);
-                                if (p) {
-                                    // mostra um infobox simples
-                                    let old = document.getElementById('tourism-infobox');
-                                    if (old) old.parentNode.removeChild(old);
-                                    const box = document.createElement('div');
-                                    box.id = 'tourism-infobox';
-                                    box.style.position = 'fixed';
-                                    box.style.top = '10px';
-                                    box.style.right = '20px';
-                                    box.style.setProperty('background', '#494949', 'important');
-                                    box.style.setProperty('color', '#fff', 'important');
-                                    box.style.color = '#fff';
-                                    box.style.padding = '10px';
-                                    box.style.zIndex = 70;
-                                    box.style.border = '1px solid #666';
-                                    box.style.borderRadius = '8px';
-                                    box.innerHTML = `<div style='font-weight:bold;margin-bottom:6px;'>${p.name}</div>
+                        // Clique em marcador turístico
+                        if (pickedObject && pickedObject.id && pickedObject.id.tourismId) {
+                            const tid = pickedObject.id.tourismId;
+                            const p = tourismPoints.find(x => x.id === tid);
+                            if (p) {
+                                // mostra um infobox simples
+                                let old = document.getElementById('tourism-infobox');
+                                if (old) old.parentNode.removeChild(old);
+                                const box = document.createElement('div');
+                                box.id = 'tourism-infobox';
+                                box.style.position = 'fixed';
+                                box.style.top = '10px';
+                                box.style.right = '20px';
+                                box.style.setProperty('background', BOX_BG, 'important');
+                                box.style.setProperty('color', BOX_FG, 'important');
+                                box.style.color = BOX_FG;
+                                box.style.padding = '10px';
+                                box.style.zIndex = 70;
+                                box.style.border = '1px solid #666';
+                                box.style.borderRadius = '8px';
+                                box.innerHTML = `
+                                        <div style='text-align:center;'>
+                                            <img src='${(p.images && p.images[0]) ? p.images[0] : "placeholder_tour.jpg"}' style='width:300px;height:200px;object-fit:cover;border-radius:6px;display:block;margin:0 auto 8px;' />
+                                        </div>
+                                        <div style='font-weight:bold;margin-bottom:6px;'>${p.name}</div>
                                         <div style='display:flex;gap:6px;flex-wrap:wrap;align-items:center;'>
-                                            <button id='tourism-open-page' style='padding:6px;'>Abrir página</button>
+                                            <button id='tourism-open-page' style='padding:6px;background:'+BTN_BG+';color:'+BOX_FG+';'>Abrir página</button>
                                             ${p.infoUrl ? `<a id='tourism-more-info' href='${p.infoUrl}' target='_blank' style='color:#9fd;text-decoration:underline;font-size:13px;margin-left:4px;'>Mais informações</a>` : ''}
-                                            <button id='tourism-close' style='padding:6px;'>Fechar</button>
+                                            <button id='tourism-close' style='padding:6px;background:'+BOX_BG+';color:'+BOX_FG+';'>Fechar</button>
                                         </div>`;
-                                    document.body.appendChild(box);
-                                    document.getElementById('tourism-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
-                                    document.getElementById('tourism-open-page').onclick = () => { if (p.pageUrl) window.open(p.pageUrl, '_blank'); };
-                                }
-                                return;
+                                document.body.appendChild(box);
+                                document.getElementById('tourism-close').onclick = () => { if (box.parentNode) box.parentNode.removeChild(box); };
+                                document.getElementById('tourism-open-page').onclick = () => { if (p.pageUrl) window.open(p.pageUrl, '_blank'); };
                             }
+                            return;
+                        }
                         // Clique em GLB lowpoly de qualquer prédio
                         if (pickedObject.id && pickedObject.id.id && pickedObject.id.id.endsWith('_low')) {
                             const idBase = pickedObject.id.id.replace('_low', '');
@@ -1133,8 +1570,8 @@
                     box.style.position = 'fixed';
                     box.style.top = '10px';
                     box.style.right = '20px';
-                    box.style.setProperty('background', '#494949', 'important');
-                    box.style.setProperty('color', '#fff', 'important');
+                    box.style.setProperty('background', BOX_BG, 'important');
+                    box.style.setProperty('color', BOX_FG, 'important');
                     box.style.border = '1.5px solid #aaa';
                     box.style.padding = '14px';
                     box.style.zIndex = 30;
@@ -1154,12 +1591,12 @@
                     let zebraDesc = '';
                     if (data.info.description) {
                         let descParts = data.info.description.split(/<br\s*\/?><br\s*\/?/);
-                        zebraDesc = descParts.map((part, i) => `<div style='background:${i%2===0?'#333':'#292929'};color:#fff;padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
+                        zebraDesc = descParts.map((part, i) => `<div style='background:${i % 2 === 0 ? BOX_BG : BOX_ALT};color:${BOX_FG};padding:4px 8px;border-radius:3px;margin-bottom:4px;'>${part}</div>`).join('');
                     }
 
                     let extraBtn = '';
                     if (data.uri_base && data.uri_detail) {
-                        extraBtn = `<button id='back-to-low' style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>Voltar ao modelo simplificado</button> `;
+                        extraBtn = `<button id='back-to-low' style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>Voltar ao modelo simplificado</button> `;
                     }
                     let carousel = '';
                     if (data.info.images && data.info.images.length > 0) {
@@ -1170,21 +1607,21 @@
                             <div id="carousel-glb" style="text-align:center;">
                                 <img id="carousel-img-glb" src="${data.info.images[0]}" class="img-building" />
                                 <br>
-                                <button id="prev-img-glb" style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
-                                <span id="img-indicator-glb" style='color:#aaf;'>1/${data.info.images.length}</span>
-                                <button id="next-img-glb" style='background:#444;color:#fff;border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
+                                <button id="prev-img-glb" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>◀</button>
+                                <span id="img-indicator-glb" style='color:${BOX_FG};'>1/${data.info.images.length}</span>
+                                <button id="next-img-glb" style='background:'+BTN_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:2px 12px;cursor:pointer;'>▶</button>
                             </div>`;
                         }
                     }
                     box.innerHTML = `
                         <div style='text-align:center;color:#fff;position:relative;min-height:120px;'>
-                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#aaf;'>${data.info.title}</div>
+                            <div style='font-size:20px;font-weight:bold;margin-bottom:8px;color:#fff;'>${data.info.title}</div>
                             <br>
                             ${carousel}
                             <div style='margin-top:12px;text-align:left;font-size:15px;'>${zebraDesc}</div>
                             <div style='height:48px;'></div>
-                            <div style='position:sticky;bottom:0;left:0;width:100%;background:#222;padding-top:8px;padding-bottom:8px;z-index:2;display:flex;gap:8px;justify-content:center;box-shadow:0 -2px 8px #000a;'>
-                                ${extraBtn}<button id='close-infobox' style='background:#333;color:#fff;border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
+                            <div style='position:sticky;bottom:0;left:0;width:100%;background:'+BOX_ALT+';padding-top:8px;padding-bottom:8px;z-index:2;display:flex;gap:8px;justify-content:center;box-shadow:0 -2px 8px #000a;'>
+                                ${extraBtn}<button id='close-infobox' style='background:'+BOX_BG+';color:'+BOX_FG+';border:1px solid #888;border-radius:4px;padding:4px 18px;cursor:pointer;'>Fechar</button>
                             </div>
                         </div>
                     `;
